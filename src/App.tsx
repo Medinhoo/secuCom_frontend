@@ -9,12 +9,23 @@ export default function App() {
       <MainLayout>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
-          {/* Add other routes as needed */}
-          <Route path="/analytics" element={<div>Analytics Page</div>} />
-          <Route path="/users" element={<div>Users Page</div>} />
-          <Route path="/reports" element={<div>Reports Page</div>} />
-          <Route path="/settings" element={<div>Settings Page</div>} />
-          <Route path="/help" element={<div>Help Page</div>} />
+          <Route
+            path="/clients"
+            element={<div>Liste des clients / entreprises</div>}
+          />
+          <Route
+            path="/personnel"
+            element={<div>Liste du personnel des clients</div>}
+          />
+          <Route
+            path="/documents"
+            element={<div>Liste des types de documents</div>}
+          />
+          <Route
+            path="/dimona"
+            element={<div>Toutes les demandes de DIMONA</div>}
+          />
+          <Route path="/settings" element={<div>Paramètres</div>} />
         </Routes>
       </MainLayout>
     </Router>

@@ -8,6 +8,9 @@ import {
   Settings,
   HelpCircle,
   FileText,
+  Building,
+  Building2,
+  File,
 } from "lucide-react";
 
 interface SidebarLinkProps {
@@ -41,35 +44,35 @@ export function Sidebar() {
   return (
     <div className="flex h-full w-64 flex-col border-r bg-white dark:bg-gray-950 dark:border-gray-800">
       <div className="flex h-14 items-center border-b px-4 dark:border-gray-800">
-        <span className="font-semibold">Company Dashboard</span>
+        <span className="font-semibold">Secretariat social</span>
       </div>
       <nav className="flex-1 space-y-1 p-4">
         <SidebarLink
           href="/"
           icon={<Home size={20} />}
-          label="Dashboard"
+          label="Tableau de bord"
           isActive={pathname === "/"}
         />
         <SidebarLink
-          href="/analytics"
-          icon={<BarChart3 size={20} />}
-          label="Analytics"
+          href="/clients"
+          icon={<Building2 size={20} />}
+          label="Entreprises / Clients"
         />
-        <SidebarLink href="/users" icon={<Users size={20} />} label="Users" />
         <SidebarLink
-          href="/reports"
-          icon={<FileText size={20} />}
-          label="Reports"
+          href="/personnel"
+          icon={<Users size={20} />}
+          label="Employés / Ouvriers"
         />
+        <SidebarLink
+          href="/documents"
+          icon={<FileText size={20} />}
+          label="Documents"
+        />
+        <SidebarLink href="/dimona" icon={<File size={20} />} label="DIMONA" />
         <SidebarLink
           href="/settings"
           icon={<Settings size={20} />}
-          label="Settings"
-        />
-        <SidebarLink
-          href="/help"
-          icon={<HelpCircle size={20} />}
-          label="Help"
+          label="Paramètres"
         />
       </nav>
     </div>
