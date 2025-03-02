@@ -2,6 +2,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { MainLayout } from "./components/layout/MainLayout";
 import { DashboardPage } from "./pages/DashboardPage";
+import { ClientsPage } from "./pages/ClientsPage";
 
 export default function App() {
   return (
@@ -9,10 +10,7 @@ export default function App() {
       <MainLayout>
         <Routes>
           <Route path="/" element={<DashboardPage />} />
-          <Route
-            path="/clients"
-            element={<div>Liste des clients / entreprises</div>}
-          />
+          <Route path="/clients" element={<ClientsPage />} />
           <Route
             path="/personnel"
             element={<div>Liste du personnel des clients</div>}
