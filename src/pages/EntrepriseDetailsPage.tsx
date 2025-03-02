@@ -1,6 +1,6 @@
 // src/pages/EntrepriseDetailsPage.tsx
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   Edit,
   Save,
@@ -393,6 +393,13 @@ export function EntrepriseDetailsPage() {
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
                           {employee.dateEmbauche}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="secondary" size="sm" asChild>
+                            <Link to={`/personnel/${employee.id}`}>
+                              Voir détails
+                            </Link>
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))

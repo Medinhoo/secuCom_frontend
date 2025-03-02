@@ -4,6 +4,7 @@ import { MainLayout } from "./components/layout/MainLayout";
 import { DashboardPage } from "./pages/DashboardPage";
 import { ClientsPage } from "./pages/ClientsPage";
 import { EntrepriseDetailsPage } from "./pages/EntrepriseDetailsPage";
+import { PersonnelDetailsPage } from "./pages/PersonnelDetailsPage";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
             path="/personnel"
             element={<div>Liste du personnel des clients</div>}
           />
+          <Route path="/personnel/:id" element={<PersonnelDetailsPage />} />
           <Route
             path="/documents"
             element={<div>Liste des types de documents</div>}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Import useLocation
 import { cn } from "@/lib/utils";
 import {
   Home,
@@ -56,7 +56,11 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
-  const pathname = "/";
+  const location = useLocation(); // Use useLocation to get the current pathname
+  const pathname = location.pathname; // Get the current path
+
+  // Function to check if the current path matches or starts with the given path
+  const isActivePath = (href: string) => pathname.startsWith(href);
 
   return (
     <div
@@ -85,35 +89,35 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
           href="/"
           icon={<Home size={20} />}
           label="Tableau de bord"
-          isActive={pathname === "/"}
+          isActive={pathname === "/"} // Exact match for home
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           href="/clients"
           icon={<Building2 size={20} />}
           label="Entreprises"
-          isActive={pathname === "/clients"}
+          isActive={isActivePath("/clients")} // Check if the path starts with "/clients"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           href="/personnel"
           icon={<Users size={20} />}
           label="Employés / Ouvriers"
-          isActive={pathname === "/personnel"}
+          isActive={isActivePath("/personnel")} // Check if the path starts with "/personnel"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           href="/documents"
           icon={<FileText size={20} />}
           label="Documents"
-          isActive={pathname === "/documents"}
+          isActive={isActivePath("/documents")} // Check if the path starts with "/documents"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
           href="/dimona"
           icon={<File size={20} />}
           label="DIMONA"
-          isActive={pathname === "/dimona"}
+          isActive={isActivePath("/dimona")} // Check if the path starts with "/dimona"
           isCollapsed={isCollapsed}
         />
         <SidebarLink
