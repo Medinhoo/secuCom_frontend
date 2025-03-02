@@ -1,6 +1,6 @@
 // src/pages/ClientsPage.tsx
 import { useState } from "react";
-import { Plus, Eye, Trash2, Search, MoreHorizontal } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -11,20 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Link } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -88,12 +75,8 @@ const demoEntreprises: Entreprise[] = [
 ];
 
 export function ClientsPage() {
-  const [entreprises, setEntreprises] = useState<Entreprise[]>(demoEntreprises);
+  const [entreprises] = useState<Entreprise[]>(demoEntreprises);
   const [searchTerm, setSearchTerm] = useState("");
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedEntreprise, setSelectedEntreprise] =
-    useState<Entreprise | null>(null);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
 
   // Filter enterprises based on search term
   const filteredEntreprises = entreprises.filter(
@@ -105,33 +88,10 @@ export function ClientsPage() {
       entreprise.numeroTVA.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Handle delete
-  const handleDelete = () => {
-    if (selectedEntreprise) {
-      setEntreprises(entreprises.filter((e) => e.id !== selectedEntreprise.id));
-      setIsDeleteDialogOpen(false);
-      setSelectedEntreprise(null);
-    }
-  };
-
-  // Handle view action
-  const handleView = (entreprise: Entreprise) => {
-    setSelectedEntreprise(entreprise);
-    setIsViewDialogOpen(true);
-  };
-
-  // Handle delete action
-  const handleDeleteClick = (entreprise: Entreprise) => {
-    setSelectedEntreprise(entreprise);
-    setIsDeleteDialogOpen(true);
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold tracking-tight">
-          Clients / Entreprises
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">Entreprises</h1>
         <Button onClick={() => console.log("Create new entreprise")}>
           <Plus className="mr-2 h-4 w-4" /> Ajouter une entreprise
         </Button>
@@ -192,29 +152,11 @@ export function ClientsPage() {
                       {entreprise.adresse}
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Actions</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleView(entreprise)}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            Voir détails
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDeleteClick(entreprise)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button variant="secondary" size="sm" asChild>
+                        <Link to={`/clients/${entreprise.id}`}>
+                          Voir détails
+                        </Link>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))
@@ -223,80 +165,6 @@ export function ClientsPage() {
           </Table>
         </CardContent>
       </Card>
-
-      {/* View Details Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{selectedEntreprise?.nom}</DialogTitle>
-            <DialogDescription>Détails de l'entreprise</DialogDescription>
-          </DialogHeader>
-          {selectedEntreprise && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Nom
-                  </p>
-                  <p>{selectedEntreprise.nom}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    N° TVA
-                  </p>
-                  <p>{selectedEntreprise.numeroTVA}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Secteur
-                  </p>
-                  <p>{selectedEntreprise.secteurActivite}</p>
-                </div>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Adresse
-                </p>
-                <p>{selectedEntreprise.adresse}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  ID Utilisateur
-                </p>
-                <p className="font-mono text-sm">
-                  {selectedEntreprise.utilisateurId}
-                </p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
-            <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer l'entreprise{" "}
-              <strong>{selectedEntreprise?.nom}</strong> ? Cette action est
-              irréversible.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="gap-2 sm:justify-start">
-            <Button type="button" variant="destructive" onClick={handleDelete}>
-              Supprimer
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
-              Annuler
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

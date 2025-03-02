@@ -1,4 +1,3 @@
-// src/components/layout/Sidebar.tsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -32,7 +31,6 @@ function SidebarLink({
   isActive,
   isCollapsed,
 }: SidebarLinkProps) {
-  // Create a larger version of the icon when collapsed
   const IconComponent = (icon as React.ReactElement).type;
   return (
     <Link
@@ -41,8 +39,8 @@ function SidebarLink({
         "flex items-center rounded-md px-3 py-2 text-sm transition-colors",
         isCollapsed ? "justify-center" : "gap-3",
         isActive
-          ? "bg-primary text-primary-foreground"
-          : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
+          ? "bg-blue-600 text-white"
+          : "text-gray-700 dark:text-gray-300 hover:bg-blue-100 hover:text-blue-700"
       )}
       title={isCollapsed ? label : undefined}
     >
@@ -58,25 +56,24 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
-  // In a real app, you would determine the active link based on the current route
-  const pathname = "/"; // Placeholder for actual route
+  const pathname = "/";
 
   return (
     <div
       className={cn(
-        "flex h-full flex-col border-r bg-white dark:bg-gray-950 dark:border-gray-800 transition-all duration-300",
+        "flex h-full flex-col border-r bg-blue-50 dark:bg-blue-900 dark:border-blue-800 transition-all duration-300",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
-      <div className="flex h-14 items-center border-b px-4 dark:border-gray-800 justify-between">
+      <div className="flex h-14 items-center border-b px-4 dark:border-blue-800 justify-between bg-blue-400 text-white">
         {!isCollapsed && (
-          <span className="font-semibold">Company Dashboard</span>
+          <span className="font-semibold">Secretariat social</span>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={toggleCollapse}
-          className={cn("h-8 w-8", isCollapsed && "mx-auto")}
+          className={cn("h-8 w-8 text-white", isCollapsed && "mx-auto")}
         >
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
         </Button>
@@ -94,7 +91,7 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
         <SidebarLink
           href="/clients"
           icon={<Building2 size={20} />}
-          label="Entreprises / Clients"
+          label="Entreprises"
           isActive={pathname === "/clients"}
           isCollapsed={isCollapsed}
         />
