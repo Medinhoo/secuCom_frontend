@@ -19,7 +19,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     <div className="flex h-screen overflow-hidden">
       <Sidebar isCollapsed={isCollapsed} toggleCollapse={toggleCollapse} />
       <main className="flex-1 overflow-auto">
-        <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-full">
+        <div className="p-10 bg-gradient-to-b from-blue-50 to-white min-h-screen">
           {children}
         </div>
       </main>
