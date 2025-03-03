@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   Trash2,
   Building,
+  Calendar,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +40,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { PrestationsCalendar } from "@/components/layout/calendar";
 
 // Types
 interface Employee {
@@ -237,12 +239,15 @@ export function PersonnelDetailsPage() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full md:w-auto md:grid-cols-3 grid-cols-3 mb-4">
+        <TabsList className="grid w-full md:w-auto md:grid-cols-4 grid-cols-4 mb-4">
           <TabsTrigger value="infos">
             <Info className="h-4 w-4 mr-2" /> Infos
           </TabsTrigger>
           <TabsTrigger value="documents">
             <FileText className="h-4 w-4 mr-2" /> Documents
+          </TabsTrigger>
+          <TabsTrigger value="prestations">
+            <Calendar className="h-4 w-4 mr-2" /> Prestations
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4 mr-2" /> Paramètres
@@ -467,6 +472,12 @@ export function PersonnelDetailsPage() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Prestation Tab */}
+        <TabsContent value="prestations">
+          {" "}
+          <PrestationsCalendar employeeId={employee.id} />
         </TabsContent>
 
         {/* Settings Tab */}

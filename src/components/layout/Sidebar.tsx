@@ -70,9 +70,7 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
       )}
     >
       <div className="flex h-14 items-center border-b px-4 dark:border-blue-800 justify-between bg-blue-400 text-white">
-        {!isCollapsed && (
-          <span className="font-semibold">Secretariat social</span>
-        )}
+        {!isCollapsed && <span className="font-semibold">Sodabel</span>}
         <Button
           variant="ghost"
           size="icon"
