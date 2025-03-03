@@ -1,4 +1,4 @@
-// src/pages/ClientsPage.tsx
+// src/pages/EntreprisePage.tsx
 import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -74,7 +74,7 @@ const demoEntreprises: Entreprise[] = [
   },
 ];
 
-export function ClientsPage() {
+export function EntreprisePage() {
   const [entreprises] = useState<Entreprise[]>(demoEntreprises);
   const [searchTerm, setSearchTerm] = useState("");
 
