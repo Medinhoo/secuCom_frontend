@@ -12,6 +12,11 @@ import {
   Trash2,
   Building,
   Calendar,
+  Download,
+  Plus,
+  Mail,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +58,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 // Import data from mockData
 import {
@@ -129,7 +135,7 @@ const PrestationsCalendar = ({ employeeId }: { employeeId: string }) => {
   // Add leading empty cells for the first week
   for (let i = 0; i < firstDayOfMonth; i++) {
     days.push(
-      <div key={`empty-${i}`} className="h-12 border border-gray-100"></div>
+      <div key={`empty-${i}`} className="h-12 border border-slate-100"></div>
     );
   }
 
@@ -144,11 +150,11 @@ const PrestationsCalendar = ({ employeeId }: { employeeId: string }) => {
         <Tooltip>
           <TooltipTrigger asChild>
             <div
-              className={`h-12 border border-gray-200 flex flex-col justify-between p-1 relative ${statusColorClass}`}
+              className={`h-12 border border-slate-200 flex flex-col justify-between p-1 relative hover:border-blue-300 transition-colors ${statusColorClass}`}
             >
               <span className="text-xs font-semibold">{day}</span>
               {dayData?.hours && (
-                <span className="text-xs text-gray-600">{dayData.hours}h</span>
+                <span className="text-xs text-slate-600">{dayData.hours}h</span>
               )}
             </div>
           </TooltipTrigger>
@@ -177,12 +183,24 @@ const PrestationsCalendar = ({ employeeId }: { employeeId: string }) => {
   ];
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
+    <Card className="border-0 shadow-sm bg-white overflow-hidden">
+      <CardHeader className="pb-3 border-b border-slate-100">
         <div className="flex justify-between items-center">
-          <CardTitle>Calendrier des prestations</CardTitle>
+          <div>
+            <CardTitle className="text-blue-700">
+              Calendrier des prestations
+            </CardTitle>
+            <CardDescription>
+              Suivi de la présence et des congés
+            </CardDescription>
+          </div>
           <div className="flex space-x-2">
-            <Button variant="outline" size="sm" onClick={prevMonth}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={prevMonth}
+              className="border-slate-200 hover:bg-blue-50 hover:text-blue-700"
+            >
               &lt;
             </Button>
             <div className="flex items-center space-x-2">
@@ -190,7 +208,7 @@ const PrestationsCalendar = ({ employeeId }: { employeeId: string }) => {
                 value={month.toString()}
                 onValueChange={(value) => setMonth(parseInt(value))}
               >
-                <SelectTrigger className="w-32">
+                <SelectTrigger className="w-32 border-slate-200 focus:ring-blue-500">
                   <SelectValue placeholder="Mois" />
                 </SelectTrigger>
                 <SelectContent>
@@ -206,7 +224,7 @@ const PrestationsCalendar = ({ employeeId }: { employeeId: string }) => {
                 value={year.toString()}
                 onValueChange={(value) => setYear(parseInt(value))}
               >
-                <SelectTrigger className="w-24">
+                <SelectTrigger className="w-24 border-slate-200 focus:ring-blue-500">
                   <SelectValue placeholder="Année" />
                 </SelectTrigger>
                 <SelectContent>
@@ -220,47 +238,69 @@ const PrestationsCalendar = ({ employeeId }: { employeeId: string }) => {
                 </SelectContent>
               </Select>
             </div>
-            <Button variant="outline" size="sm" onClick={nextMonth}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={nextMonth}
+              className="border-slate-200 hover:bg-blue-50 hover:text-blue-700"
+            >
               &gt;
             </Button>
           </div>
         </div>
-        <CardDescription>Suivi de la présence et des congés</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="mb-4 flex flex-wrap gap-2">
           {Object.entries(WorkStatus).map(([key, value]) => (
             <div key={key} className="flex items-center">
               <div
                 className={`w-4 h-4 rounded mr-1 ${statusColors[value]}`}
               ></div>
-              <span className="text-xs">{statusLabels[value]}</span>
+              <span className="text-xs text-slate-700">
+                {statusLabels[value]}
+              </span>
             </div>
           ))}
         </div>
 
         <div className="mb-4">
           <div className="grid grid-cols-7 gap-px">
-            <div className="text-center font-medium text-xs p-1">Lun</div>
-            <div className="text-center font-medium text-xs p-1">Mar</div>
-            <div className="text-center font-medium text-xs p-1">Mer</div>
-            <div className="text-center font-medium text-xs p-1">Jeu</div>
-            <div className="text-center font-medium text-xs p-1">Ven</div>
-            <div className="text-center font-medium text-xs p-1">Sam</div>
-            <div className="text-center font-medium text-xs p-1">Dim</div>
+            <div className="text-center font-medium text-xs p-1 text-blue-700">
+              Lun
+            </div>
+            <div className="text-center font-medium text-xs p-1 text-blue-700">
+              Mar
+            </div>
+            <div className="text-center font-medium text-xs p-1 text-blue-700">
+              Mer
+            </div>
+            <div className="text-center font-medium text-xs p-1 text-blue-700">
+              Jeu
+            </div>
+            <div className="text-center font-medium text-xs p-1 text-blue-700">
+              Ven
+            </div>
+            <div className="text-center font-medium text-xs p-1 text-blue-700">
+              Sam
+            </div>
+            <div className="text-center font-medium text-xs p-1 text-blue-700">
+              Dim
+            </div>
           </div>
           <div className="grid grid-cols-7 gap-px">{days}</div>
         </div>
 
         <div className="mt-6">
-          <h3 className="text-sm font-medium mb-2">Récapitulatif du mois</h3>
+          <h3 className="text-sm font-medium mb-2 text-blue-700">
+            Récapitulatif du mois
+          </h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
             {Object.entries(statusCounts).map(([status, count]) => (
-              <div key={status} className="border rounded p-2">
-                <div className="text-xs text-gray-500">
+              <div key={status} className="bg-slate-50 rounded-lg p-3">
+                <div className="text-xs text-blue-600">
                   {statusLabels[status as WorkStatus]}
                 </div>
-                <div className="text-lg font-semibold">
+                <div className="text-lg font-semibold text-slate-800">
                   {count} {count > 1 ? "jours" : "jour"}
                 </div>
               </div>
@@ -334,190 +374,293 @@ export function PersonnelDetailsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate("/personnel")}
-          className="mr-4"
-        >
-          <ChevronLeft className="h-4 w-4 mr-1" /> Retour
-        </Button>
-        <h1 className="text-3xl font-bold tracking-tight">
-          {employee.prenom} {employee.nom}
-        </h1>
+    <div className="max-w-7xl mx-auto">
+      {/* Header section */}
+      <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-start mb-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate("/personnel")}
+              className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50 shadow-sm"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-3xl font-bold tracking-tight text-blue-700">
+              {employee.prenom} {employee.nom}
+            </h1>
+          </div>
+          <div className="flex items-center">
+            <Badge className="bg-blue-100 text-blue-700 mr-2">
+              {employee.poste}
+            </Badge>
+            <Link
+              to={`/clients/${employee.entrepriseId}`}
+              className="text-sm text-slate-500 hover:text-blue-600 flex items-center"
+            >
+              <Building className="h-3 w-3 mr-1" />
+              {getEntrepriseName(employee.entrepriseId)}
+            </Link>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50 shadow-sm"
+          >
+            <Download className="mr-2 h-4 w-4" /> Exporter
+          </Button>
+        </div>
       </div>
 
+      {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full md:w-auto md:grid-cols-4 grid-cols-4 mb-4">
-          <TabsTrigger value="infos">
-            <Info className="h-4 w-4 mr-2" /> Infos
+        <TabsList className="bg-white p-1 rounded-lg mb-4 shadow-sm">
+          <TabsTrigger
+            value="infos"
+            className="rounded-md data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+          >
+            <Info className="h-4 w-4 mr-2" /> Informations
           </TabsTrigger>
-          <TabsTrigger value="documents">
+          <TabsTrigger
+            value="documents"
+            className="rounded-md data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+          >
             <FileText className="h-4 w-4 mr-2" /> Documents
+            <Badge
+              variant="secondary"
+              className="ml-2 bg-blue-100 text-blue-700 hover:bg-blue-200"
+            >
+              {documents.length}
+            </Badge>
           </TabsTrigger>
-          <TabsTrigger value="prestations">
+          <TabsTrigger
+            value="prestations"
+            className="rounded-md data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+          >
             <Calendar className="h-4 w-4 mr-2" /> Prestations
           </TabsTrigger>
-          <TabsTrigger value="settings">
+          <TabsTrigger
+            value="settings"
+            className="rounded-md data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+          >
             <Settings className="h-4 w-4 mr-2" /> Paramètres
           </TabsTrigger>
         </TabsList>
 
         {/* Infos Tab */}
         <TabsContent value="infos">
-          <Card>
-            <CardHeader className="pb-3 flex flex-row items-start justify-between">
-              <div>
-                <CardTitle>Informations employé</CardTitle>
-                <CardDescription>
-                  Détails et coordonnées de l'employé
-                </CardDescription>
-              </div>
-              {!editMode ? (
-                <Button onClick={() => setEditMode(true)} size="sm">
-                  <Edit className="h-4 w-4 mr-2" /> Modifier
-                </Button>
-              ) : (
-                <div className="flex space-x-2">
-                  <Button onClick={handleSave} size="sm" variant="default">
-                    <Save className="h-4 w-4 mr-2" /> Enregistrer
-                  </Button>
-                  <Button onClick={handleCancel} size="sm" variant="outline">
-                    <X className="h-4 w-4 mr-2" /> Annuler
-                  </Button>
+          <Card className="border-0 shadow-sm bg-white overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-100">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-blue-700">
+                    Informations employé
+                  </CardTitle>
+                  <CardDescription>
+                    Détails et coordonnées de l'employé
+                  </CardDescription>
                 </div>
-              )}
+                {!editMode ? (
+                  <Button
+                    onClick={() => setEditMode(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                  >
+                    <Edit className="mr-2 h-4 w-4" /> Modifier
+                  </Button>
+                ) : (
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleSave}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                    >
+                      <Save className="mr-2 h-4 w-4" /> Enregistrer
+                    </Button>
+                    <Button
+                      onClick={handleCancel}
+                      variant="outline"
+                      className="bg-white text-red-600 border-red-200 hover:bg-red-50 shadow-sm"
+                    >
+                      <X className="mr-2 h-4 w-4" /> Annuler
+                    </Button>
+                  </div>
+                )}
+              </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="space-y-6">
                 {editMode ? (
                   // Edit form
                   <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="nom">Nom</Label>
+                      <Label htmlFor="nom" className="text-blue-700">
+                        Nom
+                      </Label>
                       <Input
                         id="nom"
                         name="nom"
                         value={formData.nom}
                         onChange={handleInputChange}
+                        className="border-slate-200 focus-visible:ring-blue-500"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="prenom">Prénom</Label>
+                      <Label htmlFor="prenom" className="text-blue-700">
+                        Prénom
+                      </Label>
                       <Input
                         id="prenom"
                         name="prenom"
                         value={formData.prenom}
                         onChange={handleInputChange}
+                        className="border-slate-200 focus-visible:ring-blue-500"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="poste">Poste</Label>
+                      <Label htmlFor="poste" className="text-blue-700">
+                        Poste
+                      </Label>
                       <Input
                         id="poste"
                         name="poste"
                         value={formData.poste}
                         onChange={handleInputChange}
+                        className="border-slate-200 focus-visible:ring-blue-500"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="dateEmbauche">Date d'embauche</Label>
+                      <Label htmlFor="dateEmbauche" className="text-blue-700">
+                        Date d'embauche
+                      </Label>
                       <Input
                         id="dateEmbauche"
                         name="dateEmbauche"
                         value={formData.dateEmbauche}
                         onChange={handleInputChange}
+                        className="border-slate-200 focus-visible:ring-blue-500"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email" className="text-blue-700">
+                        Email
+                      </Label>
                       <Input
                         id="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
+                        className="border-slate-200 focus-visible:ring-blue-500"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="telephone">Téléphone</Label>
+                      <Label htmlFor="telephone" className="text-blue-700">
+                        Téléphone
+                      </Label>
                       <Input
                         id="telephone"
                         name="telephone"
                         value={formData.telephone || ""}
                         onChange={handleInputChange}
+                        className="border-slate-200 focus-visible:ring-blue-500"
                       />
                     </div>
                     <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="adresse">Adresse</Label>
+                      <Label htmlFor="adresse" className="text-blue-700">
+                        Adresse
+                      </Label>
                       <Input
                         id="adresse"
                         name="adresse"
                         value={formData.adresse || ""}
                         onChange={handleInputChange}
+                        className="border-slate-200 focus-visible:ring-blue-500"
                       />
                     </div>
                   </div>
                 ) : (
                   // Display info
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <h3 className="text-sm font-medium text-blue-600 mb-1">
                         Nom
                       </h3>
-                      <p className="text-lg">{employee.nom}</p>
+                      <p className="text-lg text-slate-800">{employee.nom}</p>
                     </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <h3 className="text-sm font-medium text-blue-600 mb-1">
                         Prénom
                       </h3>
-                      <p className="text-lg">{employee.prenom}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                        Poste
-                      </h3>
-                      <p className="text-lg">{employee.poste}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                        Date d'embauche
-                      </h3>
-                      <p className="text-lg">{employee.dateEmbauche}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                        Email
-                      </h3>
-                      <p className="text-lg">{employee.email}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                        Téléphone
-                      </h3>
-                      <p className="text-lg">{employee.telephone}</p>
-                    </div>
-                    <div className="md:col-span-2">
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                        Adresse
-                      </h3>
-                      <p className="text-lg">{employee.adresse}</p>
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-medium text-muted-foreground mb-1">
-                        Entreprise
-                      </h3>
-                      <p className="text-lg">
-                        {getEntrepriseName(employee.entrepriseId)}
+                      <p className="text-lg text-slate-800">
+                        {employee.prenom}
                       </p>
                     </div>
-                    <div>
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <h3 className="text-sm font-medium text-blue-600 mb-1">
+                        Poste
+                      </h3>
+                      <p className="text-lg text-slate-800">
+                        <Badge className="bg-blue-100 text-blue-700">
+                          {employee.poste}
+                        </Badge>
+                      </p>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <h3 className="text-sm font-medium text-blue-600 mb-1">
+                        Date d'embauche
+                      </h3>
+                      <div className="flex items-center text-slate-800">
+                        <Calendar className="h-4 w-4 text-slate-400 mr-2" />
+                        <span className="text-lg">{employee.dateEmbauche}</span>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <h3 className="text-sm font-medium text-blue-600 mb-1">
+                        Email
+                      </h3>
+                      <div className="flex items-center text-slate-800">
+                        <Mail className="h-4 w-4 text-slate-400 mr-2" />
+                        <span className="text-lg">{employee.email}</span>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <h3 className="text-sm font-medium text-blue-600 mb-1">
+                        Téléphone
+                      </h3>
+                      <div className="flex items-center text-slate-800">
+                        <Phone className="h-4 w-4 text-slate-400 mr-2" />
+                        <span className="text-lg">
+                          {employee.telephone || "Non renseigné"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-lg md:col-span-2">
+                      <h3 className="text-sm font-medium text-blue-600 mb-1">
+                        Adresse
+                      </h3>
+                      <div className="flex items-start text-slate-800">
+                        <MapPin className="h-4 w-4 text-slate-400 mr-2 mt-1" />
+                        <span className="text-lg">
+                          {employee.adresse || "Non renseignée"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-lg">
+                      <h3 className="text-sm font-medium text-blue-600 mb-1">
+                        Entreprise
+                      </h3>
+                      <div className="flex items-center text-slate-800">
+                        <Building className="h-4 w-4 text-slate-400 mr-2" />
+                        <span className="text-lg">
+                          {getEntrepriseName(employee.entrepriseId)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-lg flex items-center">
                       <Button
-                        variant="outline"
-                        size="sm"
                         asChild
-                        className="mt-2"
+                        className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                       >
                         <Link to={`/clients/${employee.entrepriseId}`}>
                           <Building className="h-4 w-4 mr-2" /> Voir
@@ -534,22 +677,36 @@ export function PersonnelDetailsPage() {
 
         {/* Documents Tab */}
         <TabsContent value="documents">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle>Documents</CardTitle>
-              <CardDescription>Documents associés à l'employé</CardDescription>
+          <Card className="border-0 shadow-sm bg-white overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-100 flex flex-row justify-between items-center">
+              <div>
+                <CardTitle className="text-blue-700">Documents</CardTitle>
+                <CardDescription>
+                  Documents associés à l'employé
+                </CardDescription>
+              </div>
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                <Plus className="mr-2 h-4 w-4" /> Ajouter un document
+              </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="hidden md:table-cell">
+                  <TableRow className="hover:bg-transparent border-b border-slate-100">
+                    <TableHead className="text-blue-700 font-medium">
+                      Nom
+                    </TableHead>
+                    <TableHead className="text-blue-700 font-medium">
+                      Type
+                    </TableHead>
+                    <TableHead className="text-blue-700 font-medium hidden md:table-cell">
                       Date d'upload
                     </TableHead>
-                    <TableHead className="hidden md:table-cell">
+                    <TableHead className="text-blue-700 font-medium hidden md:table-cell">
                       Taille
+                    </TableHead>
+                    <TableHead className="text-blue-700 font-medium text-right">
+                      Actions
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -557,24 +714,65 @@ export function PersonnelDetailsPage() {
                   {documents.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={4}
-                        className="text-center py-6 text-muted-foreground"
+                        colSpan={5}
+                        className="text-center py-10 text-slate-500"
                       >
-                        Aucun document trouvé
+                        <div className="flex flex-col items-center justify-center">
+                          <FileText className="h-10 w-10 text-slate-300 mb-2" />
+                          <p>Aucun document trouvé</p>
+                          <p className="text-sm text-slate-400 mt-1">
+                            Commencez par ajouter un document pour cet employé
+                          </p>
+                          <Button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                            <Plus className="mr-2 h-4 w-4" /> Ajouter un
+                            document
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ) : (
                     documents.map((document) => (
-                      <TableRow key={document.id}>
-                        <TableCell className="font-medium">
+                      <TableRow
+                        key={document.id}
+                        className="hover:bg-slate-50 border-b border-slate-100 group"
+                      >
+                        <TableCell className="font-medium text-blue-800 group-hover:text-blue-600 transition-colors">
                           {document.nom}
                         </TableCell>
-                        <TableCell>{document.type}</TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {document.dateUpload}
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className="bg-slate-50 text-slate-700"
+                          >
+                            {document.type}
+                          </Badge>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
+                          <div className="flex items-center">
+                            <Calendar className="h-3 w-3 text-slate-400 mr-1" />
+                            <span>{document.dateUpload}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell font-mono text-sm text-slate-600">
                           {document.taille}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
+                            >
+                              <Download className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
+                            >
+                              Voir
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -592,26 +790,27 @@ export function PersonnelDetailsPage() {
 
         {/* Settings Tab */}
         <TabsContent value="settings">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle>Paramètres</CardTitle>
+          <Card className="border-0 shadow-sm bg-white overflow-hidden">
+            <CardHeader className="pb-3 border-b border-slate-100">
+              <CardTitle className="text-blue-700">Paramètres</CardTitle>
               <CardDescription>
                 Gérer les paramètres de l'employé
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="space-y-6">
-                <div className="border p-4 rounded-md">
+                <div className="border border-red-200 p-6 rounded-md bg-red-50">
                   <h3 className="text-lg font-semibold text-red-600 mb-2">
                     Zone de danger
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
+                  <p className="text-sm text-red-500 mb-4">
                     La suppression d'un employé est irréversible et supprimera
                     toutes les données associées.
                   </p>
                   <Button
                     variant="destructive"
                     onClick={() => setIsDeleteDialogOpen(true)}
+                    className="bg-red-600 hover:bg-red-700"
                   >
                     <Trash2 className="h-4 w-4 mr-2" /> Supprimer l'employé
                   </Button>
@@ -626,7 +825,9 @@ export function PersonnelDetailsPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogTitle className="text-blue-700">
+              Confirmer la suppression
+            </DialogTitle>
             <DialogDescription>
               Êtes-vous sûr de vouloir supprimer l'employé{" "}
               <strong>
@@ -637,13 +838,19 @@ export function PersonnelDetailsPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:justify-start">
-            <Button type="button" variant="destructive" onClick={handleDelete}>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
               Supprimer
             </Button>
             <Button
               type="button"
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
+              className="bg-white border-slate-200"
             >
               Annuler
             </Button>
