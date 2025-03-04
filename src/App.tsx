@@ -9,6 +9,7 @@ import { PersonnelPage } from "./pages/PersonnelPage.tsx";
 import { DimonaPage } from "./pages/DimonaPage.tsx";
 import { DocumentsPage } from "./pages/DocumentsPage.tsx";
 import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
+import SettingsPage from "./pages/SettingsPage.tsx";
 
 export default function App() {
   return (
@@ -26,7 +27,7 @@ export default function App() {
             element={<DocumentsListPage />}
           />
           <Route path="/dimona" element={<DimonaPage />} />
-          <Route path="/settings" element={<div>Paramètres</div>} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </MainLayout>
     </Router>
