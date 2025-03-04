@@ -1,7 +1,6 @@
 // src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { MainLayout } from "./components/layout/MainLayout";
-import { DashboardPage } from "./pages/DashboardPage";
 import { EntreprisePage } from "./pages/EntreprisePage.tsx";
 import { EntrepriseDetailsPage } from "./pages/EntrepriseDetailsPage";
 import { PersonnelDetailsPage } from "./pages/PersonnelDetailsPage";
@@ -10,6 +9,7 @@ import { DimonaPage } from "./pages/DimonaPage.tsx";
 import { DocumentsPage } from "./pages/DocumentsPage.tsx";
 import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
+import DashboardPage from "./pages/DashboardPage.tsx";
 
 export default function App() {
   return (
