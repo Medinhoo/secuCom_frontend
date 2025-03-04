@@ -1,6 +1,6 @@
 // src/pages/DimonaPage.tsx
 import { useState } from "react";
-import { Plus, Search, Calendar, Check, AlertCircle } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -26,124 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 
-// Type for Dimona
-interface Dimona {
-  id: string;
-  employee: {
-    id: string;
-    nom: string;
-    prenom: string;
-  };
-  entreprise: {
-    id: string;
-    nom: string;
-  };
-  type: "IN" | "OUT" | "UPDATE";
-  dateDeclaration: string;
-  dateDebut: string;
-  dateFin: string | null;
-  statut: "PENDING" | "ACCEPTED" | "REJECTED";
-  refNumber: string;
-}
-
-// Sample data for demonstration
-const demoDimonas: Dimona[] = [
-  {
-    id: "dimona1",
-    employee: {
-      id: "emp1",
-      nom: "Dubois",
-      prenom: "Jean",
-    },
-    entreprise: {
-      id: "123e4567-e89b-12d3-a456-426614174000",
-      nom: "TechSolutions SPRL",
-    },
-    type: "IN",
-    dateDeclaration: "12/02/2023",
-    dateDebut: "15/02/2023",
-    dateFin: null,
-    statut: "ACCEPTED",
-    refNumber: "DIMONA20230212001",
-  },
-  {
-    id: "dimona2",
-    employee: {
-      id: "emp2",
-      nom: "Martin",
-      prenom: "Sophie",
-    },
-    entreprise: {
-      id: "123e4567-e89b-12d3-a456-426614174000",
-      nom: "TechSolutions SPRL",
-    },
-    type: "IN",
-    dateDeclaration: "18/09/2023",
-    dateDebut: "21/09/2023",
-    dateFin: null,
-    statut: "ACCEPTED",
-    refNumber: "DIMONA20230918002",
-  },
-  {
-    id: "dimona3",
-    employee: {
-      id: "emp3",
-      nom: "Laurent",
-      prenom: "Michel",
-    },
-    entreprise: {
-      id: "223e4567-e89b-12d3-a456-426614174001",
-      nom: "Construction Dupont SA",
-    },
-    type: "IN",
-    dateDeclaration: "01/05/2023",
-    dateDebut: "03/05/2023",
-    dateFin: null,
-    statut: "ACCEPTED",
-    refNumber: "DIMONA20230501003",
-  },
-  {
-    id: "dimona4",
-    employee: {
-      id: "emp1",
-      nom: "Dubois",
-      prenom: "Jean",
-    },
-    entreprise: {
-      id: "123e4567-e89b-12d3-a456-426614174000",
-      nom: "TechSolutions SPRL",
-    },
-    type: "UPDATE",
-    dateDeclaration: "25/05/2023",
-    dateDebut: "01/06/2023",
-    dateFin: null,
-    statut: "PENDING",
-    refNumber: "DIMONA20230525004",
-  },
-  {
-    id: "dimona5",
-    employee: {
-      id: "emp3",
-      nom: "Laurent",
-      prenom: "Michel",
-    },
-    entreprise: {
-      id: "223e4567-e89b-12d3-a456-426614174001",
-      nom: "Construction Dupont SA",
-    },
-    type: "OUT",
-    dateDeclaration: "10/11/2023",
-    dateDebut: "03/05/2023",
-    dateFin: "30/11/2023",
-    statut: "ACCEPTED",
-    refNumber: "DIMONA20231110005",
-  },
-];
+// Import data and utils
+import { demoDimonas, DimonaType, DimonaStatus } from "@/data/mockData";
+import { getStatusBadge, getTypeBadge } from "@/utils/dimonaUtils";
 
 export function DimonaPage() {
-  const [dimonas] = useState<Dimona[]>(demoDimonas);
+  const [dimonas] = useState(demoDimonas);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -169,73 +58,6 @@ export function DimonaPage() {
 
     return matchesSearch && matchesStatus && matchesType;
   });
-
-  // Status badge renderer
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "ACCEPTED":
-        return (
-          <Badge
-            variant="success"
-            className="bg-green-100 text-green-800 hover:bg-green-100"
-          >
-            <Check className="mr-1 h-3 w-3" /> Acceptée
-          </Badge>
-        );
-      case "REJECTED":
-        return (
-          <Badge variant="destructive">
-            <AlertCircle className="mr-1 h-3 w-3" /> Rejetée
-          </Badge>
-        );
-      case "PENDING":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-          >
-            <Calendar className="mr-1 h-3 w-3" /> En attente
-          </Badge>
-        );
-      default:
-        return <Badge>{status}</Badge>;
-    }
-  };
-
-  // Type badge renderer
-  const getTypeBadge = (type: string) => {
-    switch (type) {
-      case "IN":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-blue-100 text-blue-800 hover:bg-blue-100"
-          >
-            Entrée
-          </Badge>
-        );
-      case "OUT":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-gray-100 text-gray-800 hover:bg-gray-100"
-          >
-            Sortie
-          </Badge>
-        );
-      case "UPDATE":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-purple-100 text-purple-800 hover:bg-purple-100"
-          >
-            Modification
-          </Badge>
-        );
-      default:
-        return <Badge variant="outline">{type}</Badge>;
-    }
-  };
 
   return (
     <div className="space-y-6">

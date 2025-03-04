@@ -1,6 +1,6 @@
 // src/pages/EntreprisePage.tsx
 import { useState } from "react";
-import { Plus, Search, Download, Eye, Building2 } from "lucide-react";
+import { Plus, Search, Download, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,75 +12,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Link } from "react-router-dom";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Type for Entreprise
-interface Entreprise {
-  id: string;
-  nom: string;
-  adresse: string;
-  numeroTVA: string;
-  secteurActivite: string;
-  utilisateurId: string;
-  employesCount?: number;
-}
-
-// Sample data for demonstration
-const demoEntreprises: Entreprise[] = [
-  {
-    id: "123e4567-e89b-12d3-a456-426614174000",
-    nom: "TechSolutions SPRL",
-    adresse: "15 Rue de la Loi, 1000 Bruxelles",
-    numeroTVA: "BE0123456789",
-    secteurActivite: "Informatique",
-    utilisateurId: "987e6543-e21b-12d3-a456-426614174111",
-    employesCount: 12,
-  },
-  {
-    id: "223e4567-e89b-12d3-a456-426614174001",
-    nom: "Construction Dupont SA",
-    adresse: "24 Avenue Louise, 1050 Bruxelles",
-    numeroTVA: "BE0987654321",
-    secteurActivite: "Construction",
-    utilisateurId: "887e6543-e21b-12d3-a456-426614174112",
-    employesCount: 28,
-  },
-  {
-    id: "323e4567-e89b-12d3-a456-426614174002",
-    nom: "Resto Gourmand",
-    adresse: "8 Place du Marché, 4000 Liège",
-    numeroTVA: "BE0567891234",
-    secteurActivite: "Restauration",
-    utilisateurId: "787e6543-e21b-12d3-a456-426614174113",
-    employesCount: 7,
-  },
-  {
-    id: "423e4567-e89b-12d3-a456-426614174003",
-    nom: "Transports Express",
-    adresse: "112 Chaussée de Namur, 5000 Namur",
-    numeroTVA: "BE0345678912",
-    secteurActivite: "Transport",
-    utilisateurId: "687e6543-e21b-12d3-a456-426614174114",
-    employesCount: 15,
-  },
-  {
-    id: "523e4567-e89b-12d3-a456-426614174004",
-    nom: "Média & Communications",
-    adresse: "45 Boulevard Anspach, 1000 Bruxelles",
-    numeroTVA: "BE0234567891",
-    secteurActivite: "Médias",
-    utilisateurId: "587e6543-e21b-12d3-a456-426614174115",
-    employesCount: 9,
-  },
-];
+// Import data from mockData file
+import {
+  demoEntreprises,
+  getSectorLightColor,
+  Entreprise,
+} from "@/data/mockData";
 
 export function EntreprisePage() {
   const [entreprises] = useState<Entreprise[]>(demoEntreprises);
@@ -103,20 +44,6 @@ export function EntreprisePage() {
     acc[sector] = (acc[sector] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
-
-  // Functions to get color based on sector
-  const getSectorLightColor = (sector: string) => {
-    const colors = {
-      Informatique: "bg-blue-100 text-blue-700",
-      Construction: "bg-amber-100 text-amber-700",
-      Restauration: "bg-rose-100 text-rose-700",
-      Transport: "bg-emerald-100 text-emerald-700",
-      Médias: "bg-violet-100 text-violet-700",
-    };
-    return (
-      colors[sector as keyof typeof colors] || "bg-slate-100 text-slate-700"
-    );
-  };
 
   return (
     <div className="max-w-7xl mx-auto">

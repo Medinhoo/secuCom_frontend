@@ -40,114 +40,13 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 
-// Types
-interface Entreprise {
-  id: string;
-  nom: string;
-  adresse: string;
-  numeroTVA: string;
-  secteurActivite: string;
-  utilisateurId: string;
-}
-
-interface Employee {
-  id: string;
-  nom: string;
-  prenom: string;
-  poste: string;
-  email: string;
-  dateEmbauche: string;
-}
-
-interface Document {
-  id: string;
-  nom: string;
-  type: string;
-  dateUpload: string;
-  taille: string;
-}
-
-// Sample data
-const demoEntreprises: Entreprise[] = [
-  {
-    id: "123e4567-e89b-12d3-a456-426614174000",
-    nom: "TechSolutions SPRL",
-    adresse: "15 Rue de la Loi, 1000 Bruxelles",
-    numeroTVA: "BE0123456789",
-    secteurActivite: "Informatique",
-    utilisateurId: "987e6543-e21b-12d3-a456-426614174111",
-  },
-  {
-    id: "223e4567-e89b-12d3-a456-426614174001",
-    nom: "Construction Dupont SA",
-    adresse: "24 Avenue Louise, 1050 Bruxelles",
-    numeroTVA: "BE0987654321",
-    secteurActivite: "Construction",
-    utilisateurId: "887e6543-e21b-12d3-a456-426614174112",
-  },
-  // ... other enterprises
-];
-
-// Sample employees
-const demoEmployees: Record<string, Employee[]> = {
-  "123e4567-e89b-12d3-a456-426614174000": [
-    {
-      id: "emp1",
-      nom: "Dubois",
-      prenom: "Jean",
-      poste: "Développeur Senior",
-      email: "jean.dubois@techsolutions.be",
-      dateEmbauche: "15/03/2020",
-    },
-    {
-      id: "emp2",
-      nom: "Martin",
-      prenom: "Sophie",
-      poste: "Designer UX",
-      email: "sophie.martin@techsolutions.be",
-      dateEmbauche: "21/09/2021",
-    },
-  ],
-  "223e4567-e89b-12d3-a456-426614174001": [
-    {
-      id: "emp3",
-      nom: "Laurent",
-      prenom: "Michel",
-      poste: "Chef de chantier",
-      email: "michel.laurent@construction-dupont.be",
-      dateEmbauche: "03/05/2018",
-    },
-  ],
-};
-
-// Sample documents
-const demoDocuments: Record<string, Document[]> = {
-  "123e4567-e89b-12d3-a456-426614174000": [
-    {
-      id: "doc1",
-      nom: "Contrat de service",
-      type: "PDF",
-      dateUpload: "10/01/2023",
-      taille: "1.2 MB",
-    },
-    {
-      id: "doc2",
-      nom: "Facture Q1 2023",
-      type: "PDF",
-      dateUpload: "15/04/2023",
-      taille: "850 KB",
-    },
-  ],
-  "223e4567-e89b-12d3-a456-426614174001": [
-    {
-      id: "doc3",
-      nom: "Plan de chantier",
-      type: "PDF",
-      dateUpload: "22/03/2023",
-      taille: "3.5 MB",
-    },
-  ],
-};
+// Import data from mockData file
+import {
+  demoEntreprises,
+  getEmployeesByCompany,
+  demoCompanyDocuments,
+  Entreprise,
+} from "@/data/mockData";
 
 export function EntrepriseDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -158,8 +57,9 @@ export function EntrepriseDetailsPage() {
   const [formData, setFormData] = useState<Entreprise | null>(null);
   const [activeTab, setActiveTab] = useState("infos");
 
-  const employees = id ? demoEmployees[id] || [] : [];
-  const documents = id ? demoDocuments[id] || [] : [];
+  // Get employees and documents for this company
+  const employees = id ? getEmployeesByCompany(id) : [];
+  const documents = id ? demoCompanyDocuments[id] || [] : [];
 
   // Fetch enterprise data
   useEffect(() => {

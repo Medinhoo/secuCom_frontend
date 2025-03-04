@@ -1,4 +1,4 @@
-// src/pages/EmployeeDetailsPage.tsx
+// src/pages/PersonnelDetailsPage.tsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
@@ -54,238 +54,18 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-// Types
-interface Employee {
-  id: string;
-  nom: string;
-  prenom: string;
-  poste: string;
-  email: string;
-  dateEmbauche: string;
-  telephone: string;
-  adresse: string;
-  entrepriseId: string;
-}
-
-interface Entreprise {
-  id: string;
-  nom: string;
-}
-
-interface Document {
-  id: string;
-  nom: string;
-  type: string;
-  dateUpload: string;
-  taille: string;
-}
-
-// Calendar Types
-interface CalendarDay {
-  date: string; // YYYY-MM-DD
-  status: WorkStatus;
-  hours?: number;
-}
-
-enum WorkStatus {
-  WORKING_DAY = "WORKING_DAY",
-  PAID_LEAVE = "PAID_LEAVE",
-  UNPAID_LEAVE = "UNPAID_LEAVE",
-  PUBLIC_HOLIDAY = "PUBLIC_HOLIDAY",
-  SICK_LEAVE = "SICK_LEAVE",
-  WEEKEND = "WEEKEND",
-  TRAINING = "TRAINING",
-}
-
-const statusLabels: Record<WorkStatus, string> = {
-  [WorkStatus.WORKING_DAY]: "Jour de travail",
-  [WorkStatus.PAID_LEAVE]: "Congé payé",
-  [WorkStatus.UNPAID_LEAVE]: "Congé sans solde",
-  [WorkStatus.PUBLIC_HOLIDAY]: "Jour férié",
-  [WorkStatus.SICK_LEAVE]: "Congé maladie",
-  [WorkStatus.WEEKEND]: "Weekend",
-  [WorkStatus.TRAINING]: "Formation",
-};
-
-const statusColors: Record<WorkStatus, string> = {
-  [WorkStatus.WORKING_DAY]: "bg-green-100",
-  [WorkStatus.PAID_LEAVE]: "bg-blue-100",
-  [WorkStatus.UNPAID_LEAVE]: "bg-orange-100",
-  [WorkStatus.PUBLIC_HOLIDAY]: "bg-purple-100",
-  [WorkStatus.SICK_LEAVE]: "bg-red-100",
-  [WorkStatus.WEEKEND]: "bg-gray-100",
-  [WorkStatus.TRAINING]: "bg-yellow-100",
-};
-
-// Sample data
-const demoEmployees: Employee[] = [
-  {
-    id: "emp1",
-    nom: "Dubois",
-    prenom: "Jean",
-    poste: "Développeur Senior",
-    email: "jean.dubois@techsolutions.be",
-    dateEmbauche: "15/03/2020",
-    telephone: "+32 470 12 34 56",
-    adresse: "10 Rue de la Paix, 1000 Bruxelles",
-    entrepriseId: "123e4567-e89b-12d3-a456-426614174000",
-  },
-  {
-    id: "emp2",
-    nom: "Martin",
-    prenom: "Sophie",
-    poste: "Designer UX",
-    email: "sophie.martin@techsolutions.be",
-    dateEmbauche: "21/09/2021",
-    telephone: "+32 471 23 45 67",
-    adresse: "25 Avenue Louise, 1050 Bruxelles",
-    entrepriseId: "123e4567-e89b-12d3-a456-426614174000",
-  },
-  {
-    id: "emp3",
-    nom: "Laurent",
-    prenom: "Michel",
-    poste: "Chef de chantier",
-    email: "michel.laurent@construction-dupont.be",
-    dateEmbauche: "03/05/2018",
-    telephone: "+32 472 34 56 78",
-    adresse: "5 Rue du Commerce, 1040 Bruxelles",
-    entrepriseId: "223e4567-e89b-12d3-a456-426614174001",
-  },
-];
-
-// Sample enterprises
-const demoEntreprises: Entreprise[] = [
-  {
-    id: "123e4567-e89b-12d3-a456-426614174000",
-    nom: "TechSolutions SPRL",
-  },
-  {
-    id: "223e4567-e89b-12d3-a456-426614174001",
-    nom: "Construction Dupont SA",
-  },
-];
-
-// Sample documents
-const demoDocuments: Record<string, Document[]> = {
-  emp1: [
-    {
-      id: "doc1",
-      nom: "Contrat de travail",
-      type: "PDF",
-      dateUpload: "15/03/2020",
-      taille: "750 KB",
-    },
-    {
-      id: "doc2",
-      nom: "CV",
-      type: "PDF",
-      dateUpload: "10/03/2020",
-      taille: "1.2 MB",
-    },
-  ],
-  emp2: [
-    {
-      id: "doc3",
-      nom: "Contrat de travail",
-      type: "PDF",
-      dateUpload: "21/09/2021",
-      taille: "720 KB",
-    },
-    {
-      id: "doc4",
-      nom: "Attestation de formation",
-      type: "PDF",
-      dateUpload: "05/11/2021",
-      taille: "1.5 MB",
-    },
-  ],
-  emp3: [
-    {
-      id: "doc5",
-      nom: "Contrat de travail",
-      type: "PDF",
-      dateUpload: "03/05/2018",
-      taille: "800 KB",
-    },
-  ],
-};
-
-// Calendar data
-const demoCalendarData: Record<string, CalendarDay[]> = {
-  emp1: [
-    { date: "2025-03-01", status: WorkStatus.WEEKEND },
-    { date: "2025-03-02", status: WorkStatus.WEEKEND },
-    { date: "2025-03-03", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-04", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-05", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-06", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-07", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-08", status: WorkStatus.WEEKEND },
-    { date: "2025-03-09", status: WorkStatus.WEEKEND },
-    { date: "2025-03-10", status: WorkStatus.SICK_LEAVE },
-    { date: "2025-03-11", status: WorkStatus.SICK_LEAVE },
-    { date: "2025-03-12", status: WorkStatus.SICK_LEAVE },
-    { date: "2025-03-13", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-14", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-15", status: WorkStatus.WEEKEND },
-    { date: "2025-03-16", status: WorkStatus.WEEKEND },
-    { date: "2025-03-17", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-18", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-19", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-20", status: WorkStatus.TRAINING },
-    { date: "2025-03-21", status: WorkStatus.TRAINING },
-    { date: "2025-03-22", status: WorkStatus.WEEKEND },
-    { date: "2025-03-23", status: WorkStatus.WEEKEND },
-    { date: "2025-03-24", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-25", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-26", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-27", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-28", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-29", status: WorkStatus.WEEKEND },
-    { date: "2025-03-30", status: WorkStatus.WEEKEND },
-    { date: "2025-03-31", status: WorkStatus.WORKING_DAY, hours: 8 },
-    // Add April data
-    { date: "2025-04-01", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-04-02", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-04-03", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-04-04", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-04-05", status: WorkStatus.WEEKEND },
-    { date: "2025-04-06", status: WorkStatus.WEEKEND },
-    { date: "2025-04-07", status: WorkStatus.PAID_LEAVE },
-    { date: "2025-04-08", status: WorkStatus.PAID_LEAVE },
-    { date: "2025-04-09", status: WorkStatus.PAID_LEAVE },
-    { date: "2025-04-10", status: WorkStatus.PAID_LEAVE },
-    { date: "2025-04-11", status: WorkStatus.PAID_LEAVE },
-    { date: "2025-04-12", status: WorkStatus.WEEKEND },
-    { date: "2025-04-13", status: WorkStatus.WEEKEND },
-    { date: "2025-04-14", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-04-15", status: WorkStatus.PUBLIC_HOLIDAY },
-    { date: "2025-04-16", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-04-17", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-04-18", status: WorkStatus.WORKING_DAY, hours: 8 },
-  ],
-  emp2: [
-    // Similar structure for employee 2
-    { date: "2025-03-01", status: WorkStatus.WEEKEND },
-    { date: "2025-03-02", status: WorkStatus.WEEKEND },
-    { date: "2025-03-03", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-04", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-05", status: WorkStatus.WORKING_DAY, hours: 8 },
-    { date: "2025-03-06", status: WorkStatus.PAID_LEAVE },
-    { date: "2025-03-07", status: WorkStatus.PAID_LEAVE },
-    // Add more days as needed
-  ],
-  emp3: [
-    // Similar structure for employee 3
-    { date: "2025-03-01", status: WorkStatus.WEEKEND },
-    { date: "2025-03-02", status: WorkStatus.WEEKEND },
-    { date: "2025-03-03", status: WorkStatus.UNPAID_LEAVE },
-    { date: "2025-03-04", status: WorkStatus.UNPAID_LEAVE },
-    { date: "2025-03-05", status: WorkStatus.WORKING_DAY, hours: 8 },
-    // Add more days as needed
-  ],
-};
+// Import data from mockData
+import {
+  demoEmployees,
+  demoEmployeeDocuments,
+  demoCalendarData,
+  statusLabels,
+  statusColors,
+  getCompanyById,
+  WorkStatus,
+  Employee,
+  CalendarDay,
+} from "@/data/mockData";
 
 // Calendar helper function
 function getDaysInMonth(year: number, month: number): number {
@@ -502,7 +282,7 @@ export function PersonnelDetailsPage() {
   const [formData, setFormData] = useState<Employee | null>(null);
   const [activeTab, setActiveTab] = useState("infos");
 
-  const documents = id ? demoDocuments[id] || [] : [];
+  const documents = id ? demoEmployeeDocuments[id] || [] : [];
 
   // Fetch employee data
   useEffect(() => {
@@ -523,7 +303,7 @@ export function PersonnelDetailsPage() {
   }
 
   const getEntrepriseName = (id: string) => {
-    const entreprise = demoEntreprises.find((e) => e.id === id);
+    const entreprise = getCompanyById(id);
     return entreprise ? entreprise.nom : "Inconnu";
   };
 
@@ -665,7 +445,7 @@ export function PersonnelDetailsPage() {
                       <Input
                         id="telephone"
                         name="telephone"
-                        value={formData.telephone}
+                        value={formData.telephone || ""}
                         onChange={handleInputChange}
                       />
                     </div>
@@ -674,7 +454,7 @@ export function PersonnelDetailsPage() {
                       <Input
                         id="adresse"
                         name="adresse"
-                        value={formData.adresse}
+                        value={formData.adresse || ""}
                         onChange={handleInputChange}
                       />
                     </div>

@@ -1,4 +1,4 @@
-// src/pages/EmployeePage.tsx
+// src/pages/PersonnelPage.tsx
 import { useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,91 +20,17 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// Type for Employee
-interface Employee {
-  id: string;
-  nom: string;
-  prenom: string;
-  poste: string;
-  email: string;
-  dateEmbauche: string;
-  telephone: string;
-  entrepriseId: string;
-  entrepriseNom: string;
-}
+// Import data from mockData file
+import { getEmployeesWithCompanyName, Employee } from "@/data/mockData";
 
-// Sample data for demonstration
-const demoEmployees: Employee[] = [
-  {
-    id: "emp1",
-    nom: "Dubois",
-    prenom: "Jean",
-    poste: "Développeur Senior",
-    email: "jean.dubois@techsolutions.be",
-    dateEmbauche: "15/03/2020",
-    telephone: "+32 470 12 34 56",
-    entrepriseId: "123e4567-e89b-12d3-a456-426614174000",
-    entrepriseNom: "TechSolutions SPRL",
-  },
-  {
-    id: "emp2",
-    nom: "Martin",
-    prenom: "Sophie",
-    poste: "Designer UX",
-    email: "sophie.martin@techsolutions.be",
-    dateEmbauche: "21/09/2021",
-    telephone: "+32 471 23 45 67",
-    entrepriseId: "123e4567-e89b-12d3-a456-426614174000",
-    entrepriseNom: "TechSolutions SPRL",
-  },
-  {
-    id: "emp3",
-    nom: "Laurent",
-    prenom: "Michel",
-    poste: "Chef de chantier",
-    email: "michel.laurent@construction-dupont.be",
-    dateEmbauche: "03/05/2018",
-    telephone: "+32 472 34 56 78",
-    entrepriseId: "223e4567-e89b-12d3-a456-426614174001",
-    entrepriseNom: "Construction Dupont SA",
-  },
-  {
-    id: "emp4",
-    nom: "Leroy",
-    prenom: "Émilie",
-    poste: "Comptable",
-    email: "emilie.leroy@mediascom.be",
-    dateEmbauche: "12/01/2022",
-    telephone: "+32 473 45 67 89",
-    entrepriseId: "523e4567-e89b-12d3-a456-426614174004",
-    entrepriseNom: "Média & Communications",
-  },
-  {
-    id: "emp5",
-    nom: "Petit",
-    prenom: "Thomas",
-    poste: "Chauffeur",
-    email: "thomas.petit@transportsexpress.be",
-    dateEmbauche: "07/08/2019",
-    telephone: "+32 474 56 78 90",
-    entrepriseId: "423e4567-e89b-12d3-a456-426614174003",
-    entrepriseNom: "Transports Express",
-  },
-  {
-    id: "emp6",
-    nom: "Dupont",
-    prenom: "Claire",
-    poste: "Chef cuisinière",
-    email: "claire.dupont@resto-gourmand.be",
-    dateEmbauche: "22/11/2020",
-    telephone: "+32 475 67 89 01",
-    entrepriseId: "323e4567-e89b-12d3-a456-426614174002",
-    entrepriseNom: "Resto Gourmand",
-  },
-];
+// Type for employee with company name
+type EmployeeWithCompany = Employee & { entrepriseNom: string };
 
 export function PersonnelPage() {
-  const [employees] = useState<Employee[]>(demoEmployees);
+  // Get employees with company name from mock data
+  const [employees] = useState<EmployeeWithCompany[]>(
+    getEmployeesWithCompanyName()
+  );
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filter employees based on search term

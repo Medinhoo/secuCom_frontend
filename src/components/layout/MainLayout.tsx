@@ -1,8 +1,6 @@
 // src/components/layout/MainLayout.tsx
 import React, { useState } from "react";
 import { Sidebar } from "./Sidebar";
-import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface MainLayoutProps {
   children: React.ReactNode;
