@@ -7,6 +7,8 @@ import { EntrepriseDetailsPage } from "./pages/EntrepriseDetailsPage";
 import { PersonnelDetailsPage } from "./pages/PersonnelDetailsPage";
 import { PersonnelPage } from "./pages/PersonnelPage.tsx";
 import { DimonaPage } from "./pages/DimonaPage.tsx";
+import { DocumentsPage } from "./pages/DocumentsPage.tsx";
+import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
 
 export default function App() {
   return (
@@ -18,9 +20,10 @@ export default function App() {
           <Route path="/clients/:id" element={<EntrepriseDetailsPage />} />
           <Route path="/personnel" element={<PersonnelPage />} />
           <Route path="/personnel/:id" element={<PersonnelDetailsPage />} />
+          <Route path="/documents" element={<DocumentsPage />} />
           <Route
-            path="/documents"
-            element={<div>Liste des types de documents</div>}
+            path="/documents/:categoryId"
+            element={<DocumentsListPage />}
           />
           <Route path="/dimona" element={<DimonaPage />} />
           <Route path="/settings" element={<div>Paramètres</div>} />
