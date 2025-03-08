@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 // URL de base de l'API
-const API_URL = import.meta.env.SECUCOM_API;
+const API_URL = import.meta.env.VITE_SECUCOM_API;
 
 // Types
 export interface User {
