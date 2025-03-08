@@ -53,7 +53,7 @@ const LoginPage = () => {
                   htmlFor="username"
                   className="text-lg text-slate-700 font-medium"
                 >
-                  Nom d'Entreprise
+                  Nom de votre entreprise
                 </Label>
                 <div className="relative">
                   <MailIcon className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />

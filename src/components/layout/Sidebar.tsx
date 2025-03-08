@@ -43,7 +43,7 @@ function SidebarLink({
     ? React.cloneElement(icon as React.ReactElement, { size: 24 })
     : icon;
 
-  // Create content element, used for both normal rendering and tooltip trigger
+  // Create content element for button-type links (like logout)
   const linkContent = (
     <div
       className={cn(
@@ -68,10 +68,20 @@ function SidebarLink({
         {iconElement}
       </div>
 
-      {/* Label */}
-      {!isCollapsed && (
+      {/* Label with improved transition */}
+      <div
+        className={cn(
+          "transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap",
+          isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+        )}
+        style={{
+          maxWidth: isCollapsed ? "0" : "150px",
+          marginLeft: isCollapsed ? "0" : "0.75rem",
+          transitionDelay: isCollapsed ? "0ms" : "100ms",
+        }}
+      >
         <span className={cn(isActive ? "font-semibold" : "")}>{label}</span>
-      )}
+      </div>
 
       {/* Active indicators */}
       {isActive && (
@@ -80,9 +90,15 @@ function SidebarLink({
           <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-blue-400 rounded-r"></div>
 
           {/* Right side dot indicator - only when expanded */}
-          {!isCollapsed && (
-            <div className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-400 z-10"></div>
-          )}
+          <div
+            className={cn(
+              "transition-all duration-300 ease-in-out ml-auto h-1.5 w-1.5 rounded-full bg-blue-400 z-10",
+              isCollapsed ? "opacity-0 scale-0" : "opacity-100 scale-100"
+            )}
+            style={{
+              transitionDelay: isCollapsed ? "0ms" : "150ms",
+            }}
+          ></div>
         </>
       )}
     </div>
@@ -114,10 +130,20 @@ function SidebarLink({
           {iconElement}
         </div>
 
-        {/* Label */}
-        {!isCollapsed && (
+        {/* Label with improved transition */}
+        <div
+          className={cn(
+            "transition-all duration-300 ease-in-out overflow-hidden whitespace-nowrap",
+            isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+          )}
+          style={{
+            maxWidth: isCollapsed ? "0" : "150px",
+            marginLeft: isCollapsed ? "0" : "0.75rem",
+            transitionDelay: isCollapsed ? "0ms" : "100ms",
+          }}
+        >
           <span className={cn(isActive ? "font-semibold" : "")}>{label}</span>
-        )}
+        </div>
 
         {/* Active indicators */}
         {isActive && (
@@ -126,9 +152,15 @@ function SidebarLink({
             <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-blue-400 rounded-r"></div>
 
             {/* Right side dot indicator - only when expanded */}
-            {!isCollapsed && (
-              <div className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-400 z-10"></div>
-            )}
+            <div
+              className={cn(
+                "transition-all duration-300 ease-in-out ml-auto h-1.5 w-1.5 rounded-full bg-blue-400 z-10",
+                isCollapsed ? "opacity-0 scale-0" : "opacity-100 scale-100"
+              )}
+              style={{
+                transitionDelay: isCollapsed ? "0ms" : "150ms",
+              }}
+            ></div>
           </>
         )}
       </Link>
@@ -176,7 +208,7 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
   const location = useLocation();
   const pathname = location.pathname;
   const [mounted, setMounted] = useState(false);
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   // Function to check if the current path matches or starts with the given path
   const isActivePath = (href: string) => pathname.startsWith(href);
@@ -237,40 +269,66 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
         boxShadow: "0 0 25px rgba(59, 130, 246, 0.1)",
       }}
     >
-      {/* Header with static gradient */}
-      <div className="flex h-16 items-center border-b border-slate-200 relative overflow-hidden bg-gradient-to-r from-blue-500 to-blue-400">
-        {/* Glass effect overlay */}
-        <div className="absolute inset-0 bg-white/10"></div>
+      {/* Header arrondi avec transitions améliorées */}
+      <div className="relative h-20 px-3 pt-3">
+        {/* Conteneur arrondi avec gradient */}
+        <div className="absolute inset-x-3 top-3 bottom-0 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-400 overflow-hidden shadow-lg">
+          {/* Effet de brillance */}
+          <div className="absolute -top-10 -left-10 h-20 w-20 bg-white/20 rounded-full blur-xl"></div>
+          <div className="absolute -right-5 -bottom-8 h-16 w-16 bg-white/10 rounded-full blur-lg"></div>
+        </div>
 
-        <div
-          className={cn(
-            "flex items-center px-4 transition-all duration-300 overflow-hidden relative z-10",
-            isCollapsed ? "justify-center w-full" : "justify-between w-full"
-          )}
-        >
-          {!isCollapsed && (
-            <span className="font-bold text-lg text-white drop-shadow-sm">
-              Espace de Sodabel
-            </span>
-          )}
+        {/* Contenu du header avec transitions améliorées */}
+        <div className="relative z-10 flex items-center justify-center h-full w-full">
+          {/* Conteneur pour le contenu utilisateur avec transition */}
+          <div
+            className={cn(
+              "flex items-center gap-3 transition-all duration-300 ease-in-out absolute",
+              isCollapsed
+                ? "opacity-0 -translate-x-10 pointer-events-none"
+                : "opacity-100 translate-x-0"
+            )}
+            style={{
+              width: "calc(100% - 2rem)",
+              left: "0.5rem",
+              padding: "0 0.5rem",
+              visibility: isCollapsed ? "hidden" : "visible",
+              transitionDelay: isCollapsed ? "0ms" : "150ms",
+            }}
+          >
+            <div className="h-10 w-10 flex-shrink-0 rounded-full bg-white/20 flex items-center justify-center shadow-sm">
+              <span className="font-bold text-lg text-white">
+                {user?.username?.charAt(0) || "S"}
+              </span>
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="font-bold text-white drop-shadow-sm truncate">
+                {user?.username}
+              </span>
+              <span className="text-xs text-blue-100 truncate">
+                Secrétariat social
+              </span>
+            </div>
+          </div>
 
+          {/* Bouton recentré */}
           <Button
             variant="ghost"
             size="icon"
             onClick={toggleCollapse}
             className={cn(
-              "h-8 w-8 text-white rounded-full relative overflow-hidden",
-              "hover:bg-white/20 transition-all duration-200"
+              "h-8 w-8 text-white rounded-full hover:bg-white/20 transition-all duration-300",
+              "absolute",
+              isCollapsed ? "left-1/2 -translate-x-1/2" : "right-4"
             )}
           >
             <div
               className={cn(
-                "transition-transform duration-300",
-                !isCollapsed && "rotate-180",
-                "flex items-center justify-center"
+                "transition-transform duration-300 flex items-center justify-center",
+                !isCollapsed && "rotate-180"
               )}
             >
-              <ChevronRight size={18} className="drop-shadow-sm" />
+              <ChevronRight size={18} />
             </div>
           </Button>
         </div>
@@ -303,10 +361,24 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
         </nav>
       </div>
 
-      {/* Footer with logout and brand tag */}
-      <div className="mt-auto border-t border-slate-200">
+      {/* Footer with logout and brand tag - RÉORGANISÉ */}
+      <div
+        className={cn(
+          "mt-auto transition-all duration-300",
+          isCollapsed
+            ? "flex flex-col justify-end h-24"
+            : "border-t border-slate-200"
+        )}
+      >
+        {/* ORDRE INVERSÉ: D'abord le bouton de déconnexion, puis le tag Sodabel */}
+
         {/* Logout button */}
-        <div className={cn("py-2", isCollapsed ? "px-2" : "px-3")}>
+        <div
+          className={cn(
+            "transition-all duration-300",
+            isCollapsed ? "px-2 mt-auto" : "px-3 py-3"
+          )}
+        >
           <SidebarLink
             href=""
             icon={<LogOut size={20} className="text-red-500" />}
@@ -316,12 +388,15 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
           />
         </div>
 
-        {/* Brand tag */}
+        {/* Brand tag avec transition - seulement visible quand expanded */}
         <div
           className={cn(
-            "text-center py-3 transition-all duration-300",
-            isCollapsed ? "opacity-0" : "opacity-100"
+            "text-center py-3 overflow-hidden transition-all duration-100 ease-in-out",
+            isCollapsed ? "max-h-0 opacity-0" : "max-h-10 opacity-100"
           )}
+          style={{
+            transitionDelay: isCollapsed ? "0ms" : "50ms",
+          }}
         >
           <div className="flex justify-center items-center">
             <div className="h-1 w-1 rounded-full bg-blue-400 mr-1"></div>
