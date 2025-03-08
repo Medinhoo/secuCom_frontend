@@ -28,7 +28,10 @@ function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/dimona" element={<DimonaPage />} />
               <Route path="/documents" element={<DocumentsPage />} />
-              <Route path="/documents/:id" element={<DocumentsListPage />} />
+              <Route
+                path="/documents/:categoryId"
+                element={<DocumentsListPage />}
+              />
               <Route path="/entreprises" element={<EntreprisePage />} />
               <Route
                 path="/entreprises/:id"
@@ -44,9 +47,9 @@ function App() {
             </Route>
           </Route>
 
-          {/* Redirection par défaut */}
+          {/* Redirection par défaut
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} /> */}
         </Routes>
       </AuthProvider>
     </BrowserRouter>

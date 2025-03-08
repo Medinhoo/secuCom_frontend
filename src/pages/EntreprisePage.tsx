@@ -208,7 +208,7 @@ export function EntreprisePage() {
                             asChild
                             className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                           >
-                            <Link to={`/clients/${entreprise.id}`}>
+                            <Link to={`/entreprises/${entreprise.id}`}>
                               <Eye className="h-4 w-4 mr-2" /> Détails
                             </Link>
                           </Button>
@@ -303,7 +303,7 @@ export function EntreprisePage() {
                               asChild
                               className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                             >
-                              <Link to={`/clients/${entreprise.id}`}>
+                              <Link to={`/entreprises/${entreprise.id}`}>
                                 <Eye className="h-4 w-4 mr-2" /> Détails
                               </Link>
                             </Button>

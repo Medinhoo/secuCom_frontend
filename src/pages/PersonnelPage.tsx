@@ -165,7 +165,7 @@ export function PersonnelPage() {
                       <div className="flex items-center">
                         <Building className="h-3 w-3 text-slate-400 mr-1" />
                         <Link
-                          to={`/clients/${employee.entrepriseId}`}
+                          to={`/entreprises/${employee.entrepriseId}`}
                           className="text-blue-600 hover:text-blue-800 hover:underline"
                         >
                           {employee.entrepriseNom}

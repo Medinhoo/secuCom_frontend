@@ -396,7 +396,7 @@ export function PersonnelDetailsPage() {
               {employee.poste}
             </Badge>
             <Link
-              to={`/clients/${employee.entrepriseId}`}
+              to={`/entreprises/${employee.entrepriseId}`}
               className="text-sm text-slate-500 hover:text-blue-600 flex items-center"
             >
               <Building className="h-3 w-3 mr-1" />
@@ -662,7 +662,7 @@ export function PersonnelDetailsPage() {
                         asChild
                         className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                       >
-                        <Link to={`/clients/${employee.entrepriseId}`}>
+                        <Link to={`/entreprises/${employee.entrepriseId}`}>
                           <Building className="h-4 w-4 mr-2" /> Voir
                           l'entreprise
                         </Link>

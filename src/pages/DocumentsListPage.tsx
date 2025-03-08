@@ -225,12 +225,16 @@ export function DocumentsListPage() {
     (category) => category.id === categoryId
   );
 
-  if (!currentCategory) {
-    // Rediriger si la catégorie n'existe pas
-    useEffect(() => {
+  // Effet pour rediriger si la catégorie n'existe pas
+  useEffect(() => {
+    if (!currentCategory && categoryId) {
       navigate("/documents");
-    }, [navigate]);
-    return <div>Redirection...</div>;
+    }
+  }, [navigate, currentCategory, categoryId]);
+
+  // Si pas de catégorie valide et toujours en cours de redirection
+  if (!currentCategory) {
+    return <div>Chargement des documents...</div>;
   }
 
   // Filtrer les documents en fonction de la catégorie, de la recherche et des filtres

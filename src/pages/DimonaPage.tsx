@@ -203,7 +203,7 @@ export function DimonaPage() {
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <Link
-                        to={`/clients/${dimona.entreprise.id}`}
+                        to={`/entreprises/${dimona.entreprise.id}`}
                         className="text-slate-600 hover:text-blue-600"
                       >
                         {dimona.entreprise.nom}

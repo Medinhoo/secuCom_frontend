@@ -77,7 +77,7 @@ export function EntrepriseDetailsPage() {
         setFormData(foundEntreprise);
       } else {
         // Enterprise not found, redirect to list
-        navigate("/clients");
+        navigate("/entreprises");
       }
     }
   }, [id, navigate]);
@@ -104,7 +104,7 @@ export function EntrepriseDetailsPage() {
     // Here you would delete from your backend
     console.log("Deleting enterprise:", entreprise.id);
     setIsDeleteDialogOpen(false);
-    navigate("/clients");
+    navigate("/entreprises");
   };
 
   const handleCancel = () => {
@@ -122,7 +122,7 @@ export function EntrepriseDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate("/clients")}
+                onClick={() => navigate("/entreprises")}
                 className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50 shadow-sm"
               >
                 <ChevronLeft className="h-4 w-4" />
