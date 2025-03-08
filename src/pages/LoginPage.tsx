@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -10,37 +9,19 @@ import {
   MailIcon,
   AlertCircle,
 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const LoginPage = () => {
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+
+  const { login, isLoading, error, clearError } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    try {
-      // Simulation d'appel API (à remplacer par votre vrai appel API)
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // À remplacer par votre authentification réelle
-      // const response = await authService.login(email, password);
-      // localStorage.setItem("user", JSON.stringify(response.user));
-
-      // Pour le moment, on simule un succès
-      console.log("Utilisateur connecté:", email);
-      navigate("/dashboard");
-    } catch (err) {
-      console.error("Erreur de connexion:", err);
-      setError("Email ou mot de passe incorrect. Veuillez réessayer.");
-    } finally {
-      setIsLoading(false);
-    }
+    clearError();
+    await login(username, password);
   };
 
   return (
@@ -69,20 +50,20 @@ const LoginPage = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <Label
-                  htmlFor="email"
+                  htmlFor="username"
                   className="text-lg text-slate-700 font-medium"
                 >
-                  Adresse email
+                  Nom d'Entreprise
                 </Label>
                 <div className="relative">
                   <MailIcon className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="nom@entreprise.com"
+                    id="name"
+                    type="text"
+                    placeholder="mon enteprise"
                     className="pl-12 py-6 text-lg border-slate-200 rounded-lg focus-visible:ring-blue-500"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     required
                   />
                 </div>
@@ -100,7 +81,6 @@ const LoginPage = () => {
                     variant="link"
                     className="text-blue-600 p-0 h-auto text-base font-medium"
                     type="button"
-                    onClick={() => navigate("/forgot-password")}
                   >
                     Mot de passe oublié?
                   </Button>
