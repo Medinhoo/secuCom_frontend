@@ -297,9 +297,11 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
             }}
           >
             <div className="h-10 w-10 flex-shrink-0 rounded-full bg-white/20 flex items-center justify-center shadow-sm">
-              <span className="font-bold text-lg text-white">
-                {user?.username?.charAt(0) || "S"}
-              </span>
+              <Link to="/profile">
+                <span className="font-bold text-lg text-white">
+                  {user?.username?.charAt(0) || "S"}
+                </span>
+              </Link>
             </div>
             <div className="flex flex-col min-w-0">
               <span className="font-bold text-white drop-shadow-sm truncate">

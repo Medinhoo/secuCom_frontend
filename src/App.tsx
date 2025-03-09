@@ -13,11 +13,14 @@ import DashboardPage from "./pages/DashboardPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
+import { Toaster } from "./components/ui/sonner.tsx";
+import ProfilePage from "./pages/ProfilePage.tsx";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Toaster theme="light" />
         <Routes>
           {/* Routes publiques */}
           <Route path="/login" element={<LoginPage />} />
@@ -26,6 +29,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/dimona" element={<DimonaPage />} />
               <Route path="/documents" element={<DocumentsPage />} />
               <Route
@@ -47,9 +51,9 @@ function App() {
             </Route>
           </Route>
 
-          {/* Redirection par défaut
+          {/* Redirection par défautv*/}
           <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} /> */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

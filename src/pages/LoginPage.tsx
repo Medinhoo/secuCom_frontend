@@ -43,7 +43,7 @@ const LoginPage = () => {
             {error && (
               <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6 flex items-center gap-3">
                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                <span>{error}</span>
+                <span>Connexion échouée</span>
               </div>
             )}
 

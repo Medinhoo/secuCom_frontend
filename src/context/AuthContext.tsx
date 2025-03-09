@@ -1,17 +1,21 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// URL de base de l'API
+// API base URL
 const API_URL = import.meta.env.VITE_SECUCOM_API;
 
-// Types
+// Updated User interface to match backend entity
 export interface User {
-  id: number;
+  id: string; // UUID type
   username: string;
   email?: string;
   firstName?: string;
   lastName?: string;
+  phoneNumber?: string;
+  accountStatus?: string; // ACTIVE, INACTIVE, LOCKED, PENDING
   roles: string[];
+  createdAt?: string;
+  lastLogin?: string;
 }
 
 interface AuthContextType {
@@ -24,15 +28,15 @@ interface AuthContextType {
   clearError: () => void;
   isAuthenticated: boolean;
   refreshToken: () => Promise<boolean>;
-  fetchUserDetails: (userId: number) => Promise<boolean>;
+  fetchUserDetails: (userId: string) => Promise<boolean>;
   hasRole: (role: string) => boolean;
   isInitialized: boolean;
 }
 
-// Création du contexte
+// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Provider du contexte
+// Context provider
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -44,12 +48,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const navigate = useNavigate();
 
-  // Fonction pour récupérer les détails complets de l'utilisateur
+  // Function to fetch complete user details
   const fetchUserDetails = async (
-    userId: number,
+    userId: string,
     accessToken?: string
   ): Promise<boolean> => {
-    // Utiliser soit le token passé en paramètre, soit celui du state
+    // Use either the token passed as parameter or the one from state
     const currentToken = accessToken || token;
     if (!currentToken) return false;
 
@@ -62,27 +66,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       if (!response.ok) {
-        throw new Error("Impossible de récupérer les détails utilisateur");
+        throw new Error("Unable to retrieve user details");
       }
 
       const userData = await response.json();
       setUser(userData);
       return true;
     } catch (error) {
-      console.error(
-        "Erreur lors de la récupération des détails utilisateur:",
-        error
-      );
+      console.error("Error while retrieving user details:", error);
       return false;
     }
   };
 
-  // Fonction pour rafraîchir le token
+  // Function to refresh token
   const refreshToken = async (): Promise<boolean> => {
     try {
       const response = await fetch(`${API_URL}/auth/refresh`, {
         method: "POST",
-        credentials: "include", // Inclure le cookie refresh token
+        credentials: "include", // Include refresh token cookie
       });
 
       if (!response.ok) {
@@ -92,51 +93,51 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const data = await response.json();
       setToken(data.token);
 
-      // Si on a l'ID utilisateur, récupérer les détails complets
+      // If we have user ID, retrieve complete details
       if (data.id) {
         await fetchUserDetails(data.id, data.token);
       }
 
       return true;
     } catch (error) {
-      console.error("Erreur lors du rafraîchissement du token:", error);
+      console.error("Error refreshing token:", error);
       return false;
     }
   };
 
-  // Vérifier l'authentification au chargement initial
+  // Check authentication on initial load
   useEffect(() => {
     const checkAuth = async () => {
-      // Si déjà authentifié, ne rien faire
+      // If already authenticated, do nothing
       if (token && user) {
         setIsInitialized(true);
         return;
       }
 
-      // Tenter de rafraîchir le token
+      // Try to refresh token
       const success = await refreshToken();
       setIsInitialized(true);
 
-      // Si rafraîchissement réussi et sur la page login, rediriger
+      // If refresh successful and on login page, redirect
       if (success && window.location.pathname === "/login") {
         navigate("/dashboard");
       }
     };
 
     checkAuth();
-  }, []); // S'exécute une seule fois au montage
+  }, []); // Run once on mount
 
-  // Navigation quand l'utilisateur devient authentifié
+  // Navigate when user becomes authenticated
   useEffect(() => {
     if (user && token) {
-      // Naviguer vers dashboard seulement si on est sur la page login
+      // Navigate to dashboard only if on login page
       if (window.location.pathname === "/login") {
         navigate("/dashboard");
       }
     }
   }, [user, token, navigate]);
 
-  // Fonction de connexion
+  // Login function
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     setError(null);
@@ -145,34 +146,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // Pour le cookie refresh token
+        credentials: "include", // For refresh token cookie
         body: JSON.stringify({ username, password }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Échec de connexion");
+        throw new Error(errorData.message || "Login failed");
       }
 
       const data = await response.json();
 
-      // Stocker le token
+      // Store token
       setToken(data.token);
 
-      // Créer un utilisateur minimal avec l'ID et les rôles
+      // Create minimal user with ID and roles
       const minimalUser = {
         id: data.id,
-        username: username, // Utilisateur connecté
+        username: username, // Logged in user
         roles: data.roles || [],
       };
 
-      // Définir l'utilisateur minimal pour être authentifié immédiatement
+      // Set minimal user to be immediately authenticated
       setUser(minimalUser);
 
-      // Récupérer les détails complets de l'utilisateur
+      // Retrieve complete user details
       await fetchUserDetails(data.id);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erreur de connexion");
+      setError(err instanceof Error ? err.message : "Login error");
     } finally {
       setIsLoading(false);
     }
@@ -186,24 +187,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       const data = await response.json();
-      console.log("Réponse de déconnexion:", data);
+      console.log("Logout response:", data);
 
-      // Nettoyer l'état local
+      // Clean local state
       setUser(null);
       setToken(null);
       navigate("/login");
     } catch (error) {
-      console.error("Erreur de déconnexion:", error);
+      console.error("Logout error:", error);
     }
   };
 
-  // Effacer les erreurs
+  // Clear errors
   const clearError = () => setError(null);
 
-  // Fonction utilitaire pour les requêtes API authentifiées
+  // Utility function for authenticated API requests
   const authFetch = async (url: string, options: RequestInit = {}) => {
     if (!token) {
-      throw new Error("Non authentifié");
+      throw new Error("Not authenticated");
     }
 
     const authOptions = {
@@ -216,12 +217,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const response = await fetch(url, authOptions);
 
-    // Si token expiré (401), essayer de le rafraîchir
+    // If token expired (401), try to refresh it
     if (response.status === 401) {
       const refreshSuccess = await refreshToken();
 
       if (refreshSuccess) {
-        // Réessayer avec le nouveau token
+        // Retry with new token
         return fetch(url, {
           ...options,
           headers: {
@@ -230,27 +231,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           },
         });
       } else {
-        // Échec du rafraîchissement, déconnecter
+        // Refresh failed, logout
         logout();
-        throw new Error("Session expirée. Veuillez vous reconnecter.");
+        throw new Error("Session expired. Please log in again.");
       }
     }
 
     return response;
   };
 
-  // Exposer authFetch à l'application
+  // Expose authFetch to the application
   useEffect(() => {
-    // @ts-ignore - Ajout d'une propriété personnalisée à window pour faciliter l'accès
+    // @ts-ignore - Add custom property to window for easy access
     window.authFetch = authFetch;
   }, [token]);
 
-  // Fonction pour vérifier si l'utilisateur a un rôle spécifique
+  // Function to check if user has a specific role
   const hasRole = (role: string): boolean => {
     return user?.roles?.includes(role) || false;
   };
 
-  // Valeur du contexte
+  // Context value
   const value = {
     user,
     token,
@@ -269,13 +270,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Hook personnalisé pour utiliser le contexte
+// Custom hook to use the context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error(
-      "useAuth doit être utilisé à l'intérieur d'un AuthProvider"
-    );
+    throw new Error("useAuth must be used inside an AuthProvider");
   }
   return context;
 };
