@@ -14,9 +14,11 @@ import {
   Phone,
   Clock,
   Calendar,
+  Loader2,
 } from "lucide-react";
 
 import PasswordChange from "../components/layout/PasswordChange";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
 const API_URL = import.meta.env.VITE_SECUCOM_API;
 
@@ -25,19 +27,18 @@ interface ProfileForm {
   lastName: string;
   email: string;
   phoneNumber: string;
-  username: string;
 }
 
 const ProfilePage: React.FC = () => {
   const { user, token, fetchUserDetails } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("information");
   const [formData, setFormData] = useState<ProfileForm>({
     firstName: "",
     lastName: "",
     email: "",
     phoneNumber: "",
-    username: "",
   });
 
   useEffect(() => {
@@ -47,7 +48,6 @@ const ProfilePage: React.FC = () => {
         lastName: user.lastName || "",
         email: user.email || "",
         phoneNumber: user.phoneNumber || "",
-        username: user.username || "",
       });
     }
   }, [user]);
@@ -72,25 +72,48 @@ const ProfilePage: React.FC = () => {
     });
   };
 
+  const handleTabChange = (value: string) => {
+    // Cancel editing mode when switching tabs
+    if (isEditing) {
+      cancelEdit();
+    }
+    setActiveTab(value);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.id || !token) return;
 
     setIsLoading(true);
     try {
-      // Créer un objet complet qui combine les données utilisateur existantes avec les modifications
-      const updatedUserData = {
-        ...user, // Garder toutes les données utilisateur existantes
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phoneNumber: formData.phoneNumber,
-        username: formData.username,
-      };
+      // Create an object containing only the fields that have changed
+      const updates: Record<string, string> = {};
 
-      // Supprimer les champs que le backend ne devrait pas recevoir lors d'une mise à jour
-      // (par exemple, les dates qui sont générées côté serveur)
-      const { createdAt, lastLogin, ...userToUpdate } = updatedUserData;
+      if (formData.firstName !== user.firstName) {
+        updates.firstName = formData.firstName;
+      }
+
+      if (formData.lastName !== user.lastName) {
+        updates.lastName = formData.lastName;
+      }
+
+      if (formData.email !== user.email) {
+        updates.email = formData.email;
+      }
+
+      if (formData.phoneNumber !== user.phoneNumber) {
+        updates.phoneNumber = formData.phoneNumber;
+      }
+
+      // Only proceed if there are actual changes
+      if (Object.keys(updates).length === 0) {
+        toast.info("Aucune modification", {
+          description: "Aucune modification n'a été apportée au profil.",
+        });
+        setIsEditing(false);
+        setIsLoading(false);
+        return;
+      }
 
       const response = await fetch(`${API_URL}/users/${user.id}`, {
         method: "PUT",
@@ -98,7 +121,7 @@ const ProfilePage: React.FC = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(userToUpdate),
+        body: JSON.stringify(updates),
       });
 
       if (!response.ok) {
@@ -118,12 +141,23 @@ const ProfilePage: React.FC = () => {
       });
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil:", error);
-      toast.error("Échec de la mise à jour", {
-        description:
-          error instanceof Error
-            ? error.message
-            : "Une erreur est survenue lors de la mise à jour de votre profil",
-      });
+
+      // Handle specific error messages
+      const errorMessage =
+        error instanceof Error ? error.message : "Une erreur est survenue";
+
+      // Provide more user-friendly error messages
+      let description =
+        "Une erreur est survenue lors de la mise à jour de votre profil";
+
+      if (errorMessage.includes("Email is already in use")) {
+        description =
+          "Cette adresse email est déjà utilisée par un autre compte.";
+      } else if (error instanceof Error) {
+        description = error.message;
+      }
+
+      toast.error("Échec de la mise à jour", { description });
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +171,6 @@ const ProfilePage: React.FC = () => {
         lastName: user.lastName || "",
         email: user.email || "",
         phoneNumber: user.phoneNumber || "",
-        username: user.username || "",
       });
     }
     setIsEditing(false);
@@ -148,9 +181,12 @@ const ProfilePage: React.FC = () => {
       <div className="max-w-7xl mx-auto p-6">
         <Card className="border-0 shadow-sm overflow-hidden">
           <CardContent className="p-6">
-            <p className="text-slate-500">
-              Chargement des informations du profil...
-            </p>
+            <div className="flex items-center">
+              <LoadingSpinner />
+              <p className="text-slate-500">
+                Chargement des informations du profil...
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -168,14 +204,15 @@ const ProfilePage: React.FC = () => {
             Consultez et gérez les informations de votre compte
           </p>
         </div>
-        {!isEditing ? (
+        {/* Only show edit button on information tab and not already editing */}
+        {activeTab === "information" && !isEditing ? (
           <Button
             className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
             onClick={() => setIsEditing(true)}
           >
             Modifier le Profil
           </Button>
-        ) : (
+        ) : isEditing ? (
           <div className="space-x-2">
             <Button
               variant="outline"
@@ -193,10 +230,15 @@ const ProfilePage: React.FC = () => {
               {isLoading ? "Enregistrement..." : "Enregistrer"}
             </Button>
           </div>
-        )}
+        ) : null}
       </div>
 
-      <Tabs defaultValue="information" className="space-y-4">
+      <Tabs
+        defaultValue="information"
+        className="space-y-4"
+        value={activeTab}
+        onValueChange={handleTabChange}
+      >
         <TabsList className="bg-white p-1 rounded-lg mb-4 shadow-sm">
           <TabsTrigger
             value="information"
@@ -315,11 +357,13 @@ const ProfilePage: React.FC = () => {
                       <Input
                         id="username"
                         name="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                        className="pl-9 border-slate-200 focus-visible:ring-blue-500"
+                        value={user.username}
+                        disabled={true}
+                        className="pl-9 border-slate-200 bg-slate-50"
                       />
+                      <p className="text-xs text-slate-500 mt-1">
+                        Le nom d'utilisateur ne peut pas être modifié.
+                      </p>
                     </div>
                   </div>
                 </div>
