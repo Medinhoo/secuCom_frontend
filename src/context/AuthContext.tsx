@@ -171,7 +171,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       setUser(minimalUser);
 
       // Retrieve complete user details
-      await fetchUserDetails(data.id);
+      await fetchUserDetails(data.id, data.token);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login error");
     } finally {
