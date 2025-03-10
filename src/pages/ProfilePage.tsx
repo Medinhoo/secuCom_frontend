@@ -14,7 +14,6 @@ import {
   Phone,
   Clock,
   Calendar,
-  KeyRound,
 } from "lucide-react";
 
 import PasswordChange from "../components/layout/PasswordChange";

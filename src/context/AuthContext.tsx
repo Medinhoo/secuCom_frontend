@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   ): Promise<boolean> => {
     // Use either the token passed as parameter or the one from state
     const currentToken = accessToken || token;
-    if (!currentToken) return false;
+    if (!currentToken) throw new Error("No token provided");
 
     try {
       const response = await fetch(`${API_URL}/users/${userId}`, {
