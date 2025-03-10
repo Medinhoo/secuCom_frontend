@@ -181,14 +181,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     try {
-      const response = await fetch(`${API_URL}/auth/logout`, {
+      await fetch(`${API_URL}/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
-
-      const data = await response.json();
-      console.log("Logout response:", data);
-
       // Clean local state
       setUser(null);
       setToken(null);

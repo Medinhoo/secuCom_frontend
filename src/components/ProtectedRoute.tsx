@@ -21,7 +21,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
     const checkAuth = async () => {
       if (!isAuthenticated) {
         // Essayer de rafraîchir le token
-
         await refreshToken();
       }
       setAuthChecked(true);

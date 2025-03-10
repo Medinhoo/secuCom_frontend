@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,10 @@ const LoginPage = () => {
     clearError();
     await login(username, password);
   };
+
+  useEffect(() => {
+    clearError();
+  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 to-white">
