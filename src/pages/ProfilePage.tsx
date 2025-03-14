@@ -15,18 +15,23 @@ import {
   Clock,
   Calendar,
   Loader2,
+  AlertCircle
 } from "lucide-react";
 
 import PasswordChange from "../components/layout/PasswordChange";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
-const API_URL = import.meta.env.VITE_SECUCOM_API;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 interface ProfileForm {
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
+}
+
+interface ValidationErrors {
+  email?: string;
 }
 
 const ProfilePage: React.FC = () => {
@@ -40,6 +45,7 @@ const ProfilePage: React.FC = () => {
     email: "",
     phoneNumber: "",
   });
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
 
   useEffect(() => {
     if (user) {
@@ -52,9 +58,32 @@ const ProfilePage: React.FC = () => {
     }
   }, [user]);
 
+  // Validate email format
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    
+    // Validate email input
+    if (name === "email") {
+      if (!validateEmail(value) && value.length > 0) {
+        setValidationErrors(prev => ({
+          ...prev,
+          email: "Format d'email invalide"
+        }));
+      } else {
+        setValidationErrors(prev => ({
+          ...prev,
+          email: undefined
+        }));
+      }
+    }
+    
+    // Update form data
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
@@ -83,6 +112,17 @@ const ProfilePage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user?.id || !token) return;
+
+    // Validate email before submission
+    if (formData.email && !validateEmail(formData.email)) {
+      setValidationErrors({
+        email: "Format d'email invalide"
+      });
+      toast.error("Erreur de validation", {
+        description: "Veuillez corriger les erreurs dans le formulaire.",
+      });
+      return;
+    }
 
     setIsLoading(true);
     try {
@@ -173,6 +213,8 @@ const ProfilePage: React.FC = () => {
         phoneNumber: user.phoneNumber || "",
       });
     }
+    // Clear validation errors
+    setValidationErrors({});
     setIsEditing(false);
   };
 
@@ -309,8 +351,16 @@ const ProfilePage: React.FC = () => {
                         value={formData.email}
                         onChange={handleChange}
                         disabled={!isEditing}
-                        className="pl-9 border-slate-200 focus-visible:ring-blue-500"
+                        className={`pl-9 border-slate-200 focus-visible:ring-blue-500 ${
+                          validationErrors.email ? "border-red-300 focus-visible:ring-red-500" : ""
+                        }`}
                       />
+                      {validationErrors.email && (
+                        <div className="flex items-center mt-1 text-red-500 text-xs">
+                          <AlertCircle className="h-3 w-3 mr-1" />
+                          {validationErrors.email}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-2">
