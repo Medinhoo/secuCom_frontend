@@ -374,7 +374,7 @@ export function PersonnelDetailsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="w-full">
       {/* Header section */}
       <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-start mb-6">
         <div className="space-y-2">

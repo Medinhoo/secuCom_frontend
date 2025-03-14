@@ -178,7 +178,7 @@ const ProfilePage: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="w-full p-6">
         <Card className="border-0 shadow-sm overflow-hidden">
           <CardContent className="p-6">
             <div className="flex items-center">
@@ -194,7 +194,7 @@ const ProfilePage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
+    <div className="w-full p-6">
       <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-blue-700">

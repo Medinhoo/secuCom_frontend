@@ -14,7 +14,7 @@ export function MainLayout() {
     <div className="flex h-screen overflow-hidden">
       <Sidebar isCollapsed={isCollapsed} toggleCollapse={toggleCollapse} />
       <main className="flex-1 overflow-auto">
-        <div className="p-10 bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <div className="p-10 bg-gradient-to-b from-blue-50 to-white min-h-screen w-full">
           <Outlet /> {/* Utilisez Outlet ici au lieu de children */}
         </div>
       </main>
