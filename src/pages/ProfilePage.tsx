@@ -14,24 +14,33 @@ import {
   Phone,
   Clock,
   Calendar,
-  Loader2,
-  AlertCircle
+  AlertCircle,
+  Building2,
+  Briefcase,
+  Star,
 } from "lucide-react";
 
 import PasswordChange from "../components/layout/PasswordChange";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const API_URL = import.meta.env.VITE_SECUCOM_API;
 
 interface ProfileForm {
   firstName: string;
   lastName: string;
   email: string;
   phoneNumber: string;
+  position?: string;
+  specialization?: string;
 }
 
 interface ValidationErrors {
   email?: string;
+}
+
+interface SecretariatInfo {
+  id: string;
+  name: string;
 }
 
 const ProfilePage: React.FC = () => {
@@ -39,13 +48,22 @@ const ProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("information");
+  const [secretariatInfo, setSecretariatInfo] =
+    useState<SecretariatInfo | null>(null);
   const [formData, setFormData] = useState<ProfileForm>({
     firstName: "",
     lastName: "",
     email: "",
     phoneNumber: "",
+    position: "",
+    specialization: "",
   });
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>(
+    {}
+  );
+
+  // Check if user is a secretariat employee
+  const isSecretariatEmployee = user?.roles.includes("ROLE_SECRETARIAT");
 
   useEffect(() => {
     if (user) {
@@ -54,9 +72,43 @@ const ProfilePage: React.FC = () => {
         lastName: user.lastName || "",
         email: user.email || "",
         phoneNumber: user.phoneNumber || "",
+        position: user.position || "",
+        specialization: user.specialization || "",
       });
+
+      // If user is a secretariat employee, fetch secretariat info
+      if (isSecretariatEmployee && user.secretariatId) {
+        fetchSecretariatInfo(user.secretariatId);
+      }
     }
-  }, [user]);
+  }, [user, isSecretariatEmployee]);
+
+  // Fetch secretariat info if user is a secretariat employee
+  const fetchSecretariatInfo = async (secretariatId: string) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/social-secretariat/${secretariatId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setSecretariatInfo({
+        id: data.id,
+        name: data.name,
+      });
+    } catch (error) {
+      console.error("Error fetching secretariat info:", error);
+    }
+  };
 
   // Validate email format
   const validateEmail = (email: string): boolean => {
@@ -66,24 +118,24 @@ const ProfilePage: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
+
     // Validate email input
     if (name === "email") {
       if (!validateEmail(value) && value.length > 0) {
-        setValidationErrors(prev => ({
+        setValidationErrors((prev) => ({
           ...prev,
-          email: "Format d'email invalide"
+          email: "Format d'email invalide",
         }));
       } else {
-        setValidationErrors(prev => ({
+        setValidationErrors((prev) => ({
           ...prev,
-          email: undefined
+          email: undefined,
         }));
       }
     }
-    
+
     // Update form data
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -116,7 +168,7 @@ const ProfilePage: React.FC = () => {
     // Validate email before submission
     if (formData.email && !validateEmail(formData.email)) {
       setValidationErrors({
-        email: "Format d'email invalide"
+        email: "Format d'email invalide",
       });
       toast.error("Erreur de validation", {
         description: "Veuillez corriger les erreurs dans le formulaire.",
@@ -145,6 +197,17 @@ const ProfilePage: React.FC = () => {
         updates.phoneNumber = formData.phoneNumber;
       }
 
+      // Add employee-specific fields if applicable
+      if (isSecretariatEmployee) {
+        if (formData.position !== user.position) {
+          updates.position = formData.position || "";
+        }
+
+        if (formData.specialization !== user.specialization) {
+          updates.specialization = formData.specialization || "";
+        }
+      }
+
       // Only proceed if there are actual changes
       if (Object.keys(updates).length === 0) {
         toast.info("Aucune modification", {
@@ -155,7 +218,12 @@ const ProfilePage: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/users/${user.id}`, {
+      // Determine the endpoint based on user role
+      const endpoint = isSecretariatEmployee
+        ? `${API_URL}/users/secretariat-employees/${user.id}`
+        : `${API_URL}/users/${user.id}`;
+
+      const response = await fetch(endpoint, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -211,6 +279,8 @@ const ProfilePage: React.FC = () => {
         lastName: user.lastName || "",
         email: user.email || "",
         phoneNumber: user.phoneNumber || "",
+        position: user.position || "",
+        specialization: user.specialization || "",
       });
     }
     // Clear validation errors
@@ -352,7 +422,9 @@ const ProfilePage: React.FC = () => {
                         onChange={handleChange}
                         disabled={!isEditing}
                         className={`pl-9 border-slate-200 focus-visible:ring-blue-500 ${
-                          validationErrors.email ? "border-red-300 focus-visible:ring-red-500" : ""
+                          validationErrors.email
+                            ? "border-red-300 focus-visible:ring-red-500"
+                            : ""
                         }`}
                       />
                       {validationErrors.email && (
@@ -382,6 +454,60 @@ const ProfilePage: React.FC = () => {
                       />
                     </div>
                   </div>
+
+                  {/* Additional fields for secretariat employees */}
+                  {isSecretariatEmployee && (
+                    <>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="position"
+                          className="text-sm font-medium"
+                        >
+                          Poste
+                        </Label>
+                        <div className="relative">
+                          <Briefcase className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                          <Input
+                            id="position"
+                            name="position"
+                            value={formData.position}
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                            className="pl-9 border-slate-200 focus-visible:ring-blue-500"
+                            placeholder={
+                              !isEditing && !formData.position
+                                ? "Non défini"
+                                : ""
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="specialization"
+                          className="text-sm font-medium"
+                        >
+                          Spécialisation
+                        </Label>
+                        <div className="relative">
+                          <Star className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                          <Input
+                            id="specialization"
+                            name="specialization"
+                            value={formData.specialization}
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                            className="pl-9 border-slate-200 focus-visible:ring-blue-500"
+                            placeholder={
+                              !isEditing && !formData.specialization
+                                ? "Non définie"
+                                : ""
+                            }
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </form>
             </CardContent>
@@ -417,6 +543,21 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Show secretariat info for secretariat employees */}
+                {isSecretariatEmployee && secretariatInfo && (
+                  <div className="border-t border-slate-100 pt-4">
+                    <h3 className="font-medium mb-2 text-blue-700">
+                      Secrétariat Social
+                    </h3>
+                    <div className="flex items-center">
+                      <Building2 className="h-4 w-4 text-slate-400 mr-2" />
+                      <span className="text-slate-700">
+                        {secretariatInfo.name}
+                      </span>
+                    </div>
+                  </div>
+                )}
 
                 <div className="border-t border-slate-100 pt-4">
                   <h3 className="font-medium mb-2 text-blue-700">

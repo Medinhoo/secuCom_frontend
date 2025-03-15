@@ -15,6 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
+import SocialSecretariatDetailsPage from "./pages/SocialSecretriatDetailsPage.tsx";
 
 function App() {
   return (
@@ -43,6 +44,10 @@ function App() {
               />
               <Route path="/personnel" element={<PersonnelPage />} />
               <Route path="/personnel/:id" element={<PersonnelDetailsPage />} />
+              <Route
+                path="/secretariat/:id"
+                element={<SocialSecretariatDetailsPage />}
+              />
 
               {/* Routes avec rôle spécifique */}
               <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
