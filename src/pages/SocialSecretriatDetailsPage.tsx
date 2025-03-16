@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { UserService } from "@/services/api/userService";
+import { SecretariatService } from "@/services/api/secretariatService";
 import {
   Card,
   CardContent,
@@ -19,7 +21,6 @@ import {
   Phone,
   Globe,
   MapPin,
-  Pencil,
   Edit,
   Save,
   AlertCircle,
@@ -32,16 +33,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { SocialSecretariat } from "@/types/SocialSecretariatTypes";
-
-interface Employee {
-  id: string;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string;
-  position?: string;
-  specialization?: string;
-}
+import { User as Employee } from "@/context/AuthContext";
 
 interface ValidationErrors {
   email?: string;
@@ -58,7 +50,7 @@ interface FormData {
 }
 
 const SocialSecretariatDetailsPage: React.FC = () => {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [secretariat, setSecretariat] = useState<SocialSecretariat | null>(
@@ -84,25 +76,16 @@ const SocialSecretariatDetailsPage: React.FC = () => {
     {}
   );
 
-  // API base URL
-  const API_URL = import.meta.env.VITE_SECUCOM_API;
-
   useEffect(() => {
     const fetchSecretariatDetails = async () => {
+      if (!id) {
+        setError("ID du secrétariat social non fourni");
+        return;
+      }
+
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/social-secretariat/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await SecretariatService.getSecretariatDetails(id);
         setSecretariat(data);
         setFormData({
           name: data.name || "",
@@ -130,7 +113,7 @@ const SocialSecretariatDetailsPage: React.FC = () => {
     if (id) {
       fetchSecretariatDetails();
     }
-  }, [id, token, API_URL]);
+  }, [id]);
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -138,21 +121,7 @@ const SocialSecretariatDetailsPage: React.FC = () => {
 
       try {
         setEmployeesLoading(true);
-        const response = await fetch(
-          `${API_URL}/users/secretariat-employees/by-secretariat/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            credentials: "include",
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
+        const data = await UserService.getSecretariatEmployees(id);
         setEmployees(data);
         setEmployeesError(null);
       } catch (err) {
@@ -169,7 +138,7 @@ const SocialSecretariatDetailsPage: React.FC = () => {
     if (activeTab === "employees") {
       fetchEmployees();
     }
-  }, [id, token, activeTab, API_URL]);
+  }, [id, activeTab]);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -216,6 +185,13 @@ const SocialSecretariatDetailsPage: React.FC = () => {
       return;
     }
 
+    if (!id) {
+      toast.error("Erreur", {
+        description: "ID du secrétariat social non fourni",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       // Create an object containing only the fields that have changed
@@ -258,25 +234,10 @@ const SocialSecretariatDetailsPage: React.FC = () => {
         return;
       }
 
-      const response = await fetch(`${API_URL}/socialSecretariat/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-        body: JSON.stringify(updates),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Échec de la mise à jour du secrétariat social"
-        );
-      }
-
-      // Update local state with new data
-      const updatedData = await response.json();
+      const updatedData = await SecretariatService.updateSecretariat(
+        id,
+        updates
+      );
       setSecretariat(updatedData);
 
       setIsEditing(false);
@@ -319,7 +280,9 @@ const SocialSecretariatDetailsPage: React.FC = () => {
   };
 
   const handleAddEmployee = () => {
-    navigate(`/secretariat-employees/new?secretariatId=${id}`);
+    if (id) {
+      navigate(`/secretariat-employees/new?secretariatId=${id}`);
+    }
   };
 
   const handleViewEmployee = (employeeId: string) => {

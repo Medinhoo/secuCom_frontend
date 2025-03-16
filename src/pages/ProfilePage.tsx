@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { UserService } from "@/services/api/userService";
+import { SecretariatService } from "@/services/api/secretariatService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,8 +24,7 @@ import {
 
 import PasswordChange from "../components/layout/PasswordChange";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
-
-const API_URL = import.meta.env.VITE_SECUCOM_API;
+import { Link } from "react-router-dom";
 
 interface ProfileForm {
   firstName: string;
@@ -83,24 +84,11 @@ const ProfilePage: React.FC = () => {
     }
   }, [user, isSecretariatEmployee]);
 
-  // Fetch secretariat info if user is a secretariat employee
   const fetchSecretariatInfo = async (secretariatId: string) => {
     try {
-      const response = await fetch(
-        `${API_URL}/social-secretariat/${secretariatId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: "include",
-        }
+      const data = await SecretariatService.getSecretariatDetails(
+        secretariatId
       );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
       setSecretariatInfo({
         id: data.id,
         name: data.name,
@@ -218,25 +206,10 @@ const ProfilePage: React.FC = () => {
         return;
       }
 
-      // Determine the endpoint based on user role
-      const endpoint = isSecretariatEmployee
-        ? `${API_URL}/users/secretariat-employees/${user.id}`
-        : `${API_URL}/users/${user.id}`;
-
-      const response = await fetch(endpoint, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(updates),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Échec de la mise à jour du profil"
-        );
+      if (isSecretariatEmployee) {
+        await UserService.updateSecretariatEmployeeProfile(user.id, updates);
+      } else {
+        await UserService.updateProfile(user.id, updates);
       }
 
       // Refresh user data
@@ -552,9 +525,11 @@ const ProfilePage: React.FC = () => {
                     </h3>
                     <div className="flex items-center">
                       <Building2 className="h-4 w-4 text-slate-400 mr-2" />
-                      <span className="text-slate-700">
-                        {secretariatInfo.name}
-                      </span>
+                      <Link to={`/secretariat/${secretariatInfo.id}`}>
+                        <span className="text-slate-700">
+                          {secretariatInfo.name}
+                        </span>
+                      </Link>
                     </div>
                   </div>
                 )}

@@ -1,8 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-// API base URL
-const API_URL = import.meta.env.VITE_SECUCOM_API;
+import { AuthService } from "@/services/api/authService";
 
 // Updated User interface to match backend entity
 export interface User {
@@ -16,6 +14,10 @@ export interface User {
   roles: string[];
   createdAt?: string;
   lastLogin?: string;
+  // Additional fields for secretariat employees
+  position?: string;
+  specialization?: string;
+  secretariatId?: string;
 }
 
 interface AuthContextType {
@@ -48,28 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const navigate = useNavigate();
 
-  // Function to fetch complete user details
-  const fetchUserDetails = async (
-    userId: string,
-    accessToken?: string
-  ): Promise<boolean> => {
-    // Use either the token passed as parameter or the one from state
-    const currentToken = accessToken || token;
-    if (!currentToken) throw new Error("No token provided");
-
+  const fetchUserDetails = async (userId: string): Promise<boolean> => {
     try {
-      const response = await fetch(`${API_URL}/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${currentToken}`,
-        },
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Unable to retrieve user details");
-      }
-
-      const userData = await response.json();
+      const userData = await AuthService.getUserDetails(userId);
       setUser(userData);
       return true;
     } catch (error) {
@@ -78,24 +61,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // Function to refresh token
   const refreshToken = async (): Promise<boolean> => {
     try {
-      const response = await fetch(`${API_URL}/auth/refresh`, {
-        method: "POST",
-        credentials: "include", // Include refresh token cookie
-      });
+      const response = await AuthService.refreshToken();
+      setToken(response.token);
 
-      if (!response.ok) {
-        return false;
-      }
-
-      const data = await response.json();
-      setToken(data.token);
-
-      // If we have user ID, retrieve complete details
-      if (data.id) {
-        await fetchUserDetails(data.id, data.token);
+      if (response.id) {
+        await fetchUserDetails(response.id);
       }
 
       return true;
@@ -137,41 +109,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [user, token, navigate]);
 
-  // Login function
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // For refresh token cookie
-        body: JSON.stringify({ username, password }),
-      });
+      const response = await AuthService.login({ username, password });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Login failed");
-      }
-
-      const data = await response.json();
-
-      // Store token
-      setToken(data.token);
+      setToken(response.token);
 
       // Create minimal user with ID and roles
       const minimalUser = {
-        id: data.id,
-        username: username, // Logged in user
-        roles: data.roles || [],
+        id: response.id,
+        username: username,
+        roles: response.roles || [],
       };
 
-      // Set minimal user to be immediately authenticated
       setUser(minimalUser);
 
       // Retrieve complete user details
-      await fetchUserDetails(data.id, data.token);
+      await fetchUserDetails(response.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login error");
     } finally {
@@ -181,11 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     try {
-      await fetch(`${API_URL}/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-      // Clean local state
+      await AuthService.logout();
       setUser(null);
       setToken(null);
       navigate("/login");
