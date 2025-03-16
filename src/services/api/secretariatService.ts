@@ -1,5 +1,6 @@
 import { apiClient } from "./baseApi";
 import { SocialSecretariat } from "@/types/SocialSecretariatTypes";
+import { SECRETARIAT_ENDPOINTS } from "@/config/api.config";
 
 interface SecretariatUpdate {
   name?: string;
@@ -15,7 +16,7 @@ export class SecretariatService {
     secretariatId: string
   ): Promise<SocialSecretariat> {
     return apiClient.get<SocialSecretariat>(
-      `/social-secretariat/${secretariatId}`,
+      SECRETARIAT_ENDPOINTS.GET_DETAILS(secretariatId),
       { requiresAuth: true }
     );
   }
@@ -25,14 +26,14 @@ export class SecretariatService {
     updates: SecretariatUpdate
   ): Promise<SocialSecretariat> {
     return apiClient.put<SocialSecretariat>(
-      `/socialSecretariat/${secretariatId}`,
+      SECRETARIAT_ENDPOINTS.UPDATE(secretariatId),
       updates,
       { requiresAuth: true }
     );
   }
 
   static async getAllSecretariats(): Promise<SocialSecretariat[]> {
-    return apiClient.get<SocialSecretariat[]>("/social-secretariat", {
+    return apiClient.get<SocialSecretariat[]>(SECRETARIAT_ENDPOINTS.GET_ALL, {
       requiresAuth: true,
     });
   }

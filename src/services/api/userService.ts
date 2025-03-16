@@ -1,5 +1,6 @@
 import { apiClient } from "./baseApi";
 import { User } from "@/context/AuthContext";
+import { USER_ENDPOINTS } from "@/config/api.config";
 
 interface UserProfileUpdate {
   firstName?: string;
@@ -15,7 +16,7 @@ export class UserService {
     userId: string,
     updates: UserProfileUpdate
   ): Promise<User> {
-    return apiClient.put<User>(`/users/${userId}`, updates, {
+    return apiClient.put<User>(USER_ENDPOINTS.UPDATE_PROFILE(userId), updates, {
       requiresAuth: true,
     });
   }
@@ -25,7 +26,7 @@ export class UserService {
     updates: UserProfileUpdate
   ): Promise<User> {
     return apiClient.put<User>(
-      `/users/secretariat-employees/${userId}`,
+      USER_ENDPOINTS.UPDATE_SECRETARIAT_EMPLOYEE(userId),
       updates,
       { requiresAuth: true }
     );
@@ -33,7 +34,7 @@ export class UserService {
 
   static async getSecretariatEmployees(secretariatId: string): Promise<User[]> {
     return apiClient.get<User[]>(
-      `/users/secretariat-employees/by-secretariat/${secretariatId}`,
+      USER_ENDPOINTS.GET_SECRETARIAT_EMPLOYEES(secretariatId),
       { requiresAuth: true }
     );
   }
