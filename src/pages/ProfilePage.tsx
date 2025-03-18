@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { UserService } from "@/services/api/userService";
+import {
+  UserService,
+  CompanyContactUpdateDto,
+} from "@/services/api/userService";
 import { SecretariatService } from "@/services/api/secretariatService";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +36,8 @@ interface ProfileForm {
   phoneNumber: string;
   position?: string;
   specialization?: string;
+  fonction?: string;
+  permissions?: string;
 }
 
 interface ValidationErrors {
@@ -63,8 +68,9 @@ const ProfilePage: React.FC = () => {
     {}
   );
 
-  // Check if user is a secretariat employee
+  // Check user roles
   const isSecretariatEmployee = user?.roles.includes("ROLE_SECRETARIAT");
+  const isCompanyContact = user?.roles.includes("ROLE_COMPANY");
 
   useEffect(() => {
     if (user) {
@@ -75,6 +81,8 @@ const ProfilePage: React.FC = () => {
         phoneNumber: user.phoneNumber || "",
         position: user.position || "",
         specialization: user.specialization || "",
+        fonction: user.fonction || "",
+        permissions: user.permissions || "",
       });
 
       // If user is a secretariat employee, fetch secretariat info
@@ -166,38 +174,72 @@ const ProfilePage: React.FC = () => {
 
     setIsLoading(true);
     try {
-      // Create an object containing only the fields that have changed
-      const updates: Record<string, string> = {};
+      let updates: any = {};
+      let hasChanges = false;
 
-      if (formData.firstName !== user.firstName) {
-        updates.firstName = formData.firstName;
-      }
+      if (isCompanyContact) {
+        // Create CompanyContactUpdateDto
+        const contactUpdates: CompanyContactUpdateDto = {};
 
-      if (formData.lastName !== user.lastName) {
-        updates.lastName = formData.lastName;
-      }
-
-      if (formData.email !== user.email) {
-        updates.email = formData.email;
-      }
-
-      if (formData.phoneNumber !== user.phoneNumber) {
-        updates.phoneNumber = formData.phoneNumber;
-      }
-
-      // Add employee-specific fields if applicable
-      if (isSecretariatEmployee) {
-        if (formData.position !== user.position) {
-          updates.position = formData.position || "";
+        if (formData.firstName !== user.firstName) {
+          contactUpdates.firstName = formData.firstName;
+          hasChanges = true;
+        }
+        if (formData.lastName !== user.lastName) {
+          contactUpdates.lastName = formData.lastName;
+          hasChanges = true;
+        }
+        if (formData.email !== user.email) {
+          contactUpdates.email = formData.email;
+          hasChanges = true;
+        }
+        if (formData.phoneNumber !== user.phoneNumber) {
+          contactUpdates.phoneNumber = formData.phoneNumber;
+          hasChanges = true;
+        }
+        if (formData.fonction !== user.fonction) {
+          contactUpdates.fonction = formData.fonction || "";
+          hasChanges = true;
+        }
+        if (formData.permissions !== user.permissions) {
+          contactUpdates.permissions = formData.permissions || "";
+          hasChanges = true;
+        }
+        updates = contactUpdates;
+      } else {
+        // Handle regular user and secretariat employee updates
+        if (formData.firstName !== user.firstName) {
+          updates.firstName = formData.firstName;
+          hasChanges = true;
+        }
+        if (formData.lastName !== user.lastName) {
+          updates.lastName = formData.lastName;
+          hasChanges = true;
+        }
+        if (formData.email !== user.email) {
+          updates.email = formData.email;
+          hasChanges = true;
+        }
+        if (formData.phoneNumber !== user.phoneNumber) {
+          updates.phoneNumber = formData.phoneNumber;
+          hasChanges = true;
         }
 
-        if (formData.specialization !== user.specialization) {
-          updates.specialization = formData.specialization || "";
+        // Add employee-specific fields if applicable
+        if (isSecretariatEmployee) {
+          if (formData.position !== user.position) {
+            updates.position = formData.position || "";
+            hasChanges = true;
+          }
+          if (formData.specialization !== user.specialization) {
+            updates.specialization = formData.specialization || "";
+            hasChanges = true;
+          }
         }
       }
 
       // Only proceed if there are actual changes
-      if (Object.keys(updates).length === 0) {
+      if (!hasChanges) {
         toast.info("Aucune modification", {
           description: "Aucune modification n'a été apportée au profil.",
         });
@@ -208,6 +250,8 @@ const ProfilePage: React.FC = () => {
 
       if (isSecretariatEmployee) {
         await UserService.updateSecretariatEmployeeProfile(user.id, updates);
+      } else if (isCompanyContact) {
+        await UserService.updateCompanyContactProfile(user.id, updates);
       } else {
         await UserService.updateProfile(user.id, updates);
       }
@@ -254,6 +298,8 @@ const ProfilePage: React.FC = () => {
         phoneNumber: user.phoneNumber || "",
         position: user.position || "",
         specialization: user.specialization || "",
+        fonction: user.fonction || "",
+        permissions: user.permissions || "",
       });
     }
     // Clear validation errors
@@ -481,6 +527,60 @@ const ProfilePage: React.FC = () => {
                       </div>
                     </>
                   )}
+
+                  {/* Additional fields for company contacts */}
+                  {isCompanyContact && (
+                    <>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="fonction"
+                          className="text-sm font-medium"
+                        >
+                          Fonction
+                        </Label>
+                        <div className="relative">
+                          <Briefcase className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                          <Input
+                            id="fonction"
+                            name="fonction"
+                            value={formData.fonction}
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                            className="pl-9 border-slate-200 focus-visible:ring-blue-500"
+                            placeholder={
+                              !isEditing && !formData.fonction
+                                ? "Non définie"
+                                : ""
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor="permissions"
+                          className="text-sm font-medium"
+                        >
+                          Permissions
+                        </Label>
+                        <div className="relative">
+                          <ShieldCheck className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+                          <Input
+                            id="permissions"
+                            name="permissions"
+                            value={formData.permissions}
+                            onChange={handleChange}
+                            disabled={!isEditing}
+                            className="pl-9 border-slate-200 focus-visible:ring-blue-500"
+                            placeholder={
+                              !isEditing && !formData.permissions
+                                ? "Non définies"
+                                : ""
+                            }
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </form>
             </CardContent>
@@ -516,6 +616,23 @@ const ProfilePage: React.FC = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* Show company info for company contacts */}
+                {isCompanyContact && user.companyName && (
+                  <div className="border-t border-slate-100 pt-4">
+                    <h3 className="font-medium mb-2 text-blue-700">
+                      Entreprise
+                    </h3>
+                    <div className="flex items-center">
+                      <Building2 className="h-4 w-4 text-slate-400 mr-2" />
+                      <Link to={`/entreprises/${user.companyId}`}>
+                        <span className="text-slate-700">
+                          {user.companyName}
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
 
                 {/* Show secretariat info for secretariat employees */}
                 {isSecretariatEmployee && secretariatInfo && (
@@ -587,6 +704,8 @@ const ProfilePage: React.FC = () => {
                             ? "SECRÉTARIAT"
                             : role.replace("ROLE_", "") === "ADMIN"
                             ? "ADMINISTRATEUR"
+                            : role.replace("ROLE_", "") === "COMPANY_CONTACT"
+                            ? "CONTACT ENTREPRISE"
                             : role.replace("ROLE_", "")}
                         </Badge>
                       </div>

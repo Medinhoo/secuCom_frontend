@@ -18,6 +18,12 @@ export interface User {
   position?: string;
   specialization?: string;
   secretariatId?: string;
+  // Additional fields for company contacts
+  fonction?: string;
+  permissions?: string;
+  companyId?: string;
+  companyName?: string;
+  isCompanyContact?: boolean;
 }
 
 interface AuthContextType {

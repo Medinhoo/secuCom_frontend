@@ -14,8 +14,14 @@ export const USER_ENDPOINTS = {
   UPDATE_PROFILE: (userId: string) => `/users/${userId}`,
   UPDATE_SECRETARIAT_EMPLOYEE: (userId: string) =>
     `/users/secretariat-employees/${userId}`,
+  UPDATE_COMPANY_CONTACT: (userId: string) =>
+    `/users/company-contacts/${userId}`,
   GET_SECRETARIAT_EMPLOYEES: (secretariatId: string) =>
     `/users/secretariat-employees/by-secretariat/${secretariatId}`,
+  GET_COMPANY_CONTACTS: "/users/company-contacts",
+  GET_COMPANY_CONTACT: (id: string) => `/users/company-contacts/${id}`,
+  GET_COMPANY_CONTACTS_BY_COMPANY: (companyId: string) =>
+    `/users/company-contacts/by-company/${companyId}`,
 } as const;
 
 // Social Secretariat endpoints
