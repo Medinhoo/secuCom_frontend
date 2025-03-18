@@ -1,6 +1,6 @@
 // src/pages/EntreprisePage.tsx
-import { useState } from "react";
-import { Plus, Search, Download, Eye } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Search, Download, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,35 +15,76 @@ import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
+import { companyService } from "@/services/api/companyService";
+import type { CompanyDto } from "@/types/CompanyTypes";
 
-// Import data from mockData file
-import {
-  demoEntreprises,
-  getSectorLightColor,
-  Entreprise,
-} from "@/data/mockData";
+// Helper function to get sector color
+const getSectorLightColor = (sector: string | undefined) => {
+  if (!sector) return "bg-slate-100 text-slate-700";
+
+  const sectorColors: Record<string, string> = {
+    Construction: "bg-blue-100 text-blue-700",
+    Transport: "bg-green-100 text-green-700",
+    Horeca: "bg-yellow-100 text-yellow-700",
+    Commerce: "bg-purple-100 text-purple-700",
+    Services: "bg-pink-100 text-pink-700",
+  };
+
+  return sectorColors[sector] || "bg-slate-100 text-slate-700";
+};
 
 export function EntreprisePage() {
-  const [entreprises] = useState<Entreprise[]>(demoEntreprises);
+  const [companies, setCompanies] = useState<CompanyDto[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
-  // Filter enterprises based on search term
-  const filteredEntreprises = entreprises.filter(
-    (entreprise) =>
-      entreprise.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      entreprise.secteurActivite
-        .toLowerCase()
+  // Fetch companies
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const data = await companyService.getAllCompanies();
+        setCompanies(data);
+      } catch (error) {
+        toast.error("Erreur lors du chargement des entreprises", {
+          description: "Veuillez réessayer plus tard",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
+
+  // Filter companies based on search term
+  const filteredCompanies = companies.filter(
+    (company) =>
+      company.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      company.activitySector
+        ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      entreprise.numeroTVA.toLowerCase().includes(searchTerm.toLowerCase())
+      company.vatNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      company.bceNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Get sector counts for tabs
-  const sectorCounts = entreprises.reduce((acc, entreprise) => {
-    const sector = entreprise.secteurActivite;
-    acc[sector] = (acc[sector] || 0) + 1;
+  const sectorCounts = companies.reduce((acc, company) => {
+    const sector = company.activitySector;
+    if (sector) {
+      acc[sector] = (acc[sector] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
+
+  if (loading) {
+    return (
+      <div className="w-full h-[50vh] flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -76,7 +117,7 @@ export function EntreprisePage() {
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <Input
-            placeholder="Rechercher une entreprise, un secteur, un n° TVA..."
+            placeholder="Rechercher par nom, secteur, BCE ou numéro TVA..."
             className="pl-9 py-2 border-slate-200 rounded-md bg-white shadow-sm focus-visible:ring-blue-500"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -96,7 +137,7 @@ export function EntreprisePage() {
               variant="secondary"
               className="ml-2 bg-blue-100 text-blue-700 hover:bg-blue-200"
             >
-              {entreprises.length}
+              {companies.length}
             </Badge>
           </TabsTrigger>
           {Object.entries(sectorCounts).map(([sector, count]) => (
@@ -123,16 +164,22 @@ export function EntreprisePage() {
                 <TableHeader>
                   <TableRow className="hover:bg-transparent border-b border-slate-100">
                     <TableHead className="text-blue-700 font-medium">
-                      Entreprise
+                      Nom de l'entreprise
                     </TableHead>
                     <TableHead className="text-blue-700 font-medium">
-                      TVA
+                      Contact
                     </TableHead>
                     <TableHead className="text-blue-700 font-medium">
-                      Secteur
+                      N° ONSS
                     </TableHead>
                     <TableHead className="text-blue-700 font-medium">
-                      Employés
+                      Forme juridique
+                    </TableHead>
+                    <TableHead className="text-blue-700 font-medium">
+                      Secteur & CP
+                    </TableHead>
+                    <TableHead className="text-blue-700 font-medium">
+                      Formule
                     </TableHead>
                     <TableHead className="text-blue-700 font-medium text-right">
                       Actions
@@ -140,7 +187,7 @@ export function EntreprisePage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredEntreprises.length === 0 ? (
+                  {filteredCompanies.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={5}
@@ -156,50 +203,82 @@ export function EntreprisePage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredEntreprises.map((entreprise) => (
+                    filteredCompanies.map((company) => (
                       <TableRow
-                        key={entreprise.id}
+                        key={company.id}
                         className="hover:bg-slate-50 border-b border-slate-100 group"
                       >
                         <TableCell className="py-4">
                           <div className="flex flex-col">
                             <div className="font-medium text-blue-800 group-hover:text-blue-600 transition-colors">
-                              {entreprise.nom}
+                              {company.name}
                             </div>
-                            <div className="text-xs text-slate-500 mt-0.5">
-                              {entreprise.adresse}
+                            <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
+                              <span>BCE: {company.bceNumber}</span>
+                              <span>•</span>
+                              <span>TVA: {company.vatNumber || "N/A"}</span>
                             </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col text-sm">
+                            <span className="text-slate-600">
+                              {company.email || "—"}
+                            </span>
+                            <span className="text-slate-500">
+                              {company.phoneNumber || "—"}
+                            </span>
                           </div>
                         </TableCell>
                         <TableCell className="font-mono text-sm text-slate-600">
-                          {entreprise.numeroTVA}
+                          {company.onssNumber || "N/A"}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="text-slate-700">
+                              {company.legalForm || "N/A"}
+                            </span>
+                            {company.creationDate && (
+                              <span className="text-xs text-slate-500">
+                                Créé le{" "}
+                                {new Date(
+                                  company.creationDate
+                                ).toLocaleDateString("fr-BE")}
+                              </span>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-2">
+                            <Badge
+                              className={`${getSectorLightColor(
+                                company.activitySector
+                              )}`}
+                            >
+                              {company.activitySector || "N/A"}
+                            </Badge>
+                            <div className="flex flex-wrap gap-1">
+                              {company.jointCommittees?.map(
+                                (committee, index) => (
+                                  <Badge
+                                    key={index}
+                                    variant="outline"
+                                    className="text-xs"
+                                  >
+                                    {committee}
+                                  </Badge>
+                                )
+                              )}
+                            </div>
+                          </div>
                         </TableCell>
                         <TableCell>
                           <Badge
-                            className={`${getSectorLightColor(
-                              entreprise.secteurActivite
-                            )}`}
+                            variant="secondary"
+                            className="bg-blue-50 text-blue-700"
                           >
-                            {entreprise.secteurActivite}
+                            {company.subscriptionFormula || "Standard"}
                           </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <div className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center text-xs font-medium">
-                              {entreprise.employesCount}
-                            </div>
-                            <div className="ml-2 w-16 bg-slate-100 rounded-full h-2">
-                              <div
-                                className="bg-blue-500 h-2 rounded-full"
-                                style={{
-                                  width: `${Math.min(
-                                    100,
-                                    ((entreprise.employesCount || 0) / 30) * 100
-                                  )}%`,
-                                }}
-                              />
-                            </div>
-                          </div>
                         </TableCell>
                         <TableCell className="text-right">
                           <Button
@@ -208,7 +287,7 @@ export function EntreprisePage() {
                             asChild
                             className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                           >
-                            <Link to={`/entreprises/${entreprise.id}`}>
+                            <Link to={`/entreprises/${company.id}`}>
                               <Eye className="h-4 w-4 mr-2" /> Détails
                             </Link>
                           </Button>
@@ -231,16 +310,22 @@ export function EntreprisePage() {
                   <TableHeader>
                     <TableRow className="hover:bg-transparent border-b border-slate-100">
                       <TableHead className="text-blue-700 font-medium">
-                        Entreprise
+                        Nom de l'entreprise
                       </TableHead>
                       <TableHead className="text-blue-700 font-medium">
-                        TVA
+                        Contact
                       </TableHead>
                       <TableHead className="text-blue-700 font-medium">
-                        Secteur
+                        N° ONSS
                       </TableHead>
                       <TableHead className="text-blue-700 font-medium">
-                        Employés
+                        Forme juridique
+                      </TableHead>
+                      <TableHead className="text-blue-700 font-medium">
+                        Secteur & CP
+                      </TableHead>
+                      <TableHead className="text-blue-700 font-medium">
+                        Formule
                       </TableHead>
                       <TableHead className="text-blue-700 font-medium text-right">
                         Actions
@@ -248,53 +333,84 @@ export function EntreprisePage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredEntreprises
-                      .filter((e) => e.secteurActivite === sector)
-                      .map((entreprise) => (
+                    {filteredCompanies
+                      .filter((company) => company.activitySector === sector)
+                      .map((company) => (
                         <TableRow
-                          key={entreprise.id}
+                          key={company.id}
                           className="hover:bg-slate-50 border-b border-slate-100 group"
                         >
                           <TableCell className="py-4">
                             <div className="flex flex-col">
                               <div className="font-medium text-blue-800 group-hover:text-blue-600 transition-colors">
-                                {entreprise.nom}
+                                {company.name}
                               </div>
-                              <div className="text-xs text-slate-500 mt-0.5">
-                                {entreprise.adresse}
+                              <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
+                                <span>BCE: {company.bceNumber}</span>
+                                <span>•</span>
+                                <span>TVA: {company.vatNumber || "N/A"}</span>
                               </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col text-sm">
+                              <span className="text-slate-600">
+                                {company.email || "—"}
+                              </span>
+                              <span className="text-slate-500">
+                                {company.phoneNumber || "—"}
+                              </span>
                             </div>
                           </TableCell>
                           <TableCell className="font-mono text-sm text-slate-600">
-                            {entreprise.numeroTVA}
+                            {company.onssNumber || "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col">
+                              <span className="text-slate-700">
+                                {company.legalForm || "N/A"}
+                              </span>
+                              {company.creationDate && (
+                                <span className="text-xs text-slate-500">
+                                  Créé le{" "}
+                                  {new Date(
+                                    company.creationDate
+                                  ).toLocaleDateString("fr-BE")}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-2">
+                              <Badge
+                                className={`${getSectorLightColor(
+                                  company.activitySector
+                                )}`}
+                              >
+                                {company.activitySector}
+                              </Badge>
+                              <div className="flex flex-wrap gap-1">
+                                {company.jointCommittees?.map(
+                                  (committee, index) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {committee}
+                                    </Badge>
+                                  )
+                                )}
+                              </div>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <Badge
-                              className={`${getSectorLightColor(
-                                entreprise.secteurActivite
-                              )}`}
+                              variant="secondary"
+                              className="bg-blue-50 text-blue-700"
                             >
-                              {entreprise.secteurActivite}
+                              {company.subscriptionFormula || "Standard"}
                             </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center">
-                              <div className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center text-xs font-medium">
-                                {entreprise.employesCount}
-                              </div>
-                              <div className="ml-2 w-16 bg-slate-100 rounded-full h-2">
-                                <div
-                                  className="bg-blue-500 h-2 rounded-full"
-                                  style={{
-                                    width: `${Math.min(
-                                      100,
-                                      ((entreprise.employesCount || 0) / 30) *
-                                        100
-                                    )}%`,
-                                  }}
-                                />
-                              </div>
-                            </div>
                           </TableCell>
                           <TableCell className="text-right">
                             <Button
@@ -303,7 +419,7 @@ export function EntreprisePage() {
                               asChild
                               className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                             >
-                              <Link to={`/entreprises/${entreprise.id}`}>
+                              <Link to={`/entreprises/${company.id}`}>
                                 <Eye className="h-4 w-4 mr-2" /> Détails
                               </Link>
                             </Button>

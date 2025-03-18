@@ -25,3 +25,15 @@ export const SECRETARIAT_ENDPOINTS = {
   UPDATE: (secretariatId: string) => `/socialSecretariat/${secretariatId}`,
   GET_ALL: "/social-secretariat",
 } as const;
+
+// Company endpoints
+export const COMPANY_ENDPOINTS = {
+  GET_ALL: "/company",
+  GET_BY_ID: (id: string) => `/company/${id}`,
+  CREATE: "/company",
+  UPDATE: (id: string) => `/company/${id}`,
+  DELETE: (id: string) => `/company/${id}`,
+  CHECK_BCE: (bceNumber: string) => `/company/check/bce/${bceNumber}`,
+  CHECK_ONSS: (onssNumber: string) => `/company/check/onss/${onssNumber}`,
+  CHECK_VAT: (vatNumber: string) => `/company/check/vat/${vatNumber}`,
+} as const;

@@ -16,6 +16,19 @@ import {
   Calendar,
   Mail,
   Briefcase,
+  Building2,
+  Phone,
+  CreditCard,
+  Shield,
+  HardHat,
+  FileCheck,
+  Clock,
+  Wallet,
+  Factory,
+  Users2,
+  CalendarRange,
+  FileSpreadsheet,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,45 +58,69 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
+import { companyService } from "@/services/api/companyService";
+import type { CompanyDto } from "@/types/CompanyTypes";
 
-// Import data from mockData file
-import {
-  demoEntreprises,
-  getEmployeesByCompany,
-  demoCompanyDocuments,
-  Entreprise,
-  getSectorLightColor,
-} from "@/data/mockData";
+// Helper function to get sector color
+const getSectorLightColor = (sector: string | undefined) => {
+  if (!sector) return "bg-slate-100 text-slate-700";
+
+  const sectorColors: Record<string, string> = {
+    Construction: "bg-blue-100 text-blue-700",
+    Transport: "bg-green-100 text-green-700",
+    Horeca: "bg-yellow-100 text-yellow-700",
+    Commerce: "bg-purple-100 text-purple-700",
+    Services: "bg-pink-100 text-pink-700",
+  };
+
+  return sectorColors[sector] || "bg-slate-100 text-slate-700";
+};
 
 export function EntrepriseDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
+  const [company, setCompany] = useState<CompanyDto | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [formData, setFormData] = useState<Entreprise | null>(null);
+  const [formData, setFormData] = useState<CompanyDto | null>(null);
   const [activeTab, setActiveTab] = useState("infos");
+  const [loading, setLoading] = useState(true);
 
-  // Get employees and documents for this company
-  const employees = id ? getEmployeesByCompany(id) : [];
-  const documents = id ? demoCompanyDocuments[id] || [] : [];
-
-  // Fetch enterprise data
+  // Fetch company data
   useEffect(() => {
-    if (id) {
-      const foundEntreprise = demoEntreprises.find((e) => e.id === id);
-      if (foundEntreprise) {
-        setEntreprise(foundEntreprise);
-        setFormData(foundEntreprise);
-      } else {
-        // Enterprise not found, redirect to list
+    const fetchCompany = async () => {
+      if (!id) return;
+
+      try {
+        const data = await companyService.getCompanyById(id);
+        setCompany(data);
+        setFormData(data);
+      } catch (error) {
+        toast.error("Erreur lors du chargement de l'entreprise", {
+          description: "Veuillez réessayer plus tard",
+        });
         navigate("/entreprises");
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+
+    fetchCompany();
   }, [id, navigate]);
 
-  if (!entreprise || !formData) {
-    return <div className="p-8 text-center">Chargement...</div>;
+  if (loading) {
+    return (
+      <div className="w-full h-[50vh] flex items-center justify-center">
+        <div className="h-8 w-8 animate-spin text-blue-600">
+          <Loader2 className="h-8 w-8" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!company || !formData) {
+    return <div className="p-8 text-center">Entreprise non trouvée</div>;
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,24 +128,38 @@ export function EntrepriseDetailsPage() {
     setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
   };
 
-  const handleSave = () => {
-    if (formData) {
-      setEntreprise(formData);
-      setEditMode(false);
-      // Here you would typically save to your backend
-      console.log("Saving enterprise:", formData);
+  const handleSave = async () => {
+    if (formData && id) {
+      try {
+        const updatedCompany = await companyService.updateCompany(id, formData);
+        setCompany(updatedCompany);
+        setEditMode(false);
+        toast.success("Entreprise mise à jour avec succès");
+      } catch (error) {
+        toast.error("Erreur lors de la mise à jour de l'entreprise", {
+          description: "Veuillez réessayer plus tard",
+        });
+      }
     }
   };
 
-  const handleDelete = () => {
-    // Here you would delete from your backend
-    console.log("Deleting enterprise:", entreprise.id);
-    setIsDeleteDialogOpen(false);
-    navigate("/entreprises");
+  const handleDelete = async () => {
+    if (id) {
+      try {
+        await companyService.deleteCompany(id);
+        toast.success("Entreprise supprimée avec succès");
+        navigate("/entreprises");
+      } catch (error) {
+        toast.error("Erreur lors de la suppression de l'entreprise", {
+          description: "Veuillez réessayer plus tard",
+        });
+      }
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   const handleCancel = () => {
-    setFormData(entreprise);
+    setFormData(company);
     setEditMode(false);
   };
 
@@ -128,20 +179,25 @@ export function EntrepriseDetailsPage() {
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <h1 className="text-3xl font-bold tracking-tight text-blue-700">
-                {entreprise.nom}
+                {company.name}
               </h1>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
               <Badge
                 className={`${getSectorLightColor(
-                  entreprise.secteurActivite
+                  company.activitySector
                 )} mr-2`}
               >
-                {entreprise.secteurActivite}
+                {company.activitySector || "N/A"}
               </Badge>
               <span className="text-sm text-slate-500">
-                {entreprise.numeroTVA}
+                BCE: {company.bceNumber}
               </span>
+              {company.vatNumber && (
+                <span className="text-sm text-slate-500">
+                  TVA: {company.vatNumber}
+                </span>
+              )}
             </div>
           </div>
 
@@ -174,7 +230,7 @@ export function EntrepriseDetailsPage() {
               variant="secondary"
               className="ml-2 bg-blue-100 text-blue-700 hover:bg-blue-200"
             >
-              {employees.length}
+              0
             </Badge>
           </TabsTrigger>
           <TabsTrigger
@@ -186,7 +242,7 @@ export function EntrepriseDetailsPage() {
               variant="secondary"
               className="ml-2 bg-blue-100 text-blue-700 hover:bg-blue-200"
             >
-              {documents.length}
+              0
             </Badge>
           </TabsTrigger>
           <TabsTrigger
@@ -241,117 +297,597 @@ export function EntrepriseDetailsPage() {
                 {editMode ? (
                   // Edit form
                   <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="nom" className="text-blue-700">
-                        Nom de l'entreprise
-                      </Label>
-                      <Input
-                        id="nom"
-                        name="nom"
-                        value={formData.nom}
-                        onChange={handleInputChange}
-                        className="border-slate-200 focus-visible:ring-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="numeroTVA" className="text-blue-700">
-                        Numéro TVA
-                      </Label>
-                      <Input
-                        id="numeroTVA"
-                        name="numeroTVA"
-                        value={formData.numeroTVA}
-                        onChange={handleInputChange}
-                        className="border-slate-200 focus-visible:ring-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="secteurActivite"
-                        className="text-blue-700"
-                      >
-                        Secteur d'activité
-                      </Label>
-                      <Input
-                        id="secteurActivite"
-                        name="secteurActivite"
-                        value={formData.secteurActivite}
-                        onChange={handleInputChange}
-                        className="border-slate-200 focus-visible:ring-blue-500"
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="adresse" className="text-blue-700">
-                        Adresse
-                      </Label>
-                      <Input
-                        id="adresse"
-                        name="adresse"
-                        value={formData.adresse}
-                        onChange={handleInputChange}
-                        className="border-slate-200 focus-visible:ring-blue-500"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  // Display info
-                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-                    <div className="p-4 bg-slate-50 rounded-lg">
-                      <h3 className="text-sm font-medium text-blue-600 mb-1">
-                        Nom de l'entreprise
+                    {/* Basic Information */}
+                    <div className="space-y-4 md:col-span-2">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <Building2 className="h-5 w-5" /> Informations de base
                       </h3>
-                      <p className="text-lg text-slate-800">{entreprise.nom}</p>
-                    </div>
-                    <div className="p-4 bg-slate-50 rounded-lg">
-                      <h3 className="text-sm font-medium text-blue-600 mb-1">
-                        Numéro TVA
-                      </h3>
-                      <p className="text-lg font-mono text-slate-800">
-                        {entreprise.numeroTVA}
-                      </p>
-                    </div>
-                    <div className="p-4 bg-slate-50 rounded-lg">
-                      <h3 className="text-sm font-medium text-blue-600 mb-1">
-                        Secteur d'activité
-                      </h3>
-                      <p className="text-lg text-slate-800">
-                        <Badge
-                          className={`${getSectorLightColor(
-                            entreprise.secteurActivite
-                          )}`}
-                        >
-                          {entreprise.secteurActivite}
-                        </Badge>
-                      </p>
-                    </div>
-                    <div className="p-4 bg-slate-50 rounded-lg">
-                      <h3 className="text-sm font-medium text-blue-600 mb-1">
-                        Nombre d'employés
-                      </h3>
-                      <div className="flex items-center">
-                        <div className="bg-blue-100 text-blue-700 rounded-full h-6 w-6 flex items-center justify-center text-xs font-medium">
-                          {entreprise.employesCount || employees.length}
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="name" className="text-blue-700">
+                            Nom de l'entreprise
+                          </Label>
+                          <Input
+                            id="name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
                         </div>
-                        <div className="ml-2 w-16 bg-slate-100 rounded-full h-2">
-                          <div
-                            className="bg-blue-500 h-2 rounded-full"
-                            style={{
-                              width: `${Math.min(
-                                100,
-                                ((entreprise.employesCount || 0) / 30) * 100
-                              )}%`,
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="companyName"
+                            className="text-blue-700"
+                          >
+                            Dénomination sociale
+                          </Label>
+                          <Input
+                            id="companyName"
+                            name="companyName"
+                            value={formData.companyName || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="legalForm" className="text-blue-700">
+                            Forme juridique
+                          </Label>
+                          <Input
+                            id="legalForm"
+                            name="legalForm"
+                            value={formData.legalForm || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="category" className="text-blue-700">
+                            Catégorie
+                          </Label>
+                          <Input
+                            id="category"
+                            name="category"
+                            value={formData.category || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="activitySector"
+                            className="text-blue-700"
+                          >
+                            Secteur d'activité
+                          </Label>
+                          <Input
+                            id="activitySector"
+                            name="activitySector"
+                            value={formData.activitySector || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="jointCommittees"
+                            className="text-blue-700"
+                          >
+                            Commissions paritaires
+                          </Label>
+                          <Input
+                            id="jointCommittees"
+                            name="jointCommittees"
+                            value={formData.jointCommittees?.join(", ") || ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setFormData((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      jointCommittees: value
+                                        .split(",")
+                                        .map((s) => s.trim())
+                                        .filter(Boolean),
+                                    }
+                                  : null
+                              );
                             }}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="creationDate"
+                            className="text-blue-700"
+                          >
+                            Date de création
+                          </Label>
+                          <Input
+                            id="creationDate"
+                            name="creationDate"
+                            type="date"
+                            value={
+                              formData.creationDate
+                                ? new Date(formData.creationDate)
+                                    .toISOString()
+                                    .split("T")[0]
+                                : ""
+                            }
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="collaborationStartDate"
+                            className="text-blue-700"
+                          >
+                            Date de début de collaboration
+                          </Label>
+                          <Input
+                            id="collaborationStartDate"
+                            name="collaborationStartDate"
+                            type="date"
+                            value={
+                              formData.collaborationStartDate
+                                ? new Date(formData.collaborationStartDate)
+                                    .toISOString()
+                                    .split("T")[0]
+                                : ""
+                            }
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
                           />
                         </div>
                       </div>
                     </div>
-                    <div className="p-4 bg-slate-50 rounded-lg md:col-span-2">
-                      <h3 className="text-sm font-medium text-blue-600 mb-1">
-                        Adresse
+
+                    {/* Contact Information */}
+                    <div className="space-y-4 md:col-span-2">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <Phone className="h-5 w-5" /> Coordonnées
                       </h3>
-                      <p className="text-lg text-slate-800">
-                        {entreprise.adresse}
-                      </p>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-blue-700">
+                            Email
+                          </Label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={formData.email || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="phoneNumber"
+                            className="text-blue-700"
+                          >
+                            Numéro de téléphone
+                          </Label>
+                          <Input
+                            id="phoneNumber"
+                            name="phoneNumber"
+                            value={formData.phoneNumber || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="IBAN" className="text-blue-700">
+                            IBAN
+                          </Label>
+                          <Input
+                            id="IBAN"
+                            name="iban"
+                            value={formData.iban || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Registration Numbers */}
+                    <div className="space-y-4 md:col-span-2">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <FileCheck className="h-5 w-5" /> Numéros
+                        d'enregistrement
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+                        <div className="space-y-2">
+                          <Label htmlFor="bceNumber" className="text-blue-700">
+                            Numéro BCE
+                          </Label>
+                          <Input
+                            id="bceNumber"
+                            name="bceNumber"
+                            value={formData.bceNumber}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="onssNumber" className="text-blue-700">
+                            Numéro ONSS
+                          </Label>
+                          <Input
+                            id="onssNumber"
+                            name="onssNumber"
+                            value={formData.onssNumber}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="vatNumber" className="text-blue-700">
+                            Numéro TVA
+                          </Label>
+                          <Input
+                            id="vatNumber"
+                            name="vatNumber"
+                            value={formData.vatNumber || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Business Operations */}
+                    <div className="space-y-4 md:col-span-2">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <Factory className="h-5 w-5" /> Opérations commerciales
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="securityFund"
+                            className="text-blue-700"
+                          >
+                            Fonds de sécurité
+                          </Label>
+                          <Input
+                            id="securityFund"
+                            name="securityFund"
+                            value={formData.securityFund || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="workAccidentInsurance"
+                            className="text-blue-700"
+                          >
+                            Assurance accidents du travail
+                          </Label>
+                          <Input
+                            id="workAccidentInsurance"
+                            name="workAccidentInsurance"
+                            value={formData.workAccidentInsurance || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="workRegime" className="text-blue-700">
+                            Régime de travail
+                          </Label>
+                          <Input
+                            id="workRegime"
+                            name="workRegime"
+                            value={formData.workRegime || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="workCalendar"
+                            className="text-blue-700"
+                          >
+                            Calendrier de travail
+                          </Label>
+                          <Input
+                            id="workCalendar"
+                            name="workCalendar"
+                            value={formData.workCalendar || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Collaboration Details */}
+                    <div className="space-y-4 md:col-span-2">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <Users2 className="h-5 w-5" /> Détails de collaboration
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="subscriptionFormula"
+                            className="text-blue-700"
+                          >
+                            Formule d'abonnement
+                          </Label>
+                          <Input
+                            id="subscriptionFormula"
+                            name="subscriptionFormula"
+                            value={formData.subscriptionFormula || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="declarationFrequency"
+                            className="text-blue-700"
+                          >
+                            Fréquence de déclaration
+                          </Label>
+                          <Input
+                            id="declarationFrequency"
+                            name="declarationFrequency"
+                            value={formData.declarationFrequency || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor="salaryReduction"
+                            className="text-blue-700"
+                          >
+                            Réduction salariale
+                          </Label>
+                          <Input
+                            id="salaryReduction"
+                            name="salaryReduction"
+                            value={formData.salaryReduction || ""}
+                            onChange={handleInputChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  // Display info
+                  <div className="space-y-8">
+                    {/* Basic Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <Building2 className="h-5 w-5" /> Informations de base
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Nom de l'entreprise
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.name}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Dénomination sociale
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.companyName || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Forme juridique
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.legalForm || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Catégorie
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.category || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Secteur d'activité
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            <Badge
+                              className={`${getSectorLightColor(
+                                company.activitySector
+                              )}`}
+                            >
+                              {company.activitySector || "N/A"}
+                            </Badge>
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Commissions paritaires
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.jointCommittees?.join(", ") || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Date de création
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.creationDate
+                              ? new Date(
+                                  company.creationDate
+                                ).toLocaleDateString()
+                              : "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Date de début de collaboration
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.collaborationStartDate
+                              ? new Date(
+                                  company.collaborationStartDate
+                                ).toLocaleDateString()
+                              : "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Contact Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <Phone className="h-5 w-5" /> Coordonnées
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Email
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.email || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Numéro de téléphone
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.phoneNumber || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            IBAN
+                          </h4>
+                          <p className="text-lg font-mono text-slate-800">
+                            {company.iban || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Registration Numbers */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <FileCheck className="h-5 w-5" /> Numéros
+                        d'enregistrement
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Numéro BCE
+                          </h4>
+                          <p className="text-lg font-mono text-slate-800">
+                            {company.bceNumber}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Numéro ONSS
+                          </h4>
+                          <p className="text-lg font-mono text-slate-800">
+                            {company.onssNumber || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Numéro TVA
+                          </h4>
+                          <p className="text-lg font-mono text-slate-800">
+                            {company.vatNumber || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Business Operations */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <Factory className="h-5 w-5" /> Opérations commerciales
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Fonds de sécurité
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.securityFund || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Assurance accidents du travail
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.workAccidentInsurance || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Régime de travail
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.workRegime || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Calendrier de travail
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.workCalendar || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Collaboration Details */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <Users2 className="h-5 w-5" /> Détails de collaboration
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Formule d'abonnement
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.subscriptionFormula || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Fréquence de déclaration
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.declarationFrequency || "N/A"}
+                          </p>
+                        </div>
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Réduction salariale
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.salaryReduction || "N/A"}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -362,104 +898,40 @@ export function EntrepriseDetailsPage() {
 
         {/* Personnel Tab */}
         <TabsContent value="personnel">
-          <Card className="border-0 shadow-sm bg-white overflow-hidden">
-            <CardHeader className="pb-3 border-b border-slate-100 flex flex-row justify-between items-center">
-              <div>
-                <CardTitle className="text-blue-700">Personnel</CardTitle>
-                <CardDescription>
-                  Liste des employés de l'entreprise
-                </CardDescription>
+          <Card className="border-0 shadow-sm bg-white">
+            <CardHeader className="pb-3 border-b border-slate-100">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-blue-700">Personnel</CardTitle>
+                  <CardDescription>
+                    Liste du personnel de l'entreprise
+                  </CardDescription>
+                </div>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                  <Plus className="mr-2 h-4 w-4" /> Ajouter
+                </Button>
               </div>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                <Plus className="mr-2 h-4 w-4" /> Ajouter un employé
-              </Button>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent border-b border-slate-100">
-                    <TableHead className="text-blue-700 font-medium">
-                      Nom
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium">
-                      Prénom
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium">
-                      Poste
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium hidden md:table-cell">
-                      Email
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium hidden md:table-cell">
-                      Date d'embauche
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium text-right">
-                      Actions
-                    </TableHead>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Fonction</TableHead>
+                    <TableHead>Date d'entrée</TableHead>
+                    <TableHead>Statut</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {employees.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="text-center py-10 text-slate-500"
-                      >
-                        <div className="flex flex-col items-center justify-center">
-                          <Users className="h-10 w-10 text-slate-300 mb-2" />
-                          <p>Aucun employé trouvé</p>
-                          <p className="text-sm text-slate-400 mt-1">
-                            Commencez par ajouter un employé à cette entreprise
-                          </p>
-                          <Button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                            <Plus className="mr-2 h-4 w-4" /> Ajouter un employé
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    employees.map((employee) => (
-                      <TableRow
-                        key={employee.id}
-                        className="hover:bg-slate-50 border-b border-slate-100 group"
-                      >
-                        <TableCell className="font-medium text-blue-800 group-hover:text-blue-600 transition-colors">
-                          {employee.nom}
-                        </TableCell>
-                        <TableCell>{employee.prenom}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <Briefcase className="h-3 w-3 text-slate-400 mr-1" />
-                            <span>{employee.poste}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <div className="flex items-center">
-                            <Mail className="h-3 w-3 text-slate-400 mr-1" />
-                            <span>{employee.email}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <div className="flex items-center">
-                            <Calendar className="h-3 w-3 text-slate-400 mr-1" />
-                            <span>{employee.dateEmbauche}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            asChild
-                            className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
-                          >
-                            <Link to={`/personnel/${employee.id}`}>
-                              Voir détails
-                            </Link>
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="text-center py-8 text-slate-500"
+                    >
+                      Aucun personnel enregistré
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </CardContent>
@@ -468,106 +940,38 @@ export function EntrepriseDetailsPage() {
 
         {/* Documents Tab */}
         <TabsContent value="documents">
-          <Card className="border-0 shadow-sm bg-white overflow-hidden">
-            <CardHeader className="pb-3 border-b border-slate-100 flex flex-row justify-between items-center">
-              <div>
-                <CardTitle className="text-blue-700">Documents</CardTitle>
-                <CardDescription>
-                  Documents associés à l'entreprise
-                </CardDescription>
+          <Card className="border-0 shadow-sm bg-white">
+            <CardHeader className="pb-3 border-b border-slate-100">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-blue-700">Documents</CardTitle>
+                  <CardDescription>Documents de l'entreprise</CardDescription>
+                </div>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                  <Plus className="mr-2 h-4 w-4" /> Ajouter
+                </Button>
               </div>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                <Plus className="mr-2 h-4 w-4" /> Ajouter un document
-              </Button>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow className="hover:bg-transparent border-b border-slate-100">
-                    <TableHead className="text-blue-700 font-medium">
-                      Nom
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium">
-                      Type
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium hidden md:table-cell">
-                      Date d'upload
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium hidden md:table-cell">
-                      Taille
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium text-right">
-                      Actions
-                    </TableHead>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Taille</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {documents.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        className="text-center py-10 text-slate-500"
-                      >
-                        <div className="flex flex-col items-center justify-center">
-                          <FileText className="h-10 w-10 text-slate-300 mb-2" />
-                          <p>Aucun document trouvé</p>
-                          <p className="text-sm text-slate-400 mt-1">
-                            Commencez par ajouter un document à cette entreprise
-                          </p>
-                          <Button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                            <Plus className="mr-2 h-4 w-4" /> Ajouter un
-                            document
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    documents.map((document) => (
-                      <TableRow
-                        key={document.id}
-                        className="hover:bg-slate-50 border-b border-slate-100 group"
-                      >
-                        <TableCell className="font-medium text-blue-800 group-hover:text-blue-600 transition-colors">
-                          {document.nom}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className="bg-slate-50 text-slate-700"
-                          >
-                            {document.type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <div className="flex items-center">
-                            <Calendar className="h-3 w-3 text-slate-400 mr-1" />
-                            <span>{document.dateUpload}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell font-mono text-sm text-slate-600">
-                          {document.taille}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
-                            >
-                              Voir
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                  <TableRow>
+                    <TableCell
+                      colSpan={5}
+                      className="text-center py-8 text-slate-500"
+                    >
+                      Aucun document
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </CardContent>
@@ -576,66 +980,54 @@ export function EntrepriseDetailsPage() {
 
         {/* Settings Tab */}
         <TabsContent value="settings">
-          <Card className="border-0 shadow-sm bg-white overflow-hidden">
+          <Card className="border-0 shadow-sm bg-white">
             <CardHeader className="pb-3 border-b border-slate-100">
-              <CardTitle className="text-blue-700">Paramètres</CardTitle>
-              <CardDescription>
-                Gérer les paramètres de l'entreprise
-              </CardDescription>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-blue-700">Paramètres</CardTitle>
+                  <CardDescription>Paramètres de l'entreprise</CardDescription>
+                </div>
+              </div>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-6">
-                <div className="border border-red-200 p-6 rounded-md bg-red-50">
-                  <h3 className="text-lg font-semibold text-red-600 mb-2">
-                    Zone de danger
-                  </h3>
-                  <p className="text-sm text-red-500 mb-4">
-                    La suppression d'une entreprise est irréversible et
-                    supprimera toutes les données associées.
-                  </p>
-                  <Button
-                    variant="destructive"
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                    className="bg-red-600 hover:bg-red-700"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" /> Supprimer l'entreprise
-                  </Button>
-                </div>
+                <Button
+                  variant="destructive"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  className="bg-red-600 hover:bg-red-700 text-white shadow-sm"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Supprimer l'entreprise
+                </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-blue-700">
-              Confirmer la suppression
-            </DialogTitle>
+            <DialogTitle>Supprimer l'entreprise</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer l'entreprise{" "}
-              <strong>{entreprise.nom}</strong> ? Cette action est irréversible
-              et supprimera toutes les données associées.
+              Êtes-vous sûr de vouloir supprimer cette entreprise ? Cette action
+              est irréversible.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:justify-start">
+          <DialogFooter>
             <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Supprimer
-            </Button>
-            <Button
-              type="button"
               variant="outline"
               onClick={() => setIsDeleteDialogOpen(false)}
-              className="bg-white border-slate-200"
+              className="bg-white text-slate-700 border-slate-200 hover:bg-slate-50 shadow-sm"
             >
               Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              className="bg-red-600 hover:bg-red-700 text-white shadow-sm"
+            >
+              Supprimer
             </Button>
           </DialogFooter>
         </DialogContent>
