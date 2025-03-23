@@ -19,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Link } from "react-router-dom";
+import { ROUTES } from "@/config/routes.config";
 import {
   Card,
   CardContent,
@@ -237,7 +238,7 @@ export function CollaboratorPage() {
                       <div className="flex items-center">
                         <Building className="h-3 w-3 text-slate-400 mr-1" />
                         <Link
-                          to={`/companies/${collaborator.companyId}`}
+                          to={ROUTES.COMPANY_DETAILS(collaborator.companyId)}
                           className="text-blue-600 hover:text-blue-800 hover:underline"
                         >
                           {companies[collaborator.companyId]?.name ||
@@ -252,7 +253,7 @@ export function CollaboratorPage() {
                         asChild
                         className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                       >
-                        <Link to={`/collaborator/${collaborator.id}`}>
+                        <Link to={ROUTES.COLLABORATOR_DETAILS(collaborator.id)}>
                           Voir détails
                         </Link>
                       </Button>

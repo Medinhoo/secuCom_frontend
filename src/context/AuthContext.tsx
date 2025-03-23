@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "@/services/api/authService";
+import { ROUTES } from "@/config/routes.config";
 
 // Updated User interface to match backend entity
 export interface User {
@@ -98,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // If refresh successful and on login page, redirect
       if (success && window.location.pathname === "/login") {
-        navigate("/dashboard");
+        navigate(ROUTES.DASHBOARD);
       }
     };
 
@@ -110,7 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (user && token) {
       // Navigate to dashboard only if on login page
       if (window.location.pathname === "/login") {
-        navigate("/dashboard");
+        navigate(ROUTES.DASHBOARD);
       }
     }
   }, [user, token, navigate]);

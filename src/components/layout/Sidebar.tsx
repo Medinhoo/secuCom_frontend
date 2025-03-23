@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/tooltip";
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
+import { ROUTES } from "@/config/routes.config";
 
 interface SidebarLinkProps {
   href: string;
@@ -216,40 +217,40 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
   // Define sidebar links
   const links = [
     {
-      href: "/dashboard",
+      href: ROUTES.DASHBOARD,
       icon: <Home size={20} />,
       label: "Tableau de bord",
-      isActive: pathname === "/dashboard",
+      isActive: pathname === ROUTES.DASHBOARD,
     },
     {
-      href: "/companies",
+      href: ROUTES.COMPANIES,
       icon: <Building2 size={20} />,
       label: "Entreprises",
-      isActive: isActivePath("/companies"),
+      isActive: isActivePath(ROUTES.COMPANIES),
     },
     {
-      href: "/collaborator",
+      href: ROUTES.COLLABORATORS,
       icon: <Users size={20} />,
       label: "Collaborateurs",
-      isActive: isActivePath("/collaborator"),
+      isActive: isActivePath(ROUTES.COLLABORATORS),
     },
     {
-      href: "/documents",
+      href: ROUTES.DOCUMENTS,
       icon: <FileText size={20} />,
       label: "Documents",
-      isActive: isActivePath("/documents"),
+      isActive: isActivePath(ROUTES.DOCUMENTS),
     },
     {
-      href: "/dimona",
+      href: ROUTES.DIMONA,
       icon: <File size={20} />,
       label: "DIMONA",
-      isActive: isActivePath("/dimona"),
+      isActive: isActivePath(ROUTES.DIMONA),
     },
     {
-      href: "/settings",
+      href: ROUTES.SETTINGS,
       icon: <Settings size={20} />,
       label: "Paramètres",
-      isActive: pathname === "/settings",
+      isActive: pathname === ROUTES.SETTINGS,
     },
   ];
 
@@ -297,7 +298,7 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
             }}
           >
             <div className="h-10 w-10 flex-shrink-0 rounded-full bg-white/20 flex items-center justify-center shadow-sm">
-              <Link to="/profile">
+              <Link to={ROUTES.DIMONA}>
                 <span className="font-bold text-lg text-white">
                   {user?.username?.charAt(0) || "S"}
                 </span>

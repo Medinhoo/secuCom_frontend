@@ -1,5 +1,5 @@
-// src/App.tsx
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
+import { ROUTES } from "./config/routes.config";
 import { MainLayout } from "./components/layout/MainLayout";
 import { CompanyPage } from "./pages/CompanyPage.tsx";
 import { CompanyDetailsPage } from "./pages/CompanyDetailsPage";
@@ -24,41 +24,50 @@ function App() {
         <Toaster theme="light" />
         <Routes>
           {/* Routes publiques */}
-          <Route path="/login" element={<LoginPage />} />
+          <Route path={ROUTES.LOGIN} element={<LoginPage />} />
 
           {/* Routes protégées avec MainLayout */}
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/dimona" element={<DimonaPage />} />
-              <Route path="/documents" element={<DocumentsPage />} />
+              <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+              <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
+              <Route path={ROUTES.DIMONA} element={<DimonaPage />} />
+              <Route path={ROUTES.DOCUMENTS} element={<DocumentsPage />} />
               <Route
-                path="/documents/:categoryId"
+                path={`${ROUTES.DOCUMENTS}/:categoryId`}
                 element={<DocumentsListPage />}
               />
-              <Route path="/companies" element={<CompanyPage />} />
-              <Route path="/companies/:id" element={<CompanyDetailsPage />} />
-              <Route path="/collaborator" element={<CollaboratorPage />} />
+              <Route path={ROUTES.COMPANIES} element={<CompanyPage />} />
               <Route
-                path="/collaborator/:id"
+                path={`${ROUTES.COMPANIES}/:id`}
+                element={<CompanyDetailsPage />}
+              />
+              <Route
+                path={ROUTES.COLLABORATORS}
+                element={<CollaboratorPage />}
+              />
+              <Route
+                path={`${ROUTES.COLLABORATORS}/:id`}
                 element={<CollaboratorDetailsPage />}
               />
               <Route
-                path="/secretariat/:id"
+                path={`/secretariat/:id`}
                 element={<SocialSecretariatDetailsPage />}
               />
 
               {/* Routes avec rôle spécifique */}
               <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
-                <Route path="/settings" element={<SettingsPage />} />
+                <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
               </Route>
             </Route>
           </Route>
 
-          {/* Redirection par défautv*/}
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* Redirection par défaut */}
+          <Route
+            path={ROUTES.ROOT}
+            element={<Navigate to={ROUTES.LOGIN} replace />}
+          />
+          <Route path="*" element={<Navigate to={ROUTES.LOGIN} replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

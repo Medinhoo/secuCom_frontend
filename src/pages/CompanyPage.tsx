@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { companyService } from "@/services/api/companyService";
 import type { CompanyDto } from "@/types/CompanyTypes";
+import { ROUTES } from "@/config/routes.config";
 
 // Helper function to get sector color
 const getSectorLightColor = (sector: string | undefined) => {
@@ -287,7 +288,7 @@ export function CompanyPage() {
                             asChild
                             className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                           >
-                            <Link to={`/companies/${company.id}`}>
+                            <Link to={ROUTES.COMPANY_DETAILS(company.id)}>
                               <Eye className="h-4 w-4 mr-2" /> Détails
                             </Link>
                           </Button>
@@ -419,7 +420,7 @@ export function CompanyPage() {
                               asChild
                               className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                             >
-                              <Link to={`/companies/${company.id}`}>
+                              <Link to={ROUTES.COMPANY_DETAILS(company.id)}>
                                 <Eye className="h-4 w-4 mr-2" /> Détails
                               </Link>
                             </Button>

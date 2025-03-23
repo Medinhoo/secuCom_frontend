@@ -61,6 +61,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { companyService } from "@/services/api/companyService";
 import type { CompanyDto } from "@/types/CompanyTypes";
+import { ROUTES } from "@/config/routes.config";
 
 // Helper function to get sector color
 const getSectorLightColor = (sector: string | undefined) => {
@@ -100,7 +101,7 @@ export function CompanyDetailsPage() {
         toast.error("Erreur lors du chargement de la company", {
           description: "Veuillez réessayer plus tard",
         });
-        navigate("/companies");
+        navigate(ROUTES.COMPANIES);
       } finally {
         setLoading(false);
       }
@@ -148,7 +149,7 @@ export function CompanyDetailsPage() {
       try {
         await companyService.deleteCompany(id);
         toast.success("Company supprimée avec succès");
-        navigate("/companies");
+        navigate(ROUTES.COMPANIES);
       } catch (error) {
         toast.error("Erreur lors de la suppression de la company", {
           description: "Veuillez réessayer plus tard",
@@ -173,7 +174,7 @@ export function CompanyDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate("/companies")}
+                onClick={() => navigate(ROUTES.COMPANIES)}
                 className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50 shadow-sm"
               >
                 <ChevronLeft className="h-4 w-4" />

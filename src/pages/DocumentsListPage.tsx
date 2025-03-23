@@ -228,7 +228,7 @@ export function DocumentsListPage() {
   // Effet pour rediriger si la catégorie n'existe pas
   useEffect(() => {
     if (!currentCategory && categoryId) {
-      navigate("/documents");
+      navigate(ROUTES.DOCUMENTS);
     }
   }, [navigate, currentCategory, categoryId]);
 
@@ -298,7 +298,7 @@ export function DocumentsListPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("/documents")}
+              onClick={() => navigate(ROUTES.DOCUMENTS)}
               className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50 shadow-sm"
             >
               <ChevronLeft className="h-4 w-4" />

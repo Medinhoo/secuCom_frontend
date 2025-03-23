@@ -79,6 +79,7 @@ import {
   WorkStatus,
   CalendarDay,
 } from "@/data/mockData";
+import { ROUTES } from "@/config/routes.config";
 
 // Calendar helper function
 function getDaysInMonth(year: number, month: number): number {
@@ -434,7 +435,7 @@ export function CollaboratorDetailsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => navigate("/collaborator")}
+              onClick={() => navigate(ROUTES.COLLABORATORS)}
               className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50 shadow-sm"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -448,7 +449,7 @@ export function CollaboratorDetailsPage() {
               {collaborator.jobFunction || "Non spécifié"}
             </Badge>
             <Link
-              to={`/companies/${collaborator.companyId}`}
+              to={ROUTES.COMPANY_DETAILS(collaborator.companyId)}
               className="text-sm text-slate-500 hover:text-blue-600 flex items-center"
             >
               <Building className="h-3 w-3 mr-1" />
@@ -1379,7 +1380,9 @@ export function CollaboratorDetailsPage() {
                         asChild
                         className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
                       >
-                        <Link to={`/companies/${collaborator.companyId}`}>
+                        <Link
+                          to={ROUTES.COMPANY_DETAILS(collaborator.companyId)}
+                        >
                           <Building className="h-4 w-4 mr-2" /> Voir
                           l'entreprise
                         </Link>

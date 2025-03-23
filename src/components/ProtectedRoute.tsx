@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import LoadingSpinner from "./layout/LoadingSpinner";
+import { ROUTES } from "@/config/routes.config";
 
 interface ProtectedRouteProps {
   requiredRole?: string | string[];
@@ -49,7 +50,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRole }) => {
     const hasRequiredRole = requiredRoles.some((role) => hasRole(role));
 
     if (!hasRequiredRole) {
-      return <Navigate to="/dashboard" replace />;
+      return <Navigate to={ROUTES.DASHBOARD} replace />;
     }
   }
 
