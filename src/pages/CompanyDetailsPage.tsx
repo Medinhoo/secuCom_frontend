@@ -1,4 +1,4 @@
-// src/pages/EntrepriseDetailsPage.tsx
+// src/pages/CompanyDetailsPage.tsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
@@ -77,7 +77,7 @@ const getSectorLightColor = (sector: string | undefined) => {
   return sectorColors[sector] || "bg-slate-100 text-slate-700";
 };
 
-export function EntrepriseDetailsPage() {
+export function CompanyDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [company, setCompany] = useState<CompanyDto | null>(null);
@@ -97,10 +97,10 @@ export function EntrepriseDetailsPage() {
         setCompany(data);
         setFormData(data);
       } catch (error) {
-        toast.error("Erreur lors du chargement de l'entreprise", {
+        toast.error("Erreur lors du chargement de la company", {
           description: "Veuillez réessayer plus tard",
         });
-        navigate("/entreprises");
+        navigate("/companies");
       } finally {
         setLoading(false);
       }
@@ -120,7 +120,7 @@ export function EntrepriseDetailsPage() {
   }
 
   if (!company || !formData) {
-    return <div className="p-8 text-center">Entreprise non trouvée</div>;
+    return <div className="p-8 text-center">Company non trouvée</div>;
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -134,9 +134,9 @@ export function EntrepriseDetailsPage() {
         const updatedCompany = await companyService.updateCompany(id, formData);
         setCompany(updatedCompany);
         setEditMode(false);
-        toast.success("Entreprise mise à jour avec succès");
+        toast.success("Company mise à jour avec succès");
       } catch (error) {
-        toast.error("Erreur lors de la mise à jour de l'entreprise", {
+        toast.error("Erreur lors de la mise à jour de la company", {
           description: "Veuillez réessayer plus tard",
         });
       }
@@ -147,10 +147,10 @@ export function EntrepriseDetailsPage() {
     if (id) {
       try {
         await companyService.deleteCompany(id);
-        toast.success("Entreprise supprimée avec succès");
-        navigate("/entreprises");
+        toast.success("Company supprimée avec succès");
+        navigate("/companies");
       } catch (error) {
-        toast.error("Erreur lors de la suppression de l'entreprise", {
+        toast.error("Erreur lors de la suppression de la company", {
           description: "Veuillez réessayer plus tard",
         });
       }
@@ -173,7 +173,7 @@ export function EntrepriseDetailsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => navigate("/entreprises")}
+                onClick={() => navigate("/companies")}
                 className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50 shadow-sm"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -260,10 +260,10 @@ export function EntrepriseDetailsPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-blue-700">
-                    Informations entreprise
+                    Informations company
                   </CardTitle>
                   <CardDescription>
-                    Détails et coordonnées de l'entreprise
+                    Détails et coordonnées de la company
                   </CardDescription>
                 </div>
                 {!editMode ? (
@@ -305,7 +305,7 @@ export function EntrepriseDetailsPage() {
                       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="name" className="text-blue-700">
-                            Nom de l'entreprise
+                            Nom de la company
                           </Label>
                           <Input
                             id="name"
@@ -985,7 +985,7 @@ export function EntrepriseDetailsPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-blue-700">Paramètres</CardTitle>
-                  <CardDescription>Paramètres de l'entreprise</CardDescription>
+                  <CardDescription>Paramètres de la company</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -996,7 +996,7 @@ export function EntrepriseDetailsPage() {
                   onClick={() => setIsDeleteDialogOpen(true)}
                   className="bg-red-600 hover:bg-red-700 text-white shadow-sm"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" /> Supprimer l'entreprise
+                  <Trash2 className="mr-2 h-4 w-4" /> Supprimer la company
                 </Button>
               </div>
             </CardContent>
@@ -1008,9 +1008,9 @@ export function EntrepriseDetailsPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Supprimer l'entreprise</DialogTitle>
+            <DialogTitle>Supprimer la company</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer cette entreprise ? Cette action
+              Êtes-vous sûr de vouloir supprimer cette company ? Cette action
               est irréversible.
             </DialogDescription>
           </DialogHeader>

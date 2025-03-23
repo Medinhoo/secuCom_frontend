@@ -222,16 +222,16 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
       isActive: pathname === "/dashboard",
     },
     {
-      href: "/entreprises",
+      href: "/companies",
       icon: <Building2 size={20} />,
       label: "Entreprises",
-      isActive: isActivePath("/entreprises"),
+      isActive: isActivePath("/companies"),
     },
     {
-      href: "/personnel",
+      href: "/collaborator",
       icon: <Users size={20} />,
-      label: "Employés / Ouvriers",
-      isActive: isActivePath("/personnel"),
+      label: "Collaborateurs",
+      isActive: isActivePath("/collaborator"),
     },
     {
       href: "/documents",

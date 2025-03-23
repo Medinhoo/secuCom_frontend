@@ -1,4 +1,4 @@
-// src/pages/EntreprisePage.tsx
+// src/pages/CompanyPage.tsx
 import { useState, useEffect } from "react";
 import { Plus, Search, Download, Eye, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ const getSectorLightColor = (sector: string | undefined) => {
   return sectorColors[sector] || "bg-slate-100 text-slate-700";
 };
 
-export function EntreprisePage() {
+export function CompanyPage() {
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -92,10 +92,10 @@ export function EntreprisePage() {
       <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-start">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold tracking-tight text-blue-700">
-            Entreprises
+            Companies
           </h1>
           <p className="text-slate-500">
-            Gérez les entreprises enregistrées dans le secrétariat social
+            Gérez les companies enregistrées dans le secrétariat social
           </p>
         </div>
 
@@ -107,7 +107,7 @@ export function EntreprisePage() {
             <Download className="mr-2 h-4 w-4" /> Exporter
           </Button>
           <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-            <Plus className="mr-2 h-4 w-4" /> Ajouter une entreprise
+            <Plus className="mr-2 h-4 w-4" /> Ajouter une company
           </Button>
         </div>
       </div>
@@ -195,7 +195,7 @@ export function EntreprisePage() {
                       >
                         <div className="flex flex-col items-center justify-center">
                           <Search className="h-10 w-10 text-slate-300 mb-2" />
-                          <p>Aucune entreprise trouvée</p>
+                          <p>Aucune company trouvée</p>
                           <p className="text-sm text-slate-400 mt-1">
                             Essayez de modifier vos critères de recherche
                           </p>
@@ -287,7 +287,7 @@ export function EntreprisePage() {
                             asChild
                             className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                           >
-                            <Link to={`/entreprises/${company.id}`}>
+                            <Link to={`/companies/${company.id}`}>
                               <Eye className="h-4 w-4 mr-2" /> Détails
                             </Link>
                           </Button>
@@ -419,7 +419,7 @@ export function EntreprisePage() {
                               asChild
                               className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                             >
-                              <Link to={`/entreprises/${company.id}`}>
+                              <Link to={`/companies/${company.id}`}>
                                 <Eye className="h-4 w-4 mr-2" /> Détails
                               </Link>
                             </Button>

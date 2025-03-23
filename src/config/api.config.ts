@@ -33,6 +33,15 @@ export const SECRETARIAT_ENDPOINTS = {
 } as const;
 
 // Company endpoints
+// Collaborator endpoints
+export const COLLABORATOR_ENDPOINTS = {
+  GET_ALL: "/collaborators",
+  GET_BY_ID: (id: string) => `/collaborators/${id}`,
+  CREATE: "/collaborators",
+  UPDATE: (id: string) => `/collaborators/${id}`,
+  DELETE: (id: string) => `/collaborators/${id}`,
+} as const;
+
 export const COMPANY_ENDPOINTS = {
   GET_ALL: "/company",
   GET_BY_ID: (id: string) => `/company/${id}`,

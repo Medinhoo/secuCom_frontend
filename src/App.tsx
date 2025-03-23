@@ -1,10 +1,10 @@
 // src/App.tsx
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 import { MainLayout } from "./components/layout/MainLayout";
-import { EntreprisePage } from "./pages/EntreprisePage.tsx";
-import { EntrepriseDetailsPage } from "./pages/EntrepriseDetailsPage";
-import { PersonnelDetailsPage } from "./pages/PersonnelDetailsPage";
-import { PersonnelPage } from "./pages/PersonnelPage.tsx";
+import { CompanyPage } from "./pages/CompanyPage.tsx";
+import { CompanyDetailsPage } from "./pages/CompanyDetailsPage";
+import { CollaboratorDetailsPage } from "./pages/CollaboratorDetailsPage";
+import { CollaboratorPage } from "./pages/CollaboratorPage.tsx";
 import { DimonaPage } from "./pages/DimonaPage.tsx";
 import { DocumentsPage } from "./pages/DocumentsPage.tsx";
 import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
@@ -37,13 +37,13 @@ function App() {
                 path="/documents/:categoryId"
                 element={<DocumentsListPage />}
               />
-              <Route path="/entreprises" element={<EntreprisePage />} />
+              <Route path="/companies" element={<CompanyPage />} />
+              <Route path="/companies/:id" element={<CompanyDetailsPage />} />
+              <Route path="/collaborator" element={<CollaboratorPage />} />
               <Route
-                path="/entreprises/:id"
-                element={<EntrepriseDetailsPage />}
+                path="/collaborator/:id"
+                element={<CollaboratorDetailsPage />}
               />
-              <Route path="/personnel" element={<PersonnelPage />} />
-              <Route path="/personnel/:id" element={<PersonnelDetailsPage />} />
               <Route
                 path="/secretariat/:id"
                 element={<SocialSecretariatDetailsPage />}
