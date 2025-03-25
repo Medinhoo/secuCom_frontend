@@ -908,8 +908,13 @@ export function CompanyDetailsPage() {
                     Liste du personnel de l'entreprise
                   </CardDescription>
                 </div>
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                  <Plus className="mr-2 h-4 w-4" /> Ajouter
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                  asChild
+                >
+                  <Link to={ROUTES.COLLABORATOR_CREATE}>
+                    <Plus className="mr-2 h-4 w-4" /> Ajouter un collaborateur
+                  </Link>
                 </Button>
               </div>
             </CardHeader>

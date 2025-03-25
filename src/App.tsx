@@ -5,6 +5,7 @@ import { CompanyPage } from "./pages/CompanyPage.tsx";
 import { CompanyDetailsPage } from "./pages/CompanyDetailsPage";
 import { CollaboratorDetailsPage } from "./pages/CollaboratorDetailsPage";
 import { CollaboratorPage } from "./pages/CollaboratorPage.tsx";
+import { CreateCollaboratorPage } from "./pages/CreateCollaboratorPage";
 import { DimonaPage } from "./pages/DimonaPage.tsx";
 import { DocumentsPage } from "./pages/DocumentsPage.tsx";
 import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
@@ -45,6 +46,10 @@ function App() {
               <Route
                 path={ROUTES.COLLABORATORS}
                 element={<CollaboratorPage />}
+              />
+              <Route
+                path={ROUTES.COLLABORATOR_CREATE}
+                element={<CreateCollaboratorPage />}
               />
               <Route
                 path={`${ROUTES.COLLABORATORS}/:id`}

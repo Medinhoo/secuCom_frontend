@@ -107,8 +107,13 @@ export function CollaboratorPage() {
           >
             <Download className="mr-2 h-4 w-4" /> Exporter
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-            <Plus className="mr-2 h-4 w-4" /> Ajouter un collaborateur
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            asChild
+          >
+            <Link to={ROUTES.COLLABORATOR_CREATE}>
+              <Plus className="mr-2 h-4 w-4" /> Ajouter un collaborateur
+            </Link>
           </Button>
         </div>
       </div>

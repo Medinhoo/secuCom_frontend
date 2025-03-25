@@ -18,6 +18,7 @@ export const ROUTES = {
 
   // Collaborator routes
   COLLABORATORS: "/collaborator",
+  COLLABORATOR_CREATE: "/collaborator/create",
   COLLABORATOR_DETAILS: (id: string) => `/collaborator/${id}`,
 
   // Secretariat routes
