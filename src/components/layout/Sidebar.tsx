@@ -298,7 +298,7 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
             }}
           >
             <div className="h-10 w-10 flex-shrink-0 rounded-full bg-white/20 flex items-center justify-center shadow-sm">
-              <Link to={ROUTES.DIMONA}>
+              <Link to={ROUTES.PROFILE}>
                 <span className="font-bold text-lg text-white">
                   {user?.username?.charAt(0) || "S"}
                 </span>

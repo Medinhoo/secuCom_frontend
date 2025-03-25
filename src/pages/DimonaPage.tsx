@@ -31,6 +31,7 @@ import { Badge } from "@/components/ui/badge";
 // Import data and utils
 import { demoDimonas, DimonaType, DimonaStatus } from "@/data/mockData";
 import { getStatusBadge, getTypeBadge } from "@/utils/dimonaUtils";
+import { ROUTES } from "@/config/routes.config";
 
 export function DimonaPage() {
   const [dimonas] = useState(demoDimonas);
@@ -221,7 +222,9 @@ export function DimonaPage() {
                         asChild
                         className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
                       >
-                        <Link to={`/dimona/${dimona.id}`}>Voir détails</Link>
+                        <Link to={ROUTES.DIMONA_DETAILS(dimona.id)}>
+                          Voir détails
+                        </Link>
                       </Button>
                     </TableCell>
                   </TableRow>

@@ -28,6 +28,7 @@ import {
 import PasswordChange from "../components/layout/PasswordChange";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { Link } from "react-router-dom";
+import { ROUTES } from "@/config/routes.config";
 
 interface ProfileForm {
   firstName: string;
@@ -625,7 +626,7 @@ const ProfilePage: React.FC = () => {
                     </h3>
                     <div className="flex items-center">
                       <Building2 className="h-4 w-4 text-slate-400 mr-2" />
-                      <Link to={`/entreprises/${user.companyId}`}>
+                      <Link to={ROUTES.COMPANY_DETAILS(user.companyId!)}>
                         <span className="text-slate-700">
                           {user.companyName}
                         </span>
@@ -642,7 +643,7 @@ const ProfilePage: React.FC = () => {
                     </h3>
                     <div className="flex items-center">
                       <Building2 className="h-4 w-4 text-slate-400 mr-2" />
-                      <Link to={`/secretariat/${secretariatInfo.id}`}>
+                      <Link to={ROUTES.SECRETARIAT_DETAILS(secretariatInfo.id)}>
                         <span className="text-slate-700">
                           {secretariatInfo.name}
                         </span>

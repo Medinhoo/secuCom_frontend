@@ -6,6 +6,7 @@ export const ROUTES = {
   DASHBOARD: "/dashboard",
   PROFILE: "/profile",
   DIMONA: "/dimona",
+  DIMONA_DETAILS: (id: string) => `/dimona/${id}`,
 
   // Document routes
   DOCUMENTS: "/documents",
