@@ -145,16 +145,16 @@ export function CompanyDetailsPage() {
   };
 
   const handleDelete = async () => {
-    if (id) {
-      try {
-        await companyService.deleteCompany(id);
-        toast.success("Company supprimée avec succès");
-        navigate(ROUTES.COMPANIES);
-      } catch (error) {
-        toast.error("Erreur lors de la suppression de la company", {
-          description: "Veuillez réessayer plus tard",
-        });
-      }
+    if (!id) return;
+
+    try {
+      await companyService.deleteCompany(id);
+      toast.success("Entreprise supprimée avec succès");
+      navigate(ROUTES.COMPANIES);
+    } catch (error) {
+      toast.error("Échec de la suppression de l'entreprise");
+      console.error(error);
+    } finally {
       setIsDeleteDialogOpen(false);
     }
   };

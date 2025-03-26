@@ -14,6 +14,7 @@ export const ROUTES = {
 
   // Company routes
   COMPANIES: "/companies",
+  COMPANY_CREATE: "/companies/create",
   COMPANY_DETAILS: (id: string) => `/companies/${id}`,
 
   // Collaborator routes

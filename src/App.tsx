@@ -3,6 +3,7 @@ import { ROUTES } from "./config/routes.config";
 import { MainLayout } from "./components/layout/MainLayout";
 import { CompanyPage } from "./pages/CompanyPage.tsx";
 import { CompanyDetailsPage } from "./pages/CompanyDetailsPage";
+import { CreateCompanyPage } from "./pages/CreateCompanyPage";
 import { CollaboratorDetailsPage } from "./pages/CollaboratorDetailsPage";
 import { CollaboratorPage } from "./pages/CollaboratorPage.tsx";
 import { CreateCollaboratorPage } from "./pages/CreateCollaboratorPage";
@@ -39,6 +40,10 @@ function App() {
                 element={<DocumentsListPage />}
               />
               <Route path={ROUTES.COMPANIES} element={<CompanyPage />} />
+              <Route
+                path={ROUTES.COMPANY_CREATE}
+                element={<CreateCompanyPage />}
+              />
               <Route
                 path={`${ROUTES.COMPANIES}/:id`}
                 element={<CompanyDetailsPage />}

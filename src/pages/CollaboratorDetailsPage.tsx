@@ -410,14 +410,17 @@ export function CollaboratorDetailsPage() {
   };
 
   const handleDelete = async () => {
+    if (!id) return;
+
     try {
-      await collaboratorService.deleteCollaborator(collaborator.id);
+      await collaboratorService.deleteCollaborator(id);
       toast.success("Collaborateur supprimé avec succès");
-      setIsDeleteDialogOpen(false);
-      navigate("/personnel");
+      navigate(ROUTES.COLLABORATORS);
     } catch (error) {
       toast.error("Échec de la suppression du collaborateur");
       console.error(error);
+    } finally {
+      setIsDeleteDialogOpen(false);
     }
   };
 

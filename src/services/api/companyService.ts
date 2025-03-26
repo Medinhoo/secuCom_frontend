@@ -13,7 +13,7 @@ export const companyService = {
       requiresAuth: true,
     }),
 
-  createCompany: (company: CompanyDto) =>
+  createCompany: (company: Omit<CompanyDto, "id">) =>
     apiClient.post<CompanyDto>(COMPANY_ENDPOINTS.CREATE, company, {
       requiresAuth: true,
     }),

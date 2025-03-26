@@ -1,8 +1,16 @@
 // src/pages/CompanyPage.tsx
 import { useState, useEffect } from "react";
-import { Plus, Search, Download, Eye, Loader2 } from "lucide-react";
+import { Plus, Search, Download, Eye, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -40,6 +48,8 @@ export function CompanyPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [companyToDelete, setCompanyToDelete] = useState<string | null>(null);
 
   // Fetch companies
   useEffect(() => {
@@ -107,8 +117,13 @@ export function CompanyPage() {
           >
             <Download className="mr-2 h-4 w-4" /> Exporter
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-            <Plus className="mr-2 h-4 w-4" /> Ajouter une company
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            asChild
+          >
+            <Link to={ROUTES.COMPANY_CREATE}>
+              <Plus className="mr-2 h-4 w-4" /> Ajouter une entreprise
+            </Link>
           </Button>
         </div>
       </div>
@@ -282,16 +297,29 @@ export function CompanyPage() {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            asChild
-                            className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
-                          >
-                            <Link to={ROUTES.COMPANY_DETAILS(company.id)}>
-                              <Eye className="h-4 w-4 mr-2" /> Détails
-                            </Link>
-                          </Button>
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              asChild
+                              className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
+                            >
+                              <Link to={ROUTES.COMPANY_DETAILS(company.id)}>
+                                <Eye className="h-4 w-4 mr-2" /> Détails
+                              </Link>
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700"
+                              onClick={() => {
+                                setCompanyToDelete(company.id);
+                                setDeleteDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -414,16 +442,29 @@ export function CompanyPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              asChild
-                              className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
-                            >
-                              <Link to={ROUTES.COMPANY_DETAILS(company.id)}>
-                                <Eye className="h-4 w-4 mr-2" /> Détails
-                              </Link>
-                            </Button>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                asChild
+                                className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
+                              >
+                                <Link to={ROUTES.COMPANY_DETAILS(company.id)}>
+                                  <Eye className="h-4 w-4 mr-2" /> Détails
+                                </Link>
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700"
+                                onClick={() => {
+                                  setCompanyToDelete(company.id);
+                                  setDeleteDialogOpen(true);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -434,6 +475,49 @@ export function CompanyPage() {
           </TabsContent>
         ))}
       </Tabs>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer cette entreprise ? Cette action
+              est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!companyToDelete) return;
+
+                try {
+                  await companyService.deleteCompany(companyToDelete);
+                  setCompanies((prev) =>
+                    prev.filter((c) => c.id !== companyToDelete)
+                  );
+                  toast.success("Entreprise supprimée avec succès");
+                } catch (error) {
+                  toast.error("Échec de la suppression de l'entreprise");
+                  console.error(error);
+                } finally {
+                  setDeleteDialogOpen(false);
+                  setCompanyToDelete(null);
+                }
+              }}
+            >
+              Supprimer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
