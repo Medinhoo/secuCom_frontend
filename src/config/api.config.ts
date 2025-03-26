@@ -42,6 +42,17 @@ export const COLLABORATOR_ENDPOINTS = {
   DELETE: (id: string) => `/collaborators/${id}`,
 } as const;
 
+// Dimona endpoints
+export const DIMONA_ENDPOINTS = {
+  GET_ALL: "/dimona",
+  GET_BY_ID: (id: string) => `/dimona/${id}`,
+  CREATE: "/dimona",
+  DELETE: (id: string) => `/dimona/${id}`,
+  GET_BY_COLLABORATOR: (collaboratorId: string) =>
+    `/dimona/collaborator/${collaboratorId}`,
+  GET_BY_COMPANY: (companyId: string) => `/dimona/company/${companyId}`,
+} as const;
+
 export const COMPANY_ENDPOINTS = {
   GET_ALL: "/company",
   GET_BY_ID: (id: string) => `/company/${id}`,

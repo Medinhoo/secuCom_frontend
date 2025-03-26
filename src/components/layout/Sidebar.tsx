@@ -235,16 +235,16 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
       isActive: isActivePath(ROUTES.COLLABORATORS),
     },
     {
-      href: ROUTES.DOCUMENTS,
-      icon: <FileText size={20} />,
-      label: "Documents",
-      isActive: isActivePath(ROUTES.DOCUMENTS),
-    },
-    {
       href: ROUTES.DIMONA,
       icon: <File size={20} />,
       label: "DIMONA",
       isActive: isActivePath(ROUTES.DIMONA),
+    },
+    {
+      href: ROUTES.DOCUMENTS,
+      icon: <FileText size={20} />,
+      label: "Documents",
+      isActive: isActivePath(ROUTES.DOCUMENTS),
     },
     {
       href: ROUTES.SETTINGS,

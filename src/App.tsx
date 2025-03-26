@@ -8,6 +8,8 @@ import { CollaboratorDetailsPage } from "./pages/CollaboratorDetailsPage";
 import { CollaboratorPage } from "./pages/CollaboratorPage.tsx";
 import { CreateCollaboratorPage } from "./pages/CreateCollaboratorPage";
 import { DimonaPage } from "./pages/DimonaPage.tsx";
+import { DimonaDetailsPage } from "./pages/DimonaDetailsPage";
+import { CreateDimonaPage } from "./pages/CreateDimonaPage";
 import { DocumentsPage } from "./pages/DocumentsPage.tsx";
 import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
@@ -34,6 +36,14 @@ function App() {
               <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
               <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
               <Route path={ROUTES.DIMONA} element={<DimonaPage />} />
+              <Route
+                path={ROUTES.CREATE_DIMONA}
+                element={<CreateDimonaPage />}
+              />
+              <Route
+                path={`${ROUTES.DIMONA}/:id`}
+                element={<DimonaDetailsPage />}
+              />
               <Route path={ROUTES.DOCUMENTS} element={<DocumentsPage />} />
               <Route
                 path={`${ROUTES.DOCUMENTS}/:categoryId`}

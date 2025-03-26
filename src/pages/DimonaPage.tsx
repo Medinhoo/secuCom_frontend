@@ -1,5 +1,5 @@
-// src/pages/DimonaPage.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 import { Plus, Search, Download, ArrowDownUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,45 +27,62 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
 
-// Import data and utils
-import { demoDimonas, DimonaType, DimonaStatus } from "@/data/mockData";
+import { DimonaDto, DimonaType, DimonaStatus } from "@/types/DimonaTypes";
+import { dimonaService } from "@/services/api/dimonaService";
 import { getStatusBadge, getTypeBadge } from "@/utils/dimonaUtils";
 import { ROUTES } from "@/config/routes.config";
 
 export function DimonaPage() {
-  const [dimonas] = useState(demoDimonas);
+  const [dimonas, setDimonas] = useState<DimonaDto[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | DimonaStatus>("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | DimonaType>("all");
+
+  useEffect(() => {
+    const fetchDimonas = async () => {
+      try {
+        const data = await dimonaService.getAllDimonas();
+        setDimonas(data);
+        setError(null);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Error loading Dimona declarations";
+        setError(errorMessage);
+        toast.error(errorMessage);
+        setDimonas(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDimonas();
+  }, []);
 
   // Filter declarations based on search term and filters
-  const filteredDimonas = dimonas.filter((dimona) => {
-    // Search filter
-    const matchesSearch =
-      dimona.employee.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dimona.employee.prenom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dimona.entreprise.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      dimona.refNumber.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredDimonas =
+    dimonas?.filter((dimona) => {
+      // Search filter
+      const matchesSearch = dimona.onssReference
+        ? dimona.onssReference.toLowerCase().includes(searchTerm.toLowerCase())
+        : searchTerm === ""; // If no reference, only match empty search
 
-    // Status filter
-    const matchesStatus =
-      statusFilter === "all" ||
-      dimona.statut.toLowerCase() === statusFilter.toLowerCase();
+      // Status filter
+      const matchesStatus =
+        statusFilter === "all" || dimona.status === statusFilter;
 
-    // Type filter
-    const matchesType =
-      typeFilter === "all" ||
-      dimona.type.toLowerCase() === typeFilter.toLowerCase();
+      // Type filter
+      const matchesType = typeFilter === "all" || dimona.type === typeFilter;
 
-    return matchesSearch && matchesStatus && matchesType;
-  });
+      return matchesSearch && matchesStatus && matchesType;
+    }) ?? [];
 
   // Count by status for badges
-  const statusCounts = dimonas.reduce((acc, dimona) => {
-    acc[dimona.statut] = (acc[dimona.statut] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
 
   return (
     <div className="w-full">
@@ -87,8 +104,13 @@ export function DimonaPage() {
           >
             <Download className="mr-2 h-4 w-4" /> Exporter
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-            <Plus className="mr-2 h-4 w-4" /> Nouvelle déclaration
+          <Button
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            asChild
+          >
+            <Link to={ROUTES.CREATE_DIMONA}>
+              <Plus className="mr-2 h-4 w-4" /> Nouvelle déclaration
+            </Link>
           </Button>
         </div>
       </div>
@@ -106,27 +128,35 @@ export function DimonaPage() {
         </div>
 
         <div className="flex flex-wrap gap-2 w-full md:w-auto">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select
+            value={statusFilter}
+            onValueChange={(value: "all" | DimonaStatus) =>
+              setStatusFilter(value)
+            }
+          >
             <SelectTrigger className="w-[140px] border-slate-200 focus:ring-blue-500 bg-white">
               <SelectValue placeholder="Statut" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les statuts</SelectItem>
-              <SelectItem value="accepted">Acceptée</SelectItem>
-              <SelectItem value="pending">En attente</SelectItem>
-              <SelectItem value="rejected">Rejetée</SelectItem>
+              <SelectItem value={DimonaStatus.ACCEPTED}>Acceptée</SelectItem>
+              <SelectItem value={DimonaStatus.PENDING}>En attente</SelectItem>
+              <SelectItem value={DimonaStatus.REJECTED}>Rejetée</SelectItem>
             </SelectContent>
           </Select>
 
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
+          <Select
+            value={typeFilter}
+            onValueChange={(value: "all" | DimonaType) => setTypeFilter(value)}
+          >
             <SelectTrigger className="w-[140px] border-slate-200 focus:ring-blue-500 bg-white">
               <SelectValue placeholder="Type" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tous les types</SelectItem>
-              <SelectItem value="in">Entrée</SelectItem>
-              <SelectItem value="out">Sortie</SelectItem>
-              <SelectItem value="update">Modification</SelectItem>
+              <SelectItem value={DimonaType.IN}>Entrée</SelectItem>
+              <SelectItem value={DimonaType.OUT}>Sortie</SelectItem>
+              <SelectItem value={DimonaType.UPDATE}>Modification</SelectItem>
             </SelectContent>
           </Select>
 
@@ -170,7 +200,22 @@ export function DimonaPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDimonas.length === 0 ? (
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-10">
+                    <LoadingSpinner />
+                  </TableCell>
+                </TableRow>
+              ) : error ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-10 text-red-500"
+                  >
+                    {error}
+                  </TableCell>
+                </TableRow>
+              ) : filteredDimonas.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
@@ -192,29 +237,29 @@ export function DimonaPage() {
                     className="hover:bg-slate-50 border-b border-slate-100 group"
                   >
                     <TableCell className="font-mono text-blue-800 group-hover:text-blue-600 transition-colors">
-                      {dimona.refNumber}
+                      {dimona.onssReference}
                     </TableCell>
                     <TableCell className="font-medium">
                       <Link
-                        to={`/personnel/${dimona.employee.id}`}
+                        to={ROUTES.COLLABORATOR_DETAILS(dimona.collaboratorId)}
                         className="text-slate-700 hover:text-blue-600"
                       >
-                        {dimona.employee.prenom} {dimona.employee.nom}
+                        Voir collaborateur
                       </Link>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <Link
-                        to={`/entreprises/${dimona.entreprise.id}`}
+                        to={ROUTES.COMPANY_DETAILS(dimona.companyId)}
                         className="text-slate-600 hover:text-blue-600"
                       >
-                        {dimona.entreprise.nom}
+                        Voir entreprise
                       </Link>
                     </TableCell>
                     <TableCell>{getTypeBadge(dimona.type)}</TableCell>
                     <TableCell className="hidden md:table-cell text-slate-600">
-                      {dimona.dateDeclaration}
+                      {new Date(dimona.entryDate).toLocaleDateString("fr-BE")}
                     </TableCell>
-                    <TableCell>{getStatusBadge(dimona.statut)}</TableCell>
+                    <TableCell>{getStatusBadge(dimona.status)}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="secondary"
