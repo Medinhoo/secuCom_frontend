@@ -17,7 +17,10 @@ export const getStatusBadge = (status: DimonaStatus) => {
       );
     case DimonaStatus.REJECTED:
       return (
-        <Badge variant="destructive">
+        <Badge
+          variant="destructive"
+          className="bg-red-100 text-red-800 hover:bg-red-100"
+        >
           <AlertCircle className="mr-1 h-3 w-3" /> Rejetée
         </Badge>
       );

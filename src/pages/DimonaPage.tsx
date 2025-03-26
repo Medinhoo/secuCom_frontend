@@ -1,14 +1,12 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { ArrowDownUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { DimonaDto, DimonaType, DimonaStatus } from "@/types/DimonaTypes";
+import { DimonaDto } from "@/types/DimonaTypes";
 import { dimonaService } from "@/services/api/dimonaService";
 import { getStatusBadge, getTypeBadge } from "@/utils/dimonaUtils";
 import { ROUTES } from "@/config/routes.config";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { SearchBar, Filter } from "@/components/layout/SearchBar";
+import { SearchBar } from "@/components/layout/SearchBar";
 import { DataTable, Column } from "@/components/layout/DataTable";
 
 export function DimonaPage() {
