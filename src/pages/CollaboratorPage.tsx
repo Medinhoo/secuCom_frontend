@@ -7,9 +7,18 @@ import {
   Briefcase,
   Building,
   Download,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -38,6 +47,10 @@ export function CollaboratorPage() {
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [companies, setCompanies] = useState<Record<string, CompanyDto>>({});
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [collaboratorToDelete, setCollaboratorToDelete] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -252,16 +265,31 @@ export function CollaboratorPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        asChild
-                        className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
-                      >
-                        <Link to={ROUTES.COLLABORATOR_DETAILS(collaborator.id)}>
-                          Voir détails
-                        </Link>
-                      </Button>
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          asChild
+                          className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
+                        >
+                          <Link
+                            to={ROUTES.COLLABORATOR_DETAILS(collaborator.id)}
+                          >
+                            Voir détails
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700"
+                          onClick={() => {
+                            setCollaboratorToDelete(collaborator.id);
+                            setDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -270,6 +298,50 @@ export function CollaboratorPage() {
           </Table>
         </CardContent>
       </Card>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmer la suppression</DialogTitle>
+            <DialogDescription>
+              Êtes-vous sûr de vouloir supprimer ce collaborateur ? Cette action
+              est irréversible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Annuler
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!collaboratorToDelete) return;
+
+                try {
+                  await collaboratorService.deleteCollaborator(
+                    collaboratorToDelete
+                  );
+                  setCollaborators((prev) =>
+                    prev.filter((c) => c.id !== collaboratorToDelete)
+                  );
+                  toast.success("Collaborateur supprimé avec succès");
+                } catch (error) {
+                  toast.error("Échec de la suppression du collaborateur");
+                  console.error(error);
+                } finally {
+                  setDeleteDialogOpen(false);
+                  setCollaboratorToDelete(null);
+                }
+              }}
+            >
+              Supprimer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
