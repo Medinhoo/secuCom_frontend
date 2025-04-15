@@ -127,7 +127,7 @@ export function CompanyDetailsPage() {
         setCompany(data);
         setFormData(data);
       } catch (error) {
-        toast.error("Erreur lors du chargement de la company", {
+        toast.error("Erreur lors du chargement de l'entreprise", {
           description: "Veuillez réessayer plus tard",
         });
         navigate(ROUTES.COMPANIES);
@@ -171,7 +171,7 @@ export function CompanyDetailsPage() {
   }
 
   if (!company || !formData) {
-    return <div className="p-8 text-center">Company non trouvée</div>;
+    return <div className="p-8 text-center">Entreprise non trouvée</div>;
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,9 +185,9 @@ export function CompanyDetailsPage() {
         const updatedCompany = await companyService.updateCompany(id, formData);
         setCompany(updatedCompany);
         setEditMode(false);
-        toast.success("Company mise à jour avec succès");
+        toast.success("Entreprise mise à jour avec succès");
       } catch (error) {
-        toast.error("Erreur lors de la mise à jour de la company", {
+        toast.error("Erreur lors de la mise à jour de l'entreprise", {
           description: "Veuillez réessayer plus tard",
         });
       }
@@ -311,10 +311,10 @@ export function CompanyDetailsPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-blue-700">
-                    Informations company
+                    Informations de l'entreprise
                   </CardTitle>
                   <CardDescription>
-                    Détails et coordonnées de la company
+                    Détails et coordonnées de l'entreprise
                   </CardDescription>
                 </div>
                 {!editMode ? (
@@ -356,7 +356,7 @@ export function CompanyDetailsPage() {
                       <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                         <div className="space-y-2">
                           <Label htmlFor="name" className="text-blue-700">
-                            Nom de la company
+                            Nom de l'entrepries
                           </Label>
                           <Input
                             id="name"
@@ -1031,7 +1031,7 @@ export function CompanyDetailsPage() {
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-blue-700">Paramètres</CardTitle>
-                  <CardDescription>Paramètres de la company</CardDescription>
+                  <CardDescription>Paramètres de l'entreprie</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -1042,7 +1042,7 @@ export function CompanyDetailsPage() {
                   onClick={() => setIsDeleteDialogOpen(true)}
                   className="bg-red-600 hover:bg-red-700 text-white shadow-sm"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" /> Supprimer la company
+                  <Trash2 className="mr-2 h-4 w-4" /> Supprimer l'entreprie
                 </Button>
               </div>
             </CardContent>
@@ -1054,10 +1054,9 @@ export function CompanyDetailsPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Supprimer la company</DialogTitle>
+            <DialogTitle>Supprimer l'entreprie</DialogTitle>
             <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer cette company ? Cette action
-              est irréversible.
+              Êtes-vous sûr de vouloir supprimer cette entreprie ? Cette action est irréversible.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

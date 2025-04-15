@@ -135,8 +135,8 @@ export function CompanyPage() {
   return (
     <div className="w-full">
       <PageHeader
-        title="Companies"
-        description="Gérez les companies enregistrées dans le secrétariat social"
+        title="Entreprises"
+        description="Gérez les entrepries enregistrées dans le secrétariat social"
         onExport={() => {}}
         addNewButton={{
           label: "Ajouter une entreprise",
