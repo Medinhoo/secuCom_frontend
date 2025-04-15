@@ -13,6 +13,11 @@ export const collaboratorService = {
       requiresAuth: true,
     }),
 
+  getCollaboratorsByCompany: (companyId: string) =>
+    apiClient.get<Collaborator[]>(COLLABORATOR_ENDPOINTS.GET_BY_COMPANY(companyId), {
+      requiresAuth: true,
+    }),
+
   createCollaborator: (
     collaborator: Omit<Collaborator, "id" | "createdAt" | "updatedAt">
   ) =>

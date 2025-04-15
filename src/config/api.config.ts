@@ -40,6 +40,7 @@ export const COLLABORATOR_ENDPOINTS = {
   CREATE: "/collaborators",
   UPDATE: (id: string) => `/collaborators/${id}`,
   DELETE: (id: string) => `/collaborators/${id}`,
+  GET_BY_COMPANY: (companyId: string) => `/collaborators/company/${companyId}`,
 } as const;
 
 // Dimona endpoints

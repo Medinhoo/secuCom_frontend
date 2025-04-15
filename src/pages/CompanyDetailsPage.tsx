@@ -1,6 +1,9 @@
 // src/pages/CompanyDetailsPage.tsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { collaboratorService } from "@/services/api/collaboratorService";
+import type { Collaborator } from "@/types/CollaboratorTypes";
+import { DataTable, Column } from "@/components/layout/DataTable";
 import {
   Edit,
   Save,
@@ -13,21 +16,11 @@ import {
   Trash2,
   Download,
   Plus,
-  Calendar,
-  Mail,
-  Briefcase,
   Building2,
   Phone,
-  CreditCard,
-  Shield,
-  HardHat,
   FileCheck,
-  Clock,
-  Wallet,
   Factory,
   Users2,
-  CalendarRange,
-  FileSpreadsheet,
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -87,6 +80,42 @@ export function CompanyDetailsPage() {
   const [formData, setFormData] = useState<CompanyDto | null>(null);
   const [activeTab, setActiveTab] = useState("infos");
   const [loading, setLoading] = useState(true);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [loadingCollaborators, setLoadingCollaborators] = useState(false);
+  
+  // Define columns for the collaborators table
+  const collaboratorColumns: Column<Collaborator>[] = [
+    {
+      header: "Nom",
+      accessor: (collaborator) => (
+        <span className="font-medium">
+          {collaborator.lastName} {collaborator.firstName}
+        </span>
+      ),
+    },
+    {
+      header: "Fonction",
+      accessor: (collaborator) => collaborator.jobFunction || "N/A",
+    },
+    {
+      header: "Type",
+      accessor: (collaborator) => 
+        collaborator.type ? (
+          <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-200">
+            {collaborator.type}
+          </Badge>
+        ) : (
+          "N/A"
+        ),
+    },
+    {
+      header: "Date d'entrée",
+      accessor: (collaborator) => 
+        collaborator.serviceEntryDate
+          ? new Date(collaborator.serviceEntryDate).toLocaleDateString()
+          : "N/A",
+    },
+  ];
 
   // Fetch company data
   useEffect(() => {
@@ -109,6 +138,27 @@ export function CompanyDetailsPage() {
 
     fetchCompany();
   }, [id, navigate]);
+
+  // Fetch collaborators data
+  useEffect(() => {
+    const fetchCollaborators = async () => {
+      if (!id) return;
+      
+      setLoadingCollaborators(true);
+      try {
+        const companyCollaborators = await collaboratorService.getCollaboratorsByCompany(id);
+        setCollaborators(companyCollaborators);
+      } catch (error) {
+        toast.error("Erreur lors du chargement des collaborateurs", {
+          description: "Veuillez réessayer plus tard",
+        });
+      } finally {
+        setLoadingCollaborators(false);
+      }
+    };
+
+    fetchCollaborators();
+  }, [id]);
 
   if (loading) {
     return (
@@ -231,7 +281,7 @@ export function CompanyDetailsPage() {
               variant="secondary"
               className="ml-2 bg-blue-100 text-blue-700 hover:bg-blue-200"
             >
-              0
+              {collaborators.length}
             </Badge>
           </TabsTrigger>
           <TabsTrigger
@@ -919,27 +969,17 @@ export function CompanyDetailsPage() {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nom</TableHead>
-                    <TableHead>Fonction</TableHead>
-                    <TableHead>Date d'entrée</TableHead>
-                    <TableHead>Statut</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell
-                      colSpan={5}
-                      className="text-center py-8 text-slate-500"
-                    >
-                      Aucun personnel enregistré
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <DataTable
+                data={collaborators}
+                columns={collaboratorColumns}
+                loading={loadingCollaborators}
+                detailsRoute={(collaboratorId) => ROUTES.COLLABORATOR_DETAILS(collaboratorId)}
+                emptyStateMessage={{
+                  title: "Aucun personnel enregistré",
+                  description: "Ajoutez des collaborateurs à cette entreprise"
+                }}
+                detailsButtonLabel="Voir détails"
+              />
             </CardContent>
           </Card>
         </TabsContent>
