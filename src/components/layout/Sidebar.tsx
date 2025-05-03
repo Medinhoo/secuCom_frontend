@@ -223,7 +223,9 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
       isActive: pathname === ROUTES.DASHBOARD,
     },
     {
-      href: ROUTES.COMPANIES,
+      href: user?.roles.includes("ROLE_COMPANY") && user?.companyId 
+        ? ROUTES.COMPANY_DETAILS(user.companyId) 
+        : ROUTES.COMPANIES,
       icon: <Building2 size={20} />,
       label: user?.roles.includes("ROLE_COMPANY") ? "Mon Entreprise" : "Entreprises",
       isActive: isActivePath(ROUTES.COMPANIES),
@@ -403,7 +405,7 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
         >
           <div className="flex justify-center items-center">
             <div className="h-1 w-1 rounded-full bg-blue-400 mr-1"></div>
-            <span className="text-xs text-slate-400">Sodabel v2.0</span>
+            <span className="text-xs text-slate-400">Secucom v1.0</span>
           </div>
         </div>
       </div>
