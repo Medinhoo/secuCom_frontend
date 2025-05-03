@@ -41,7 +41,7 @@ function SidebarLink({
 }: SidebarLinkProps) {
   // Use larger icon when collapsed
   const iconElement = isCollapsed
-    ? React.cloneElement(icon as React.ReactElement, { size: 24 })
+    ? React.cloneElement(icon as React.ReactElement, { size: 24 } as React.HTMLAttributes<SVGElement>)
     : icon;
 
   // Create content element for button-type links (like logout)
@@ -225,7 +225,7 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
     {
       href: ROUTES.COMPANIES,
       icon: <Building2 size={20} />,
-      label: "Entreprises",
+      label: user?.roles.includes("ROLE_COMPANY") ? "Mon Entreprise" : "Entreprises",
       isActive: isActivePath(ROUTES.COMPANIES),
     },
     {
@@ -309,7 +309,7 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
                 {user?.username}
               </span>
               <span className="text-xs text-blue-100 truncate">
-                Secrétariat social
+                {user?.roles.includes("ROLE_COMPANY") ? "Entreprise" : "Secrétariat social"}
               </span>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Mail, Briefcase, Building } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
@@ -47,6 +48,7 @@ const getCollaboratorTypeLabel = (type: string | undefined) => {
 };
 
 export function CollaboratorPage() {
+  const { user, hasRole } = useAuth();
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [companies, setCompanies] = useState<Record<string, CompanyDto>>({});
   const [loading, setLoading] = useState(true);
@@ -55,14 +57,20 @@ export function CollaboratorPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [collaboratorsResponse, companiesResponse] = await Promise.all([
-          collaboratorService.getAllCollaborators(),
-          companyService.getAllCompanies(),
-        ]);
-
+        let collaboratorsResponse;
+        
+        // If user has ROLE_COMPANY, fetch only their company's collaborators
+        if (hasRole("ROLE_COMPANY") && user?.companyId) {
+          collaboratorsResponse = await collaboratorService.getCollaboratorsByCompany(user.companyId);
+        } else {
+          // For other roles, fetch all collaborators
+          collaboratorsResponse = await collaboratorService.getAllCollaborators();
+        }
+        
         setCollaborators(collaboratorsResponse || []);
 
         // Create a map of company id to company data
+        const companiesResponse = await companyService.getAllCompanies();
         const companyMap = (companiesResponse || []).reduce((acc, company) => {
           acc[company.id] = company;
           return acc;
@@ -77,7 +85,7 @@ export function CollaboratorPage() {
     };
 
     fetchData();
-  }, []);
+  }, [user, hasRole]);
 
   const filteredCollaborators = collaborators.filter(
     (collaborator) =>
@@ -154,8 +162,12 @@ export function CollaboratorPage() {
   return (
     <div className="w-full">
       <PageHeader
-        title="Collaborateurs"
-        description="Gérez les collaborateurs enregistrés dans le secrétariat social"
+        title={hasRole("ROLE_COMPANY") ? "Mes Collaborateurs" : "Collaborateurs"}
+        description={
+          hasRole("ROLE_COMPANY")
+            ? `Gérez les collaborateurs de ${user?.companyName || 'votre entreprise'}`
+            : "Gérez les collaborateurs enregistrés dans le secrétariat social"
+        }
         onExport={() => {}}
         addNewButton={{
           label: "Ajouter un collaborateur",

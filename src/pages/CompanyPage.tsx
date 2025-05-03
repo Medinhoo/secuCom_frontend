@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { companyService } from "@/services/api/companyService";
@@ -24,15 +25,24 @@ const getSectorLightColor = (sector: string | undefined) => {
 };
 
 export function CompanyPage() {
+  const { user, hasRole } = useAuth();
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  // Fetch companies (kept as is)
+  
+  // Fetch companies based on user role
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const data = await companyService.getAllCompanies();
-        setCompanies(data);
+        // If user has ROLE_COMPANY, fetch only their company
+        if (hasRole("ROLE_COMPANY") && user?.companyId) {
+          const data = await companyService.getCompanyById(user.companyId);
+          setCompanies([data]); // Set as array with single company
+        } else {
+          // For other roles, fetch all companies
+          const data = await companyService.getAllCompanies();
+          setCompanies(data);
+        }
       } catch (error) {
         toast.error("Erreur lors du chargement des entreprises", {
           description: "Veuillez réessayer plus tard",
@@ -43,7 +53,7 @@ export function CompanyPage() {
     };
 
     fetchCompanies();
-  }, []);
+  }, [user, hasRole]);
 
   // Filter companies based on search term
   const filteredCompanies = companies.filter(
@@ -135,8 +145,12 @@ export function CompanyPage() {
   return (
     <div className="w-full">
       <PageHeader
-        title="Entreprises"
-        description="Gérez les entrepries enregistrées dans le secrétariat social"
+        title={hasRole("ROLE_COMPANY") ? "Mon Entreprise" : "Entreprises"}
+        description={
+          hasRole("ROLE_COMPANY")
+            ? `Gérez les informations de ${user?.companyName || 'votre entreprise'}`
+            : "Gérez les entrepries enregistrées dans le secrétariat social"
+        }
         onExport={() => {}}
         addNewButton={{
           label: "Ajouter une entreprise",

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { DimonaDto } from "@/types/DimonaTypes";
@@ -10,6 +11,7 @@ import { SearchBar } from "@/components/layout/SearchBar";
 import { DataTable, Column } from "@/components/layout/DataTable";
 
 export function DimonaPage() {
+  const { user, hasRole } = useAuth();
   const [dimonas, setDimonas] = useState<DimonaDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,8 +19,15 @@ export function DimonaPage() {
   useEffect(() => {
     const fetchDimonas = async () => {
       try {
-        const data = await dimonaService.getAllDimonas();
-        setDimonas(data || []);
+        // If user has ROLE_COMPANY, fetch only their company's dimonas
+        if (hasRole("ROLE_COMPANY") && user?.companyId) {
+          const data = await dimonaService.getDimonasByCompany(user.companyId);
+          setDimonas(data || []);
+        } else {
+          // For other roles, fetch all dimonas
+          const data = await dimonaService.getAllDimonas();
+          setDimonas(data || []);
+        }
       } catch (error) {
         const errorMessage =
           error instanceof Error
@@ -31,7 +40,7 @@ export function DimonaPage() {
     };
 
     fetchDimonas();
-  }, []);
+  }, [user, hasRole]);
 
   // Filter declarations based on search term
   const filteredDimonas = dimonas.filter((dimona) => {
@@ -92,8 +101,12 @@ export function DimonaPage() {
   return (
     <div className="w-full">
       <PageHeader
-        title="Déclarations Dimona"
-        description="Gérez les déclarations Dimona pour vos employés"
+        title={hasRole("ROLE_COMPANY") ? "Mes Déclarations Dimona" : "Déclarations Dimona"}
+        description={
+          hasRole("ROLE_COMPANY")
+            ? `Gérez les déclarations Dimona pour les employés de ${user?.companyName || 'votre entreprise'}`
+            : "Gérez les déclarations Dimona pour vos employés"
+        }
         onExport={() => {}}
         addNewButton={{
           label: "Nouvelle déclaration",
