@@ -20,6 +20,7 @@ import { AuthProvider } from "./context/AuthContext.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import SocialSecretariatDetailsPage from "./pages/SocialSecretriatDetailsPage.tsx";
+import { NotificationsPage } from "./pages/NotificationsPage";
 
 function App() {
   return (
@@ -73,6 +74,10 @@ function App() {
               <Route
                 path={`/secretariat/:id`}
                 element={<SocialSecretariatDetailsPage />}
+              />
+              <Route
+                path={ROUTES.NOTIFICATIONS}
+                element={<NotificationsPage />}
               />
 
               {/* Routes avec rôle spécifique */}

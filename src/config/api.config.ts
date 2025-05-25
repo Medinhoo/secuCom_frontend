@@ -64,3 +64,14 @@ export const COMPANY_ENDPOINTS = {
   CHECK_ONSS: (onssNumber: string) => `/company/check/onss/${onssNumber}`,
   CHECK_VAT: (vatNumber: string) => `/company/check/vat/${vatNumber}`,
 } as const;
+
+// Notification endpoints
+export const NOTIFICATION_ENDPOINTS = {
+  GET_ALL: "/notifications",
+  GET_PAGINATED: (page: number, size: number) => `/notifications/paginated?page=${page}&size=${size}`,
+  GET_UNREAD: "/notifications/unread",
+  GET_UNREAD_COUNT: "/notifications/unread/count",
+  MARK_AS_READ: (id: string) => `/notifications/${id}/read`,
+  MARK_ALL_AS_READ: "/notifications/read-all",
+  DELETE: (id: string) => `/notifications/${id}`,
+} as const;

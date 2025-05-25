@@ -26,6 +26,9 @@ export const ROUTES = {
   // Secretariat routes
   SECRETARIAT_DETAILS: (id: string) => `/secretariat/${id}`,
 
+  // Notification routes
+  NOTIFICATIONS: "/notifications",
+
   // Admin routes
   SETTINGS: "/settings",
 
