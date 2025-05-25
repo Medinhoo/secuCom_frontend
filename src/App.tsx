@@ -16,6 +16,7 @@ import SettingsPage from "./pages/SettingsPage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
+import PendingAccountGuard from "./components/PendingAccountGuard.tsx";
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
@@ -36,7 +37,7 @@ function App() {
 
           {/* Routes protégées avec MainLayout */}
           <Route element={<ProtectedRoute />}>
-            <Route element={<MainLayout />}>
+            <Route element={<PendingAccountGuard><MainLayout /></PendingAccountGuard>}>
               <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
               <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
               <Route path={ROUTES.DIMONA} element={<DimonaPage />} />

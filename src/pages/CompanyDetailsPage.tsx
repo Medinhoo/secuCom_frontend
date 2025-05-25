@@ -55,6 +55,7 @@ import { toast } from "sonner";
 import { companyService } from "@/services/api/companyService";
 import type { CompanyDto } from "@/types/CompanyTypes";
 import { ROUTES } from "@/config/routes.config";
+import { useAuth } from "@/context/AuthContext";
 
 // Helper function to get sector color
 const getSectorLightColor = (sector: string | undefined) => {
@@ -74,6 +75,7 @@ const getSectorLightColor = (sector: string | undefined) => {
 export function CompanyDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user, fetchUserDetails } = useAuth();
   const [company, setCompany] = useState<CompanyDto | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -186,6 +188,11 @@ export function CompanyDetailsPage() {
         setCompany(updatedCompany);
         setEditMode(false);
         toast.success("Entreprise mise à jour avec succès");
+        
+        // Re-fetch user details if this is the user's company to detect status changes
+        if (user?.companyId === id && user?.id) {
+          await fetchUserDetails(user.id);
+        }
       } catch (error) {
         toast.error("Erreur lors de la mise à jour de l'entreprise", {
           description: "Veuillez réessayer plus tard",

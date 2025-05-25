@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "@/services/api/authService";
 import { ROUTES } from "@/config/routes.config";
+import PendingAccountModal from "@/components/ui/PendingAccountModal";
+import StatusChangeHandler from "@/components/StatusChangeHandler";
 
 // Updated User interface to match backend entity
 export interface User {
@@ -54,6 +56,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showPendingModal, setShowPendingModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -105,6 +108,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     checkAuth();
   }, []); // Run once on mount
+
+  // Check for pending account status after user details are loaded
+  useEffect(() => {
+    if (user && user.accountStatus === "PENDING" && (user.isCompanyContact || user.roles.includes("ROLE_COMPANY"))) {
+      setShowPendingModal(true);
+    }
+  }, [user]);
 
   // Navigate when user becomes authenticated
   useEffect(() => {
@@ -207,6 +217,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return user?.roles?.includes(role) || false;
   };
 
+  // Handle pending modal actions
+  const handleClosePendingModal = () => {
+    setShowPendingModal(false);
+  };
+
+  const handleCompleteProfile = () => {
+    setShowPendingModal(false);
+    if (user?.companyId) {
+      navigate(ROUTES.COMPANY_DETAILS(user.companyId));
+    } else {
+      navigate(ROUTES.COMPANIES);
+    }
+  };
+
   // Context value
   const value = {
     user,
@@ -223,7 +247,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     isInitialized,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      <PendingAccountModal
+        isOpen={showPendingModal}
+        onClose={handleClosePendingModal}
+        onCompleteProfile={handleCompleteProfile}
+      />
+      <StatusChangeHandler />
+    </AuthContext.Provider>
+  );
 };
 
 // Custom hook to use the context

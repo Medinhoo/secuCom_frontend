@@ -23,6 +23,7 @@ import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/config/routes.config";
 import { NotificationBellImproved } from "@/components/notifications/NotificationBellImproved";
+import { useAccountRestrictions } from "@/hooks/useAccountRestrictions";
 
 interface SidebarLinkProps {
   href: string;
@@ -212,6 +213,7 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
   const pathname = location.pathname;
   const [mounted, setMounted] = useState(false);
   const { logout, user } = useAuth();
+  const { shouldShowInNavigation } = useAccountRestrictions();
 
   // Function to check if the current path matches or starts with the given path
   const isActivePath = (href: string) => pathname.startsWith(href);
@@ -366,7 +368,9 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
       {/* Main content */}
       <div className="flex-1 overflow-y-auto pt-4">
         <nav className={cn("flex flex-col", isCollapsed ? "px-2" : "px-3")}>
-          {links.map((link, index) => (
+          {links
+            .filter(link => shouldShowInNavigation(link.href))
+            .map((link, index) => (
             <div
               key={link.href}
               style={{
