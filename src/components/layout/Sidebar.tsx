@@ -256,6 +256,15 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
       label: "Notifications",
       isActive: pathname === ROUTES.NOTIFICATIONS,
     },
+    // Admin-only links
+    ...(user?.roles.includes("ROLE_ADMIN") ? [
+      {
+        href: ROUTES.ADMIN_USERS,
+        icon: <Users size={20} />,
+        label: "Utilisateurs",
+        isActive: isActivePath(ROUTES.ADMIN_USERS),
+      },
+    ] : []),
     {
       href: ROUTES.SETTINGS,
       icon: <Settings size={20} />,

@@ -21,6 +21,9 @@ import { Toaster } from "./components/ui/sonner.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import SocialSecretariatDetailsPage from "./pages/SocialSecretriatDetailsPage.tsx";
 import { NotificationsPage } from "./pages/NotificationsPage";
+import AdminUsersPage from "./pages/AdminUsersPage.tsx";
+import CreateCompanyContactPage from "./pages/CreateCompanyContactPage.tsx";
+import AdminUserDetailsPage from "./pages/AdminUserDetailsPage.tsx";
 
 function App() {
   return (
@@ -83,6 +86,15 @@ function App() {
               {/* Routes avec rôle spécifique */}
               <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
                 <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+                <Route path={ROUTES.ADMIN_USERS} element={<AdminUsersPage />} />
+                <Route 
+                  path={ROUTES.ADMIN_USERS_CREATE_COMPANY_CONTACT} 
+                  element={<CreateCompanyContactPage />} 
+                />
+                <Route 
+                  path={`${ROUTES.ADMIN_USERS}/:id`} 
+                  element={<AdminUserDetailsPage />} 
+                />
               </Route>
             </Route>
           </Route>

@@ -31,6 +31,10 @@ export const ROUTES = {
 
   // Admin routes
   SETTINGS: "/settings",
+  ADMIN_USERS: "/admin/users",
+  ADMIN_USERS_CREATE_COMPANY_CONTACT: "/admin/users/create/company-contact",
+  ADMIN_USER_DETAILS: (id: string) => `/admin/users/${id}`,
+  ADMIN_USER_EDIT: (id: string) => `/admin/users/${id}/edit`,
 
   // Default routes
   ROOT: "/",

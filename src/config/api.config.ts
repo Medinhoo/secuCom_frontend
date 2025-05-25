@@ -24,6 +24,15 @@ export const USER_ENDPOINTS = {
     `/users/company-contacts/by-company/${companyId}`,
 } as const;
 
+// Admin User endpoints
+export const ADMIN_USER_ENDPOINTS = {
+  GET_ALL_USERS: "/users",
+  GET_USER_BY_ID: (id: string) => `/users/${id}`,
+  UPDATE_USER: (id: string) => `/users/${id}`,
+  DELETE_USER: (id: string) => `/users/${id}`,
+  CREATE_COMPANY_CONTACT: (companyId: string) => `/users/company-contacts?companyId=${companyId}`,
+} as const;
+
 // Social Secretariat endpoints
 export const SECRETARIAT_ENDPOINTS = {
   GET_DETAILS: (secretariatId: string) =>
