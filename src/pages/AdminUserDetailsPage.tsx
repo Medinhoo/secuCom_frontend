@@ -1,21 +1,25 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Building2, Shield, Mail, Phone, Calendar, Edit } from "lucide-react";
+import { ArrowLeft, User, Building2, Shield, Mail, Phone, Calendar, Save } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { AdminUserService } from "@/services/api/adminUserService";
 import { AdminUser, AccountStatus } from "@/types/AdminUserTypes";
 import { ROUTES } from "@/config/routes.config";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 export function AdminUserDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { hasRole } = useAuth();
   const [user, setUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -81,6 +85,25 @@ export function AdminUserDetailsPage() {
     );
   };
 
+  const updateUserStatus = async (newStatus: AccountStatus) => {
+    if (!user || !id) return;
+
+    try {
+      setUpdatingStatus(true);
+      await AdminUserService.updateUser(id, { accountStatus: newStatus });
+      
+      // Update local state
+      setUser({ ...user, accountStatus: newStatus });
+      
+      toast.success("Statut utilisateur mis à jour avec succès");
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour du statut");
+      console.error("Error updating user status:", error);
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -123,10 +146,6 @@ export function AdminUserDetailsPage() {
         <Button variant="outline" onClick={() => navigate(ROUTES.ADMIN_USERS)}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour à la liste
-        </Button>
-        <Button onClick={() => navigate(ROUTES.ADMIN_USER_EDIT(user.id))}>
-          <Edit className="h-4 w-4 mr-2" />
-          Modifier
         </Button>
       </div>
 
@@ -190,7 +209,33 @@ export function AdminUserDetailsPage() {
 
             <div>
               <label className="text-sm font-medium text-gray-500">Statut du compte</label>
-              <div className="mt-1">{getStatusBadge(user.accountStatus)}</div>
+              {hasRole("ROLE_ADMIN") ? (
+                <div className="mt-2 space-y-2">
+                  <Select
+                    value={user.accountStatus}
+                    onValueChange={(value) => updateUserStatus(value as AccountStatus)}
+                    disabled={updatingStatus}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ACTIVE">Actif</SelectItem>
+                      <SelectItem value="INACTIVE">Inactif</SelectItem>
+                      <SelectItem value="LOCKED">Verrouillé</SelectItem>
+                      <SelectItem value="PENDING">En attente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {updatingStatus && (
+                    <p className="text-xs text-gray-500 flex items-center gap-1">
+                      <Save className="h-3 w-3 animate-spin" />
+                      Mise à jour en cours...
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-1">{getStatusBadge(user.accountStatus)}</div>
+              )}
             </div>
 
             <div className="flex items-center gap-2">

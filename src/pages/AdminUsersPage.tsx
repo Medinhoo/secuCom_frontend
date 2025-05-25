@@ -86,17 +86,6 @@ export function AdminUsersPage() {
     setFilteredUsers(filtered);
   };
 
-  const handleDeleteUser = async (id: string) => {
-    try {
-      await AdminUserService.deleteUser(id);
-      toast.success("Utilisateur supprimé avec succès");
-      loadUsers(); // Reload the list
-    } catch (error) {
-      toast.error("Erreur lors de la suppression de l'utilisateur");
-      console.error("Error deleting user:", error);
-    }
-  };
-
   const getRoleBadge = (roles: string[]) => {
     const roleColors: Record<string, string> = {
       ROLE_ADMIN: "bg-red-100 text-red-700",
@@ -274,7 +263,6 @@ export function AdminUsersPage() {
         data={filteredUsers}
         columns={columns}
         loading={loading}
-        onDelete={handleDeleteUser}
         detailsRoute={ROUTES.ADMIN_USER_DETAILS}
         detailsButtonLabel="Voir détails"
         emptyStateMessage={{
