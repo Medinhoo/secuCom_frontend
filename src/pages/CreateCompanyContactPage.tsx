@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, User, Check, AlertCircle, Plus, Search } from "lucide-react";
+import { ArrowLeft, Building2, User, Check, AlertCircle, Plus, Search, Copy, CheckCircle } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AdminUserService } from "@/services/api/adminUserService";
 import { CreateCompanyRequest, CreateCompanyContactRequest, CreateCompanyResponse } from "@/types/AdminUserTypes";
 import { ROUTES } from "@/config/routes.config";
@@ -51,6 +52,14 @@ export function CreateCompanyContactPage() {
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
+
+  // Modal state for credentials
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+  const [createdUserCredentials, setCreatedUserCredentials] = useState<{
+    username: string;
+    password: string;
+  } | null>(null);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   // Load existing companies when component mounts
   useEffect(() => {
@@ -193,6 +202,39 @@ export function CreateCompanyContactPage() {
     }
   };
 
+  // Copy to clipboard function
+  const copyToClipboard = async (text: string, field: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedField(field);
+      toast.success(`${field === 'username' ? 'Nom d\'utilisateur' : 'Mot de passe'} copié !`);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (error) {
+      toast.error("Erreur lors de la copie");
+    }
+  };
+
+  // Copy all credentials function
+  const copyAllCredentials = async () => {
+    if (!createdUserCredentials) return;
+    
+    const credentialsText = `Identifiants de connexion :
+
+Nom d'utilisateur : ${createdUserCredentials.username}
+Mot de passe : ${createdUserCredentials.password}
+
+Veuillez conserver ces informations en sécurité.`;
+
+    try {
+      await navigator.clipboard.writeText(credentialsText);
+      setCopiedField("all");
+      toast.success("Tous les identifiants copiés !");
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (error) {
+      toast.error("Erreur lors de la copie");
+    }
+  };
+
   // Handle Step 2: Create User
   const handleCreateUser = async () => {
     if (!validateUserForm() || !createdCompany) return;
@@ -200,8 +242,15 @@ export function CreateCompanyContactPage() {
     try {
       setLoading(true);
       await AdminUserService.createCompanyContact(createdCompany.id, userData);
+      
+      // Store credentials and show modal
+      setCreatedUserCredentials({
+        username: userData.username,
+        password: userData.password,
+      });
+      setShowCredentialsModal(true);
+      
       toast.success("Contact d'entreprise créé avec succès");
-      navigate(ROUTES.ADMIN_USERS);
     } catch (error: any) {
       console.error("Error creating user:", error);
       if (error.message?.includes("username")) {
@@ -214,6 +263,13 @@ export function CreateCompanyContactPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Handle modal close and navigation
+  const handleModalClose = () => {
+    setShowCredentialsModal(false);
+    setCreatedUserCredentials(null);
+    navigate(ROUTES.ADMIN_USERS);
   };
 
   const handleReset = () => {
@@ -235,7 +291,16 @@ export function CreateCompanyContactPage() {
   };
 
   const handleCancel = () => {
-    navigate(ROUTES.ADMIN_USERS);
+    if (companyChoice) {
+      // Si on a fait un choix, revenir au choix initial
+      setCompanyChoice(null);
+      setSelectedCompanyId("");
+      setCreatedCompany(null);
+      setErrors({});
+    } else {
+      // Si on est au choix initial, quitter complètement
+      navigate(ROUTES.ADMIN_USERS);
+    }
   };
 
   return (
@@ -320,16 +385,13 @@ export function CreateCompanyContactPage() {
             {/* Create New Company Form */}
             {companyChoice === 'new' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div>
                   <Label className="text-base font-medium">Créer une nouvelle entreprise</Label>
-                  <Button variant="ghost" size="sm" onClick={() => setCompanyChoice(null)}>
-                    Changer d'option
-                  </Button>
                 </div>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="md:col-span-2">
-                    <Label htmlFor="name">Nom de l'entreprise *</Label>
+                  <div className="md:col-span-2 space-y-3">
+                    <Label htmlFor="name" className="block">Nom de l'entreprise *</Label>
                     <Input
                       id="name"
                       value={companyData.name}
@@ -342,8 +404,8 @@ export function CreateCompanyContactPage() {
                     )}
                   </div>
 
-                  <div>
-                    <Label htmlFor="bceNumber">Numéro BCE *</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="bceNumber" className="block">Numéro BCE *</Label>
                     <Input
                       id="bceNumber"
                       value={companyData.bceNumber}
@@ -356,8 +418,8 @@ export function CreateCompanyContactPage() {
                     )}
                   </div>
 
-                  <div>
-                    <Label htmlFor="onssNumber">Numéro ONSS *</Label>
+                  <div className="space-y-3">
+                    <Label htmlFor="onssNumber" className="block">Numéro ONSS *</Label>
                     <Input
                       id="onssNumber"
                       value={companyData.onssNumber}
@@ -371,9 +433,9 @@ export function CreateCompanyContactPage() {
                   </div>
                 </div>
 
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
+                <Alert className="bg-sky-50 border-sky-200">
+                  <AlertCircle className="h-4 w-4 text-sky-600" />
+                  <AlertDescription className="text-sky-800">
                     Seuls les champs obligatoires sont demandés pour la création rapide. 
                     Les autres informations pourront être ajoutées ultérieurement.
                   </AlertDescription>
@@ -384,15 +446,12 @@ export function CreateCompanyContactPage() {
             {/* Select Existing Company */}
             {companyChoice === 'existing' && (
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
+                <div>
                   <Label className="text-base font-medium">Sélectionner une entreprise existante</Label>
-                  <Button variant="ghost" size="sm" onClick={() => setCompanyChoice(null)}>
-                    Changer d'option
-                  </Button>
                 </div>
                 
                 <div>
-                  <Label htmlFor="existingCompany">Entreprise *</Label>
+                  <Label htmlFor="existingCompany" className="mb-2 block">Entreprise *</Label>
                   <Select value={selectedCompanyId} onValueChange={handleExistingCompanySelect}>
                     <SelectTrigger className={errors.company ? "border-red-500" : ""}>
                       <SelectValue placeholder="Sélectionnez une entreprise" />
@@ -416,9 +475,9 @@ export function CreateCompanyContactPage() {
                 </div>
 
                 {selectedCompanyId && (
-                  <Alert>
-                    <Check className="h-4 w-4" />
-                    <AlertDescription>
+                  <Alert className="bg-sky-50 border-sky-200">
+                    <Check className="h-4 w-4 text-sky-600" />
+                    <AlertDescription className="text-sky-800">
                       Entreprise sélectionnée : <strong>{existingCompanies.find(c => c.id === selectedCompanyId)?.name}</strong>
                     </AlertDescription>
                   </Alert>
@@ -463,8 +522,8 @@ export function CreateCompanyContactPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="firstName">Prénom *</Label>
+              <div className="space-y-3">
+                <Label htmlFor="firstName" className="block">Prénom *</Label>
                 <Input
                   id="firstName"
                   value={userData.firstName}
@@ -477,8 +536,8 @@ export function CreateCompanyContactPage() {
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="lastName">Nom *</Label>
+              <div className="space-y-3">
+                <Label htmlFor="lastName" className="block">Nom *</Label>
                 <Input
                   id="lastName"
                   value={userData.lastName}
@@ -491,8 +550,8 @@ export function CreateCompanyContactPage() {
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="username">Nom d'utilisateur *</Label>
+              <div className="space-y-3">
+                <Label htmlFor="username" className="block">Nom d'utilisateur *</Label>
                 <Input
                   id="username"
                   value={userData.username}
@@ -505,8 +564,8 @@ export function CreateCompanyContactPage() {
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="email">Email *</Label>
+              <div className="space-y-3">
+                <Label htmlFor="email" className="block">Email *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -520,8 +579,8 @@ export function CreateCompanyContactPage() {
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="password">Mot de passe *</Label>
+              <div className="space-y-3">
+                <Label htmlFor="password" className="block">Mot de passe *</Label>
                 <Input
                   id="password"
                   type="password"
@@ -535,8 +594,8 @@ export function CreateCompanyContactPage() {
                 )}
               </div>
 
-              <div>
-                <Label htmlFor="phoneNumber">Téléphone</Label>
+              <div className="space-y-3">
+                <Label htmlFor="phoneNumber" className="block">Téléphone</Label>
                 <Input
                   id="phoneNumber"
                   value={userData.phoneNumber}
@@ -545,8 +604,8 @@ export function CreateCompanyContactPage() {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="fonction">Fonction</Label>
+              <div className="space-y-3">
+                <Label htmlFor="fonction" className="block">Fonction</Label>
                 <Input
                   id="fonction"
                   value={userData.fonction}
@@ -555,8 +614,8 @@ export function CreateCompanyContactPage() {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="permissions">Permissions</Label>
+              <div className="space-y-3">
+                <Label htmlFor="permissions" className="block">Permissions</Label>
                 <Input
                   id="permissions"
                   value={userData.permissions}
@@ -567,15 +626,10 @@ export function CreateCompanyContactPage() {
             </div>
 
             <div className="flex justify-between pt-4">
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={handleCancel}>
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Annuler
-                </Button>
-                <Button variant="outline" onClick={handleReset}>
-                  Recommencer
-                </Button>
-              </div>
+              <Button variant="outline" onClick={handleCancel}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Annuler
+              </Button>
               <Button onClick={handleCreateUser} disabled={loading}>
                 {loading ? "Création..." : "Créer le contact"}
               </Button>
@@ -583,6 +637,60 @@ export function CreateCompanyContactPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Credentials Modal */}
+      <Dialog open={showCredentialsModal} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              Contact créé avec succès !
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Voici les identifiants de connexion du nouveau contact. Vous pouvez les copier pour les envoyer à l'utilisateur.
+            </p>
+            
+            {/* All Credentials Input */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Identifiants de connexion</Label>
+              <div className="relative">
+                <textarea
+                  value={`Nom d'utilisateur :\n${createdUserCredentials?.username || ""}\n\nMot de passe :\n${createdUserCredentials?.password || ""}`}
+                  readOnly
+                  className="w-full min-h-[120px] px-3 py-2 pr-12 text-sm border border-input bg-gray-50 rounded-md resize-none"
+                />
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={copyAllCredentials}
+                  className="absolute top-2 right-2 h-8 w-8 p-0"
+                >
+                  {copiedField === "all" ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <Alert className="bg-blue-50 border-blue-200">
+              <AlertCircle className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                Assurez-vous de transmettre ces identifiants de manière sécurisée à l'utilisateur.
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex justify-end pt-4">
+              <Button onClick={handleModalClose}>
+                Fermer et retourner à la liste
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
