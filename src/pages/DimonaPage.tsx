@@ -11,7 +11,8 @@ import { ROUTES } from "@/config/routes.config";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { DataTable, Column } from "@/components/layout/DataTable";
-import { StatusDropdown } from "@/components/ui/StatusDropdown";
+import { StatusDropdownWithModal } from "@/components/ui/StatusDropdownWithModal";
+import { StatusHistoryBadge } from "@/components/ui/StatusHistoryBadge";
 import type { Collaborator } from "@/types/CollaboratorTypes";
 import type { CompanyDto } from "@/types/CompanyTypes";
 
@@ -70,21 +71,14 @@ export function DimonaPage() {
   };
 
   // Handle status change
-  const handleStatusChange = async (dimonaId: string, newStatus: DimonaStatus) => {
-    try {
-      await dimonaService.updateDimonaStatus(dimonaId, newStatus);
-      setDimonas(prev => 
-        prev.map(dimona => 
-          dimona.id === dimonaId 
-            ? { ...dimona, status: newStatus }
-            : dimona
-        )
-      );
-      toast.success("Statut mis à jour avec succès");
-    } catch (error) {
-      toast.error("Erreur lors de la mise à jour du statut");
-      console.error(error);
-    }
+  const handleStatusChanged = (dimonaId: string) => (newStatus: DimonaStatus) => {
+    setDimonas(prev => 
+      prev.map(dimona => 
+        dimona.id === dimonaId 
+          ? { ...dimona, status: newStatus }
+          : dimona
+      )
+    );
   };
 
   // Filter declarations based on search term
@@ -147,16 +141,23 @@ export function DimonaPage() {
     {
       header: "Statut",
       accessor: (dimona) => (
-        hasRole("ROLE_COMPANY") ? (
-          // Company contacts see read-only status badge
-          getStatusBadge(dimona.status)
-        ) : (
-          // Other roles can change status
-          <StatusDropdown
-            currentStatus={dimona.status}
-            onStatusChange={(newStatus) => handleStatusChange(dimona.id, newStatus)}
+        <div className="flex flex-col gap-2">
+          {hasRole("ROLE_COMPANY") ? (
+            // Company contacts see read-only status badge
+            getStatusBadge(dimona.status)
+          ) : (
+            // Other roles can change status
+            <StatusDropdownWithModal
+              dimonaId={dimona.id}
+              currentStatus={dimona.status}
+              onStatusChanged={handleStatusChanged(dimona.id)}
+            />
+          )}
+          <StatusHistoryBadge 
+            dimonaId={dimona.id} 
+            className="text-xs"
           />
-        )
+        </div>
       ),
     },
   ];

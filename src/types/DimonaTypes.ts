@@ -41,3 +41,16 @@ export interface DimonaDto extends Omit<Dimona, "collaborator" | "company"> {
   collaboratorId: string;
   companyId: string;
 }
+
+export interface StatusHistoryDto {
+  id: string;
+  dimonaId: string;
+  previousStatus: string | null;
+  newStatus: string;
+  changeReason: string;
+  changedByUserId: string;
+  changedByUserName: string;
+  changedAt: string; // ISO date
+  changeDescription: string;
+  isStatusCreation: boolean;
+}

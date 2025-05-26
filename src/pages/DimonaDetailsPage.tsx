@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Trash2, Clock, Info } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -21,12 +20,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 import { dimonaService } from "@/services/api/dimonaService";
 import { DimonaDto } from "@/types/DimonaTypes";
 import { getStatusBadge, getTypeBadge } from "@/utils/dimonaUtils";
 import { ROUTES } from "@/config/routes.config";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
+import { StatusHistory } from "@/components/ui/StatusHistory";
 
 export function DimonaDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -34,15 +40,20 @@ export function DimonaDetailsPage() {
   const [dimona, setDimona] = useState<DimonaDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [historyCount, setHistoryCount] = useState<number>(0);
 
   useEffect(() => {
     const fetchDimona = async () => {
       try {
         if (!id) return;
-        const data = await dimonaService.getDimona(id);
-        setDimona(data);
+        const [dimonaData, historyCountData] = await Promise.all([
+          dimonaService.getDimona(id),
+          dimonaService.getStatusHistoryCount(id).catch(() => 0)
+        ]);
+        setDimona(dimonaData);
+        setHistoryCount(historyCountData);
       } catch (error) {
-        toast.error("Error loading Dimona declaration");
+        toast.error("Erreur lors du chargement de la déclaration Dimona");
       } finally {
         setLoading(false);
       }
@@ -50,6 +61,7 @@ export function DimonaDetailsPage() {
 
     fetchDimona();
   }, [id]);
+
 
   const handleDelete = async () => {
     try {
@@ -109,90 +121,113 @@ export function DimonaDetailsPage() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="grid gap-6">
-        {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Informations générales</CardTitle>
-            <CardDescription>
-              Informations de base de la déclaration
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-slate-500">
-                  Référence ONSS
-                </p>
-                <p className="font-mono text-blue-800">
-                  {dimona.onssReference}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Type</p>
-                <div>{getTypeBadge(dimona.type)}</div>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">Statut</p>
-                <div>{getStatusBadge(dimona.status)}</div>
-              </div>
-              {dimona.errorMessage && (
-                <div>
-                  <p className="text-sm font-medium text-slate-500">
-                    Message d'erreur
-                  </p>
-                  <p className="text-red-600">{dimona.errorMessage}</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Dates */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Période</CardTitle>
-            <CardDescription>Dates d'entrée et de sortie</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-slate-500">
-                  Date d'entrée
-                </p>
-                <p>
-                  {new Date(dimona.entryDate).toLocaleDateString("fr-BE", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-slate-500">
-                  Date de sortie
-                </p>
-                <p>
-                  {new Date(dimona.exitDate).toLocaleDateString("fr-BE", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-              {dimona.exitReason && (
+      {/* Main Content Tabs */}
+      <Tabs defaultValue="details" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="details" className="flex items-center gap-2">
+            <Info className="h-4 w-4" />
+            Détails
+          </TabsTrigger>
+          <TabsTrigger value="history" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Historique
+            {historyCount > 0 && (
+              <Badge variant="secondary" className="ml-1 text-xs">
+                {historyCount}
+              </Badge>
+            )}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="details" className="space-y-6 mt-6">
+          {/* Basic Information */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Informations générales</CardTitle>
+              <CardDescription>
+                Informations de base de la déclaration
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm font-medium text-slate-500">
-                    Raison de sortie
+                    Référence ONSS
                   </p>
-                  <p>{dimona.exitReason}</p>
+                  <p className="font-mono text-blue-800">
+                    {dimona.onssReference}
+                  </p>
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500">Type</p>
+                  <div>{getTypeBadge(dimona.type)}</div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500">Statut</p>
+                  <div>{getStatusBadge(dimona.status)}</div>
+                </div>
+                {dimona.errorMessage && (
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">
+                      Message d'erreur
+                    </p>
+                    <p className="text-red-600">{dimona.errorMessage}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Dates */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Période</CardTitle>
+              <CardDescription>Dates d'entrée et de sortie</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-slate-500">
+                    Date d'entrée
+                  </p>
+                  <p>
+                    {new Date(dimona.entryDate).toLocaleDateString("fr-BE", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-slate-500">
+                    Date de sortie
+                  </p>
+                  <p>
+                    {new Date(dimona.exitDate).toLocaleDateString("fr-BE", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+                {dimona.exitReason && (
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">
+                      Raison de sortie
+                    </p>
+                    <p>{dimona.exitReason}</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="history" className="mt-6">
+          <StatusHistory dimonaId={dimona.id} />
+        </TabsContent>
+      </Tabs>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
