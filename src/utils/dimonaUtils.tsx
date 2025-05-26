@@ -1,18 +1,36 @@
 // src/utils/dimonaUtils.ts
 import { Badge } from "@/components/ui/badge";
-import { Check, AlertCircle, Calendar } from "lucide-react";
-import { DimonaStatus, DimonaType } from "@/data/mockData";
+import { Check, AlertCircle, Clock, Send, FileCheck } from "lucide-react";
+import { DimonaStatus, DimonaType } from "@/types/DimonaTypes";
 
 // Status badge renderer
 export const getStatusBadge = (status: DimonaStatus) => {
   switch (status) {
-    case DimonaStatus.ACCEPTED:
+    case DimonaStatus.TO_CONFIRM:
       return (
         <Badge
-          variant="default"
-          className="bg-green-100 text-green-800 hover:bg-green-100"
+          variant="outline"
+          className="bg-orange-100 text-orange-800 hover:bg-orange-100"
         >
-          <Check className="mr-1 h-3 w-3" /> Acceptée
+          <FileCheck className="mr-1 h-3 w-3" /> À confirmer
+        </Badge>
+      );
+    case DimonaStatus.TO_SEND:
+      return (
+        <Badge
+          variant="outline"
+          className="bg-blue-100 text-blue-800 hover:bg-blue-100"
+        >
+          <Send className="mr-1 h-3 w-3" /> À envoyer
+        </Badge>
+      );
+    case DimonaStatus.IN_PROGRESS:
+      return (
+        <Badge
+          variant="outline"
+          className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+        >
+          <Clock className="mr-1 h-3 w-3" /> En cours
         </Badge>
       );
     case DimonaStatus.REJECTED:
@@ -24,13 +42,13 @@ export const getStatusBadge = (status: DimonaStatus) => {
           <AlertCircle className="mr-1 h-3 w-3" /> Rejetée
         </Badge>
       );
-    case DimonaStatus.PENDING:
+    case DimonaStatus.ACCEPTED:
       return (
         <Badge
-          variant="outline"
-          className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+          variant="default"
+          className="bg-green-100 text-green-800 hover:bg-green-100"
         >
-          <Calendar className="mr-1 h-3 w-3" /> En attente
+          <Check className="mr-1 h-3 w-3" /> Acceptée
         </Badge>
       );
     default:

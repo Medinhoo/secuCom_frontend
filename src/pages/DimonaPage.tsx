@@ -2,23 +2,39 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
-import { DimonaDto } from "@/types/DimonaTypes";
+import { DimonaDto, DimonaStatus } from "@/types/DimonaTypes";
 import { dimonaService } from "@/services/api/dimonaService";
+import { collaboratorService } from "@/services/api/collaboratorService";
+import { companyService } from "@/services/api/companyService";
 import { getStatusBadge, getTypeBadge } from "@/utils/dimonaUtils";
 import { ROUTES } from "@/config/routes.config";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { DataTable, Column } from "@/components/layout/DataTable";
+import { StatusDropdown } from "@/components/ui/StatusDropdown";
+import type { Collaborator } from "@/types/CollaboratorTypes";
+import type { CompanyDto } from "@/types/CompanyTypes";
 
 export function DimonaPage() {
   const { user, hasRole } = useAuth();
   const [dimonas, setDimonas] = useState<DimonaDto[]>([]);
+  const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [companies, setCompanies] = useState<CompanyDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const fetchDimonas = async () => {
+    const fetchData = async () => {
       try {
+        // Fetch collaborators and companies in parallel
+        const [collaboratorsData, companiesData] = await Promise.all([
+          collaboratorService.getAllCollaborators(),
+          companyService.getAllCompanies(),
+        ]);
+        
+        setCollaborators(collaboratorsData || []);
+        setCompanies(companiesData || []);
+
         // If user has ROLE_COMPANY, fetch only their company's dimonas
         if (hasRole("ROLE_COMPANY") && user?.companyId) {
           const data = await dimonaService.getDimonasByCompany(user.companyId);
@@ -39,16 +55,48 @@ export function DimonaPage() {
       }
     };
 
-    fetchDimonas();
+    fetchData();
   }, [user, hasRole]);
+
+  // Helper functions to get names
+  const getCollaboratorName = (collaboratorId: string) => {
+    const collaborator = collaborators.find(c => c.id === collaboratorId);
+    return collaborator ? `${collaborator.firstName} ${collaborator.lastName}` : "Collaborateur inconnu";
+  };
+
+  const getCompanyName = (companyId: string) => {
+    const company = companies.find(c => c.id === companyId);
+    return company ? company.name : "Entreprise inconnue";
+  };
+
+  // Handle status change
+  const handleStatusChange = async (dimonaId: string, newStatus: DimonaStatus) => {
+    try {
+      await dimonaService.updateDimonaStatus(dimonaId, newStatus);
+      setDimonas(prev => 
+        prev.map(dimona => 
+          dimona.id === dimonaId 
+            ? { ...dimona, status: newStatus }
+            : dimona
+        )
+      );
+      toast.success("Statut mis à jour avec succès");
+    } catch (error) {
+      toast.error("Erreur lors de la mise à jour du statut");
+      console.error(error);
+    }
+  };
 
   // Filter declarations based on search term
   const filteredDimonas = dimonas.filter((dimona) => {
-    const matchesSearch = dimona.onssReference
-      ? dimona.onssReference.toLowerCase().includes(searchTerm.toLowerCase())
-      : searchTerm === "";
+    const collaboratorName = getCollaboratorName(dimona.collaboratorId).toLowerCase();
+    const companyName = getCompanyName(dimona.companyId).toLowerCase();
+    const reference = dimona.onssReference?.toLowerCase() || "";
+    const searchLower = searchTerm.toLowerCase();
 
-    return matchesSearch;
+    return collaboratorName.includes(searchLower) || 
+           companyName.includes(searchLower) || 
+           reference.includes(searchLower);
   });
 
   const columns: Column<DimonaDto>[] = [
@@ -63,23 +111,27 @@ export function DimonaPage() {
     {
       header: "Employé",
       accessor: (dimona) => (
-        <Link
-          to={ROUTES.COLLABORATOR_DETAILS(dimona.collaboratorId)}
-          className="text-slate-700 hover:text-blue-600"
-        >
-          Voir collaborateur
-        </Link>
+        <div className="flex flex-col">
+          <Link
+            to={ROUTES.COLLABORATOR_DETAILS(dimona.collaboratorId)}
+            className="text-slate-900 hover:text-blue-600 font-medium"
+          >
+            {getCollaboratorName(dimona.collaboratorId)}
+          </Link>
+        </div>
       ),
     },
     {
       header: "Entreprise",
       accessor: (dimona) => (
-        <Link
-          to={ROUTES.COMPANY_DETAILS(dimona.companyId)}
-          className="text-slate-600 hover:text-blue-600"
-        >
-          Voir entreprise
-        </Link>
+        <div className="flex flex-col">
+          <Link
+            to={ROUTES.COMPANY_DETAILS(dimona.companyId)}
+            className="text-slate-700 hover:text-blue-600"
+          >
+            {getCompanyName(dimona.companyId)}
+          </Link>
+        </div>
       ),
       className: "hidden md:table-cell",
     },
@@ -94,7 +146,18 @@ export function DimonaPage() {
     },
     {
       header: "Statut",
-      accessor: (dimona) => getStatusBadge(dimona.status),
+      accessor: (dimona) => (
+        hasRole("ROLE_COMPANY") ? (
+          // Company contacts see read-only status badge
+          getStatusBadge(dimona.status)
+        ) : (
+          // Other roles can change status
+          <StatusDropdown
+            currentStatus={dimona.status}
+            onStatusChange={(newStatus) => handleStatusChange(dimona.id, newStatus)}
+          />
+        )
+      ),
     },
   ];
 
@@ -125,17 +188,6 @@ export function DimonaPage() {
           data={filteredDimonas}
           columns={columns}
           loading={loading}
-          onDelete={async (id) => {
-            try {
-              await dimonaService.deleteDimona(id);
-              setDimonas((prev) => prev.filter((d) => d.id !== id));
-              toast.success("Demande de Dimona supprimée avec succès");
-            } catch (error) {
-              toast.error("Échec de la suppression de la demande de Dimona");
-              console.error(error);
-              throw error;
-            }
-          }}
           detailsRoute={ROUTES.DIMONA_DETAILS}
           detailsButtonLabel="Voir détails"
         />

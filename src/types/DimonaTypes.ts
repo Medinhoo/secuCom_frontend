@@ -21,9 +21,11 @@ export enum DimonaType {
 }
 
 export enum DimonaStatus {
-  ACCEPTED = "ACCEPTED",
+  TO_CONFIRM = "TO_CONFIRM",
+  TO_SEND = "TO_SEND",
+  IN_PROGRESS = "IN_PROGRESS",
   REJECTED = "REJECTED",
-  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
 }
 
 export interface CreateDimonaRequest {

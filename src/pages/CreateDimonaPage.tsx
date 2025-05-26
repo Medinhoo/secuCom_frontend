@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,10 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
+import { PageHeader } from "@/components/layout/PageHeader";
 
 import { dimonaService } from "@/services/api/dimonaService";
 import { companyService } from "@/services/api/companyService";
@@ -29,13 +32,17 @@ import { CreateDimonaRequest, DimonaType } from "@/types/DimonaTypes";
 import type { CompanyDto } from "@/types/CompanyTypes";
 import type { Collaborator } from "@/types/CollaboratorTypes";
 import { ROUTES } from "@/config/routes.config";
+import { useAuth } from "@/context/AuthContext";
 
 export function CreateDimonaPage() {
   const navigate = useNavigate();
+  const { user, hasRole } = useAuth();
   const [loading, setLoading] = useState(false);
   const [companies, setCompanies] = useState<CompanyDto[]>([]);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
+  const [filteredCollaborators, setFilteredCollaborators] = useState<Collaborator[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  
   const [formData, setFormData] = useState<CreateDimonaRequest>({
     type: DimonaType.IN,
     entryDate: new Date(),
@@ -43,6 +50,33 @@ export function CreateDimonaPage() {
     collaboratorId: "",
     companyId: "",
   });
+
+  // Pre-fill company if user is CompanyContact
+  useEffect(() => {
+    if (hasRole("ROLE_COMPANY") && user?.companyId && !formData.companyId) {
+      setFormData(prev => ({ ...prev, companyId: user.companyId || "" }));
+    }
+  }, [user, hasRole, formData.companyId]);
+
+  // Auto-fill company when collaborator is selected
+  useEffect(() => {
+    if (formData.collaboratorId && !hasRole("ROLE_COMPANY")) {
+      const selectedCollaborator = collaborators.find(c => c.id === formData.collaboratorId);
+      if (selectedCollaborator && selectedCollaborator.companyId !== formData.companyId) {
+        setFormData(prev => ({ ...prev, companyId: selectedCollaborator.companyId }));
+      }
+    }
+  }, [formData.collaboratorId, collaborators, hasRole, formData.companyId]);
+
+  // Filter collaborators based on selected company
+  useEffect(() => {
+    if (formData.companyId) {
+      const filtered = collaborators.filter(c => c.companyId === formData.companyId);
+      setFilteredCollaborators(filtered);
+    } else {
+      setFilteredCollaborators(collaborators);
+    }
+  }, [collaborators, formData.companyId]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,6 +87,11 @@ export function CreateDimonaPage() {
         ]);
         setCompanies(companiesData);
         setCollaborators(collaboratorsData);
+        
+        // If user is CompanyContact, pre-select their company
+        if (hasRole("ROLE_COMPANY") && user?.companyId) {
+          setFormData(prev => ({ ...prev, companyId: user.companyId || "" }));
+        }
       } catch (error) {
         toast.error("Erreur lors du chargement des données");
       } finally {
@@ -61,7 +100,7 @@ export function CreateDimonaPage() {
     };
 
     fetchData();
-  }, []);
+  }, [user, hasRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,10 +121,21 @@ export function CreateDimonaPage() {
     field: keyof CreateDimonaRequest,
     value: string | DimonaType | Date
   ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => {
+      // If company changes, clear collaborator selection
+      if (field === "companyId" && value !== prev.companyId) {
+        return {
+          ...prev,
+          companyId: value as string,
+          collaboratorId: "", // Clear collaborator when company changes
+        };
+      }
+      
+      return {
+        ...prev,
+        [field]: value,
+      };
+    });
   };
 
   if (loadingData) {
@@ -98,25 +148,10 @@ export function CreateDimonaPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-blue-700">
-            Nouvelle déclaration Dimona
-          </h1>
-          <p className="text-slate-500">
-            Créez une nouvelle déclaration Dimona pour un collaborateur
-          </p>
-        </div>
-
-        <Button
-          variant="outline"
-          onClick={() => navigate(ROUTES.DIMONA)}
-          className="bg-white"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Retour
-        </Button>
-      </div>
+      <PageHeader
+        title="Créer une déclaration Dimona"
+        description="Processus de création d'une nouvelle déclaration Dimona pour un collaborateur"
+      />
 
       {/* Form */}
       <form onSubmit={handleSubmit}>
@@ -128,16 +163,26 @@ export function CreateDimonaPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Company Contact Alert */}
+            {hasRole("ROLE_COMPANY") && user?.companyName && (
+              <Alert className="bg-blue-50 border-blue-200">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  La déclaration sera automatiquement créée pour votre entreprise : <strong>{user.companyName}</strong>
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Type */}
-            <div className="space-y-2">
-              <Label htmlFor="type">Type de déclaration</Label>
+            <div className="space-y-3">
+              <Label htmlFor="type" className="block">Type de déclaration *</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value) =>
                   handleInputChange("type", value as DimonaType)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="bg-white">
                   <SelectValue placeholder="Sélectionnez un type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -151,9 +196,9 @@ export function CreateDimonaPage() {
             </div>
 
             {/* Dates */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="entryDate">Date d'entrée</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="entryDate" className="block">Date d'entrée *</Label>
                 <Input
                   id="entryDate"
                   type="date"
@@ -163,11 +208,12 @@ export function CreateDimonaPage() {
                   onChange={(e) =>
                     handleInputChange("entryDate", new Date(e.target.value))
                   }
+                  className="bg-white"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="exitDate">Date de sortie</Label>
+              <div className="space-y-3">
+                <Label htmlFor="exitDate" className="block">Date de sortie *</Label>
                 <Input
                   id="exitDate"
                   type="date"
@@ -177,6 +223,7 @@ export function CreateDimonaPage() {
                   onChange={(e) =>
                     handleInputChange("exitDate", new Date(e.target.value))
                   }
+                  className="bg-white"
                   required
                 />
               </div>
@@ -184,50 +231,37 @@ export function CreateDimonaPage() {
 
             {/* Exit Reason (only for OUT type) */}
             {formData.type === DimonaType.OUT && (
-              <div className="space-y-2">
-                <Label htmlFor="exitReason">Raison de sortie</Label>
+              <div className="space-y-3">
+                <Label htmlFor="exitReason" className="block">Raison de sortie</Label>
                 <Input
                   id="exitReason"
                   value={formData.exitReason || ""}
                   onChange={(e) =>
                     handleInputChange("exitReason", e.target.value)
                   }
+                  className="bg-white"
                   placeholder="Raison de la sortie"
                 />
               </div>
             )}
 
             {/* Collaborator and Company Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="collaboratorId">Collaborateur</Label>
-                <Select
-                  value={formData.collaboratorId}
-                  onValueChange={(value) =>
-                    handleInputChange("collaboratorId", value)
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez un collaborateur" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {collaborators.map((collaborator) => (
-                      <SelectItem key={collaborator.id} value={collaborator.id}>
-                        {collaborator.firstName} {collaborator.lastName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="companyId">Entreprise</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="companyId" className="block">
+                  Entreprise *
+                  {hasRole("ROLE_COMPANY") && (
+                    <Badge variant="secondary" className="ml-2">Pré-rempli</Badge>
+                  )}
+                </Label>
                 <Select
                   value={formData.companyId}
                   onValueChange={(value) =>
                     handleInputChange("companyId", value)
                   }
+                  disabled={hasRole("ROLE_COMPANY")}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className={`${hasRole("ROLE_COMPANY") || formData.collaboratorId ? "bg-gray-50" : "bg-white"}`}>
                     <SelectValue placeholder="Sélectionnez une entreprise" />
                   </SelectTrigger>
                   <SelectContent>
@@ -238,24 +272,62 @@ export function CreateDimonaPage() {
                     ))}
                   </SelectContent>
                 </Select>
+                {hasRole("ROLE_COMPANY") && (
+                  <p className="text-sm text-blue-600">Entreprise automatiquement sélectionnée</p>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="collaboratorId" className="block">Collaborateur *</Label>
+                <Select
+                  value={formData.collaboratorId}
+                  onValueChange={(value) =>
+                    handleInputChange("collaboratorId", value)
+                  }
+                >
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="Sélectionnez un collaborateur" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredCollaborators.map((collaborator) => (
+                      <SelectItem key={collaborator.id} value={collaborator.id}>
+                        {collaborator.firstName} {collaborator.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {hasRole("ROLE_COMPANY") && filteredCollaborators.length === 0 && formData.companyId && (
+                  <p className="text-sm text-orange-600">Aucun collaborateur trouvé pour votre entreprise</p>
+                )}
+                {hasRole("ROLE_COMPANY") && filteredCollaborators.length > 0 && (
+                  <p className="text-sm text-green-600">
+                    {filteredCollaborators.length} collaborateur(s) disponible(s) dans votre entreprise
+                  </p>
+                )}
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                onClick={() => navigate(ROUTES.DIMONA)}
-                type="button"
-              >
-                Annuler
-              </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? "Création en cours..." : "Créer la déclaration"}
-              </Button>
-            </div>
           </CardContent>
         </Card>
+
+        {/* Navigation Buttons */}
+        <div className="flex justify-between pt-6">
+          <Button 
+            type="button"
+            variant="outline" 
+            onClick={() => navigate(ROUTES.DIMONA)}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Annuler
+          </Button>
+
+          <Button 
+            type="submit"
+            disabled={loading || !formData.companyId || !formData.collaboratorId}
+          >
+            {loading ? "Création en cours..." : "Créer la déclaration"}
+          </Button>
+        </div>
       </form>
     </div>
   );

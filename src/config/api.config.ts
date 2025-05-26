@@ -58,6 +58,7 @@ export const DIMONA_ENDPOINTS = {
   GET_BY_ID: (id: string) => `/dimona/${id}`,
   CREATE: "/dimona",
   DELETE: (id: string) => `/dimona/${id}`,
+  UPDATE_STATUS: (id: string, status: string) => `/dimona/${id}/status?status=${status}`,
   GET_BY_COLLABORATOR: (collaboratorId: string) =>
     `/dimona/collaborator/${collaboratorId}`,
   GET_BY_COMPANY: (companyId: string) => `/dimona/company/${companyId}`,

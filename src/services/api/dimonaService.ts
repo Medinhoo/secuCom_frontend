@@ -1,6 +1,6 @@
 import { apiClient } from "./baseApi";
 import { DIMONA_ENDPOINTS } from "@/config/api.config";
-import { CreateDimonaRequest, DimonaDto } from "@/types/DimonaTypes";
+import { CreateDimonaRequest, DimonaDto, DimonaStatus } from "@/types/DimonaTypes";
 
 export const dimonaService = {
   createDimona: async (request: CreateDimonaRequest): Promise<DimonaDto> => {
@@ -35,6 +35,12 @@ export const dimonaService = {
       DIMONA_ENDPOINTS.GET_BY_COMPANY(companyId),
       { requiresAuth: true }
     );
+  },
+
+  updateDimonaStatus: async (id: string, status: DimonaStatus): Promise<DimonaDto> => {
+    return apiClient.put<DimonaDto>(DIMONA_ENDPOINTS.UPDATE_STATUS(id, status), {}, {
+      requiresAuth: true,
+    });
   },
 
   deleteDimona: async (id: string): Promise<void> => {
