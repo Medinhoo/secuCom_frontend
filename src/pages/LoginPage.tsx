@@ -103,7 +103,7 @@ const LoginPage = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-3 top-3 h-9 w-9 p-0"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 p-0"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
