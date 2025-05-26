@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { DimonaStatus } from "@/types/DimonaTypes";
+import { getStatusBadge } from "@/utils/dimonaUtils";
 import { useStatusHistory } from "@/hooks/useStatusHistory";
 
 interface StatusHistoryProps {
@@ -46,15 +47,15 @@ const getStatusColor = (status: string) => {
 const getStatusLabel = (status: string) => {
   switch (status) {
     case DimonaStatus.TO_CONFIRM:
-      return "À confirmer";
+      return "En attente de confirmation";
     case DimonaStatus.TO_SEND:
-      return "À envoyer";
+      return "Prête à être envoyée";
     case DimonaStatus.IN_PROGRESS:
-      return "En cours";
+      return "En cours de traitement";
     case DimonaStatus.ACCEPTED:
-      return "Acceptée";
+      return "Acceptée par l'ONSS";
     case DimonaStatus.REJECTED:
-      return "Rejetée";
+      return "Rejetée par l'ONSS";
     default:
       return status;
   }
@@ -148,19 +149,13 @@ export function StatusHistory({ dimonaId }: StatusHistoryProps) {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <Badge className={getStatusColor(entry.newStatus)}>
-                              {getStatusLabel(entry.newStatus)}
-                            </Badge>
+                            {getStatusBadge(entry.newStatus as any)}
                             {isLatest && (
                               <Badge variant="outline" className="text-xs">
                                 Actuel
                               </Badge>
                             )}
                           </div>
-                          
-                          <p className="text-sm text-gray-900 mb-2">
-                            {entry.changeDescription}
-                          </p>
                           
                           {entry.changeReason && (
                             <div className="flex items-start gap-2 mb-3">
@@ -186,16 +181,12 @@ export function StatusHistory({ dimonaId }: StatusHistoryProps) {
                       
                       {entry.previousStatus && (
                         <div className="mt-3 pt-3 border-t border-gray-100">
-                          <p className="text-xs text-gray-500">
-                            Changement de{" "}
-                            <span className="font-medium">
-                              {getStatusLabel(entry.previousStatus)}
-                            </span>
-                            {" "}vers{" "}
-                            <span className="font-medium">
-                              {getStatusLabel(entry.newStatus)}
-                            </span>
-                          </p>
+                          <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <span>Changement de</span>
+                            {getStatusBadge(entry.previousStatus as any)}
+                            <span>vers</span>
+                            {getStatusBadge(entry.newStatus as any)}
+                          </div>
                         </div>
                       )}
                     </div>

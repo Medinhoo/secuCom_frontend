@@ -82,9 +82,9 @@ export function NotificationsPage() {
 
           {unreadCount > 0 && (
             <Button
-              variant="default"
               size="sm"
               onClick={markAllAsRead}
+              className="bg-blue-100 hover:bg-blue-200 text-blue-700 border-blue-200"
             >
               <CheckCircle size={16} />
               Marquer toutes comme lues

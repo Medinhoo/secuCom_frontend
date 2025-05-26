@@ -18,6 +18,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getStatusBadge } from "@/utils/dimonaUtils";
+import { DimonaStatus } from "@/types/DimonaTypes";
 
 interface NotificationItemProps {
   notification: NotificationDto;
@@ -49,6 +51,31 @@ function getRelativeTime(dateString: string): string {
       month: "2-digit",
     });
   }
+}
+
+// Fonction pour remplacer les statuts par des badges dans les messages
+function renderMessageWithBadges(message: string): React.ReactNode {
+  // Nettoyer le message d'abord
+  let cleanMessage = message
+    .replace(/a été mis à jour:/g, "a été mise à jour :")
+    .replace(/Le statut de la déclaration DIMONA pour/g, "Le statut de la déclaration Dimona pour");
+
+  // Chercher les statuts dans le message
+  const statusPattern = /(TO_SEND|TO_CONFIRM|IN_PROGRESS|ACCEPTED|REJECTED)/g;
+  const parts = cleanMessage.split(statusPattern);
+  
+  return parts.map((part, index) => {
+    // Si c'est un statut, le remplacer par un badge
+    if (Object.values(DimonaStatus).includes(part as DimonaStatus)) {
+      return (
+        <span key={index} className="inline-block mx-1">
+          {getStatusBadge(part as DimonaStatus)}
+        </span>
+      );
+    }
+    // Sinon, retourner le texte normal
+    return part;
+  });
 }
 
 // Fonction pour obtenir l'icône selon le type de notification
@@ -127,7 +154,7 @@ export function NotificationItem({
         <div className="flex-1 min-w-0">
           {/* Message */}
           <div className="flex items-start justify-between gap-2">
-            <p 
+            <div 
               className={cn(
                 "text-sm leading-relaxed",
                 !notification.read 
@@ -136,8 +163,8 @@ export function NotificationItem({
                 compact && "line-clamp-2"
               )}
             >
-              {notification.message}
-            </p>
+              {renderMessageWithBadges(notification.message)}
+            </div>
             
             {/* Badge non lu plus visible */}
             {!notification.read && (

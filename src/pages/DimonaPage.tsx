@@ -12,7 +12,6 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { DataTable, Column } from "@/components/layout/DataTable";
 import { StatusDropdownWithModal } from "@/components/ui/StatusDropdownWithModal";
-import { StatusHistoryBadge } from "@/components/ui/StatusHistoryBadge";
 import type { Collaborator } from "@/types/CollaboratorTypes";
 import type { CompanyDto } from "@/types/CompanyTypes";
 
@@ -141,7 +140,7 @@ export function DimonaPage() {
     {
       header: "Statut",
       accessor: (dimona) => (
-        <div className="flex flex-col gap-2">
+        <div>
           {hasRole("ROLE_COMPANY") ? (
             // Company contacts see read-only status badge
             getStatusBadge(dimona.status)
@@ -153,10 +152,6 @@ export function DimonaPage() {
               onStatusChanged={handleStatusChanged(dimona.id)}
             />
           )}
-          <StatusHistoryBadge 
-            dimonaId={dimona.id} 
-            className="text-xs"
-          />
         </div>
       ),
     },

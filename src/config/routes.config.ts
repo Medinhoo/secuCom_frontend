@@ -8,6 +8,7 @@ export const ROUTES = {
   DIMONA: "/dimona",
   DIMONA_DETAILS: (id: string) => `/dimona/${id}`,
   CREATE_DIMONA: "/dimona/create",
+  EDIT_DIMONA: (id: string) => `/dimona/${id}/edit`,
 
   // Document routes
   DOCUMENTS: "/documents",

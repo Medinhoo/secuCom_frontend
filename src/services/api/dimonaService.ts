@@ -7,6 +7,15 @@ import {
   StatusHistoryDto
 } from "@/types/DimonaTypes";
 
+export interface UpdateDimonaRequest {
+  type?: string;
+  entryDate?: string;
+  exitDate?: string;
+  exitReason?: string;
+  collaboratorId?: string;
+  companyId?: string;
+}
+
 export const dimonaService = {
   createDimona: async (request: CreateDimonaRequest): Promise<DimonaDto> => {
     return apiClient.post<DimonaDto>(DIMONA_ENDPOINTS.CREATE, request, {
@@ -40,6 +49,35 @@ export const dimonaService = {
       DIMONA_ENDPOINTS.GET_BY_COMPANY(companyId),
       { requiresAuth: true }
     );
+  },
+
+  updateDimona: async (id: string, request: UpdateDimonaRequest): Promise<DimonaDto> => {
+    try {
+      const updatedDimona = await apiClient.put<DimonaDto>(
+        DIMONA_ENDPOINTS.UPDATE(id), 
+        request, 
+        {
+          requiresAuth: true,
+        }
+      );
+      
+      // Automatically update status to TO_SEND after modification
+      if (updatedDimona.status === DimonaStatus.REJECTED) {
+        return await dimonaService.updateDimonaStatus(
+          id, 
+          DimonaStatus.TO_SEND, 
+          "Déclaration modifiée par le contact entreprise"
+        );
+      }
+      
+      return updatedDimona;
+    } catch (error: any) {
+      // Handle specific backend validation errors
+      if (error.response?.status === 400 && error.response?.data?.message) {
+        throw new Error(error.response.data.message);
+      }
+      throw error;
+    }
   },
 
   updateDimonaStatus: async (
