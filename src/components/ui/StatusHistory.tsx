@@ -1,4 +1,4 @@
-import { Clock, User, FileText, CheckCircle, XCircle, AlertCircle, Send, Eye } from "lucide-react";
+import { Clock, User, FileText, CheckCircle, XCircle, AlertCircle, Send, Eye, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
@@ -149,7 +149,6 @@ export function StatusHistory({ dimonaId }: StatusHistoryProps) {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            {getStatusBadge(entry.newStatus as any)}
                             {isLatest && (
                               <Badge variant="outline" className="text-xs">
                                 Actuel
@@ -184,7 +183,7 @@ export function StatusHistory({ dimonaId }: StatusHistoryProps) {
                           <div className="flex items-center gap-2 text-xs text-gray-500">
                             <span>Changement de</span>
                             {getStatusBadge(entry.previousStatus as any)}
-                            <span>vers</span>
+                            <ArrowRight className="h-3 w-3" />
                             {getStatusBadge(entry.newStatus as any)}
                           </div>
                         </div>

@@ -10,6 +10,7 @@ import { CreateCollaboratorPage } from "./pages/CreateCollaboratorPage";
 import { DimonaPage } from "./pages/DimonaPage.tsx";
 import { DimonaDetailsPage } from "./pages/DimonaDetailsPage";
 import { CreateDimonaPage } from "./pages/CreateDimonaPage";
+import { EditDimonaPage } from "./pages/EditDimonaPage";
 import { DocumentsPage } from "./pages/DocumentsPage.tsx";
 import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
@@ -44,6 +45,10 @@ function App() {
               <Route
                 path={ROUTES.CREATE_DIMONA}
                 element={<CreateDimonaPage />}
+              />
+              <Route
+                path={ROUTES.EDIT_DIMONA(":id")}
+                element={<EditDimonaPage />}
               />
               <Route
                 path={`${ROUTES.DIMONA}/:id`}

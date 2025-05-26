@@ -82,9 +82,8 @@ export function StatusChangeModal({
       newErrors.status = "Le nouveau statut doit être différent du statut actuel";
     }
 
-    if (!reason.trim()) {
-      newErrors.reason = "Veuillez indiquer la raison du changement";
-    } else if (reason.trim().length < 10) {
+    // Reason is now optional, but if provided, it must meet minimum requirements
+    if (reason.trim() && reason.trim().length < 10) {
       newErrors.reason = "La raison doit contenir au moins 10 caractères";
     } else if (reason.trim().length > 500) {
       newErrors.reason = "La raison ne peut pas dépasser 500 caractères";
@@ -126,7 +125,7 @@ export function StatusChangeModal({
             Changer le statut
           </DialogTitle>
           <DialogDescription>
-            Modifiez le statut de cette déclaration Dimona et indiquez la raison du changement.
+            Modifiez le statut de cette déclaration Dimona. Vous pouvez optionnellement indiquer la raison du changement.
           </DialogDescription>
         </DialogHeader>
 
@@ -196,7 +195,7 @@ export function StatusChangeModal({
 
           {/* Reason */}
           <div className="space-y-2">
-            <Label htmlFor="reason">Raison du changement *</Label>
+            <Label htmlFor="reason">Raison du changement (optionnel)</Label>
             <Textarea
               id="reason"
               placeholder="Expliquez pourquoi vous changez le statut de cette déclaration..."
@@ -211,18 +210,6 @@ export function StatusChangeModal({
               className={`min-h-[100px] resize-none ${errors.reason ? "border-red-500" : ""}`}
               maxLength={500}
             />
-            <div className="flex justify-between items-center">
-              {errors.reason ? (
-                <p className="text-sm text-red-600">{errors.reason}</p>
-              ) : (
-                <p className="text-xs text-gray-500">
-                  Minimum 10 caractères requis
-                </p>
-              )}
-              <p className="text-xs text-gray-400">
-                {reason.length}/500
-              </p>
-            </div>
           </div>
         </div>
 
@@ -236,7 +223,7 @@ export function StatusChangeModal({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={loading || !selectedStatus || !reason.trim()}
+            disabled={loading || !selectedStatus}
             className="min-w-[100px]"
           >
             {loading ? "Changement..." : "Confirmer"}
