@@ -66,13 +66,13 @@ export function CompanyPage() {
       company.bceNumber?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Define table columns
+  // Define table columns with flexible widths
   const columns: Column<CompanyDto>[] = [
     {
       header: "Nom de l'entreprise",
       accessor: (company) => (
         <div className="flex flex-col">
-          <div className="font-medium text-blue-800 group-hover:text-blue-600 transition-colors">
+          <div className="font-medium text-blue-800 hover:text-blue-600 transition-colors">
             {company.name}
           </div>
           <div className="text-xs text-slate-500 mt-0.5 flex items-center gap-2">
@@ -99,7 +99,7 @@ export function CompanyPage() {
           {company.onssNumber || "N/A"}
         </span>
       ),
-      className: "font-mono text-sm text-slate-600",
+      className: "font-mono",
     },
     {
       header: "Forme juridique",
@@ -130,14 +130,6 @@ export function CompanyPage() {
             ))}
           </div>
         </div>
-      ),
-    },
-    {
-      header: "Formule",
-      accessor: (company) => (
-        <Badge variant="secondary" className="bg-blue-50 text-blue-700">
-          {company.subscriptionFormula || "Standard"}
-        </Badge>
       ),
     },
   ];
