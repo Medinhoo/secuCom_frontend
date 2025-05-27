@@ -3,6 +3,7 @@ import { CompanyDashboardHeader } from '@/components/dashboard/CompanyDashboardH
 import { CompanyStatsSection } from '@/components/dashboard/CompanyStatsSection';
 import { CompanyDimonasSection } from '@/components/dashboard/CompanyDimonasSection';
 import { CompanyCollaboratorsSection } from '@/components/dashboard/CompanyCollaboratorsSection';
+import { CompanyRecentActivitySection } from '@/components/dashboard/CompanyRecentActivitySection';
 import { useCompanyStats } from '@/hooks/useCompanyStats';
 import { useAuth } from '@/context/AuthContext';
 
@@ -45,16 +46,21 @@ const CompanyDashboard: React.FC = () => {
             <CompanyStatsSection companyId={companyId} />
           </div>
 
-          {/* Bottom rows - 2 columns layout for company dashboard */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-90">
+          {/* Bottom rows - 3 columns layout for company dashboard */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-90">
             {/* Left column - Company Dimonas */}
             <div className="flex flex-col">
               <CompanyDimonasSection companyId={companyId} />
             </div>
 
-            {/* Right column - Company Collaborators */}
+            {/* Middle column - Company Collaborators */}
             <div className="flex flex-col">
               <CompanyCollaboratorsSection companyId={companyId} />
+            </div>
+
+            {/* Right column - Recent Activity */}
+            <div className="flex flex-col">
+              <CompanyRecentActivitySection companyId={companyId} />
             </div>
           </div>
         </div>

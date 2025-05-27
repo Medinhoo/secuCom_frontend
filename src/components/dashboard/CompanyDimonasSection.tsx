@@ -134,82 +134,108 @@ export const CompanyDimonasSection: React.FC<CompanyDimonasSectionProps> = ({ co
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
-      {/* Dimonas à envoyer / en attente */}
-      <Card className="flex flex-col h-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-blue-700">
-            <Clock className="h-5 w-5" />
-            <span>Dimonas à confirmer par l'entreprise ({companyDimonasToConfirm.length})</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-          {loadingToConfirm ? (
-            <div className="flex items-center justify-center h-32">
-              <LoadingSpinner />
+    <Card className="border border-slate-200 shadow-sm bg-blue-50 flex flex-col h-full">
+      <CardHeader className="pb-3 flex-shrink-0 border-b-0">
+        <CardTitle className="text-lg font-bold text-blue-700 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Dimonas
+          </div>
+          <Badge className="bg-blue-200 text-blue-800">
+            {companyDimonasToConfirm.length + companyDimonasInProgress.length} total
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="bg-blue-50 flex-1 overflow-hidden">
+        <div className="space-y-4 h-full overflow-y-auto">
+          {/* Quick stats */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="text-center p-2 bg-yellow-50 rounded border border-yellow-200">
+              <div className="text-sm font-bold text-yellow-700">{companyDimonasToConfirm.length}</div>
+              <div className="text-xs text-yellow-600">À confirmer</div>
             </div>
-          ) : companyDimonasToConfirm.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              <FileText className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-              <p>Aucune dimona à confirmer</p>
+            <div className="text-center p-2 bg-purple-50 rounded border border-purple-200">
+              <div className="text-sm font-bold text-purple-700">{companyDimonasInProgress.length}</div>
+              <div className="text-xs text-purple-600">En cours</div>
             </div>
-          ) : (
-            companyDimonasToConfirm.slice(0, 5).map((dimona) => (
-              <DimonaItem key={dimona.id} dimona={dimona} />
-            ))
-          )}
-          
-          {companyDimonasToConfirm.length > 5 && (
-            <div className="text-center pt-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(`/dimonas?companyId=${companyId}&status=TO_CONFIRM`)}
-              >
-                Voir toutes ({companyDimonasToConfirm.length})
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
 
-      {/* Dimonas en cours */}
-      <Card className="flex flex-col h-full">
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-orange-700">
-            <Clock className="h-5 w-5" />
-            En cours de traitement ({companyDimonasInProgress.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-          {loadingInProgress ? (
-            <div className="flex items-center justify-center h-32">
-              <LoadingSpinner />
-            </div>
-          ) : companyDimonasInProgress.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              <Clock className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-              <p>Aucune dimona en cours</p>
-            </div>
-          ) : (
-            companyDimonasInProgress.slice(0, 5).map((dimona) => (
-              <DimonaItem key={dimona.id} dimona={dimona} />
-            ))
-          )}
-          
-          {companyDimonasInProgress.length > 5 && (
-            <div className="text-center pt-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate(`/dimonas?companyId=${companyId}&status=IN_PROGRESS`)}
-              >
-                Voir toutes ({companyDimonasInProgress.length})
-              </Button>
+          {/* Dimonas à confirmer */}
+          {companyDimonasToConfirm.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4" />
+                À confirmer ({companyDimonasToConfirm.length})
+              </h4>
+              <div className="space-y-2">
+                {loadingToConfirm ? (
+                  <div className="flex items-center justify-center h-16">
+                    <LoadingSpinner />
+                  </div>
+                ) : (
+                  companyDimonasToConfirm.slice(0, 3).map((dimona) => (
+                    <DimonaItem key={dimona.id} dimona={dimona} />
+                  ))
+                )}
+                {companyDimonasToConfirm.length > 3 && (
+                  <div className="text-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/dimonas?companyId=${companyId}&status=TO_CONFIRM`)}
+                      className="text-xs text-blue-600 hover:bg-blue-100"
+                    >
+                      +{companyDimonasToConfirm.length - 3} autres
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+
+          {/* Dimonas en cours */}
+          {companyDimonasInProgress.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-purple-700 mb-2 flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4" />
+                En cours ({companyDimonasInProgress.length})
+              </h4>
+              <div className="space-y-2">
+                {loadingInProgress ? (
+                  <div className="flex items-center justify-center h-16">
+                    <LoadingSpinner />
+                  </div>
+                ) : (
+                  companyDimonasInProgress.slice(0, 3).map((dimona) => (
+                    <DimonaItem key={dimona.id} dimona={dimona} />
+                  ))
+                )}
+                {companyDimonasInProgress.length > 3 && (
+                  <div className="text-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/dimonas?companyId=${companyId}&status=IN_PROGRESS`)}
+                      className="text-xs text-purple-600 hover:bg-purple-100"
+                    >
+                      +{companyDimonasInProgress.length - 3} autres
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Empty state */}
+          {companyDimonasToConfirm.length === 0 && companyDimonasInProgress.length === 0 && !loadingToConfirm && !loadingInProgress && (
+            <div className="text-center text-blue-600 py-8">
+              <FileText className="h-12 w-12 mx-auto mb-3 text-blue-300" />
+              <p className="text-sm mb-1">Aucune dimona en attente</p>
+              <p className="text-xs text-blue-500">Toutes vos dimonas sont à jour !</p>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 };

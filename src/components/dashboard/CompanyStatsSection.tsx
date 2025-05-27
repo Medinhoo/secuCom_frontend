@@ -1,19 +1,16 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import { useCompanyStats } from '@/hooks/useCompanyStats';
 import { 
   FileText, 
   Building2, 
   Users, 
-  Bell, 
   AlertTriangle,
   TrendingUp,
   CheckCircle,
   Clock,
   XCircle,
-  Target,
   Timer
 } from 'lucide-react';
 
@@ -106,14 +103,14 @@ export const CompanyStatsSection: React.FC<CompanyStatsSectionProps> = ({ compan
   };
 
   return (
-    <Card className="col-span-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-blue-700">
+    <Card className="col-span-full border border-slate-200 shadow-sm bg-slate-50">
+      <CardHeader className="border-b-0">
+        <CardTitle className="flex items-center gap-2 text-blue-700 text-lg font-bold">
           <Building2 className="h-5 w-5" />
           {stats.companyName} - Vue d'ensemble
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="bg-slate-50">
         {/* Statistiques principales */}
         <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">

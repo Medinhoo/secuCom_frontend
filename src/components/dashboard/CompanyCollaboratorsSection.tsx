@@ -163,14 +163,20 @@ export const CompanyCollaboratorsSection: React.FC<CompanyCollaboratorsSectionPr
   }
 
   return (
-    <Card className="flex flex-col h-full">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-green-700">
-          <Users className="h-5 w-5" />
-          <span>Collaborateurs ({collaborators.length})</span>
+    <Card className="border border-slate-200 shadow-sm bg-green-50 flex flex-col h-full">
+      <CardHeader className="pb-3 flex-shrink-0 border-b-0">
+        <CardTitle className="text-lg font-bold text-green-700 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Collaborateurs
+          </div>
+          <Badge className="bg-green-200 text-green-800">
+            {collaborators.length} total
+          </Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="bg-green-50 flex-1 overflow-hidden">
+        <div className="space-y-4 h-full overflow-y-auto">
         {/* Statistiques rapides */}
         <div className="grid grid-cols-2 gap-3">
           <div className="text-center p-2 bg-blue-50 rounded border border-blue-200">
@@ -224,6 +230,7 @@ export const CompanyCollaboratorsSection: React.FC<CompanyCollaboratorsSectionPr
               );
             })}
           </div>
+        </div>
         </div>
       </CardContent>
     </Card>
