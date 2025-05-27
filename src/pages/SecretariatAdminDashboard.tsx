@@ -1,42 +1,52 @@
 import React from 'react';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { NotificationPreview } from '@/components/dashboard/NotificationPreview';
+import { GlobalStatsSection } from '@/components/dashboard/GlobalStatsSection';
+import { RecentActivitySection } from '@/components/dashboard/RecentActivitySection';
 import { DimonasToSendSection } from '@/components/dashboard/DimonasToSendSection';
 import { DimonasInProgressSection } from '@/components/dashboard/DimonasInProgressSection';
-import { NotesSection } from '@/components/dashboard/NotesSection';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useGlobalStats } from '@/hooks/useGlobalStats';
 
 const SecretariatAdminDashboard: React.FC = () => {
   const { refetch: refetchStats } = useDashboardStats();
+  const { refetch: refetchGlobalStats } = useGlobalStats();
+
+  const handleRefresh = () => {
+    refetchStats();
+    refetchGlobalStats();
+  };
 
   return (
-    <div className="min-h-screen">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
+    <div className="h-screen overflow-hidden">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-4">
         {/* Header with actions */}
         <DashboardHeader 
-          onRefresh={refetchStats}
+          onRefresh={handleRefresh}
         />
 
-        {/* Main content grid 2x2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
-          {/* Top left - Notifications */}
-          <div className="flex flex-col">
-            <NotificationPreview />
+        {/* Main content grid - Compact layout */}
+        <div className="space-y-4 h-[calc(100vh-140px)]">
+          {/* Top row - Global stats spanning full width */}
+          <div className="h-auto">
+            <GlobalStatsSection />
           </div>
 
-          {/* Top right - Todo List */}
-          <div className="flex flex-col">
-            <NotesSection />
-          </div>
+          {/* Bottom rows - 3 columns layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-90">
+            {/* Left column - Recent Activity */}
+            <div className="flex flex-col">
+              <RecentActivitySection />
+            </div>
 
-          {/* Bottom left - Dimonas IN_PROGRESS */}
-          <div className="flex flex-col">
-            <DimonasInProgressSection />
-          </div>
+            {/* Middle column - Dimonas IN_PROGRESS */}
+            <div className="flex flex-col">
+              <DimonasInProgressSection />
+            </div>
 
-          {/* Bottom right - Dimonas TO_SEND */}
-          <div className="flex flex-col">
-            <DimonasToSendSection />
+            {/* Right column - Dimonas TO_SEND */}
+            <div className="flex flex-col">
+              <DimonasToSendSection />
+            </div>
           </div>
         </div>
       </div>

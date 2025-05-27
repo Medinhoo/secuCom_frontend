@@ -44,7 +44,7 @@ export const DimonasToSendSection: React.FC = () => {
   };
 
   return (
-    <Card className="border border-slate-200 shadow-sm bg-blue-50 h-[320px] flex flex-col">
+    <Card className="border border-slate-200 shadow-sm bg-blue-50 h-full flex flex-col">
       <CardHeader className="pb-3 flex-shrink-0 border-b-0">
         <CardTitle className="text-lg font-bold text-blue-700 flex items-center justify-between">
           <div className="flex items-center gap-2">
