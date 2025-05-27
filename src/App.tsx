@@ -22,7 +22,8 @@ import { Toaster } from "./components/ui/sonner.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import SocialSecretariatDetailsPage from "./pages/SocialSecretriatDetailsPage.tsx";
 import { NotificationsPage } from "./pages/NotificationsPage";
-import { SecretariatAdminDashboard } from "./pages";
+import { CompanyDashboard, SecretariatAdminDashboard } from "./pages";
+import DashboardRouter from "./components/dashboard/DashboardRouter";
 import AdminUsersPage from "./pages/AdminUsersPage.tsx";
 import CreateCompanyContactPage from "./pages/CreateCompanyContactPage.tsx";
 import AdminUserDetailsPage from "./pages/AdminUserDetailsPage.tsx";
@@ -39,7 +40,7 @@ function App() {
           {/* Routes protégées avec MainLayout */}
           <Route element={<ProtectedRoute />}>
             <Route element={<PendingAccountGuard><MainLayout /></PendingAccountGuard>}>
-              <Route path={ROUTES.DASHBOARD} element={<SecretariatAdminDashboard />} />
+              <Route path={ROUTES.DASHBOARD} element={<DashboardRouter />} />
               <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
               <Route path={ROUTES.DIMONA} element={<DimonaPage />} />
               <Route
