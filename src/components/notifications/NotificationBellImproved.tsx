@@ -1,6 +1,5 @@
 import React from "react";
-import { NotificationDto } from "@/types/notification";
-import { NotificationItem } from "./NotificationItem";
+import { NotificationItemMinimal } from "./NotificationItemMinimal";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -11,8 +10,6 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { 
   Bell, 
-  CheckCheck, 
-  Eye,
   Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -104,45 +101,28 @@ export function NotificationBellImproved({
         className="w-80 p-0 shadow-lg border-0"
         sideOffset={8}
       >
-        {/* Header */}
-        <div className="p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-blue-100">
+        {/* Header simplifié */}
+        <div className="px-4 py-3 border-b border-gray-100 bg-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Bell size={18} className="text-blue-600" />
-              <h3 className="font-semibold text-gray-900">Notifications</h3>
+              <h3 className="font-medium text-gray-900">Notifications</h3>
               {unreadCount > 0 && (
-                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                  {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
+                <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full font-medium">
+                  {unreadCount}
                 </span>
               )}
             </div>
             
-            {/* Actions du header */}
-            <div className="flex items-center gap-1">
-              {isLoading ? (
-                <Loader2 size={16} className="animate-spin text-blue-600" />
-              ) : (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 hover:bg-blue-200"
-                  onClick={refreshNotifications}
-                >
-                  <Bell size={14} />
-                </Button>
-              )}
-              
-              {unreadCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 w-7 p-0 hover:bg-green-200"
-                  onClick={markAllAsRead}
-                >
-                  <CheckCheck size={14} className="text-green-600" />
-                </Button>
-              )}
-            </div>
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 px-2 text-xs hover:bg-blue-50 text-blue-600"
+                onClick={markAllAsRead}
+              >
+                Tout marquer lu
+              </Button>
+            )}
           </div>
         </div>
 
@@ -162,39 +142,39 @@ export function NotificationBellImproved({
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div>
               {notifications.map((notification) => (
-                <NotificationItem
+                <NotificationItemMinimal
                   key={notification.id}
                   notification={notification}
                   onMarkAsRead={markAsRead}
-                  onDelete={deleteNotification}
-                  compact={true}
+                  onClose={() => setIsOpen(false)}
                 />
               ))}
             </div>
           )}
         </div>
 
-        {/* Footer avec lien vers la page complète */}
-        <>
-          <Separator />
-          <div className="p-3 bg-gray-50">
-            <Link 
-              to={ROUTES.NOTIFICATIONS} 
-              onClick={() => setIsOpen(false)}
-              className="block w-full"
-            >
-              <Button 
-                variant="ghost" 
-                className="w-full justify-center text-sm font-medium text-blue-600 hover:bg-blue-50"
+        {/* Footer simplifié */}
+        {notifications.length > 0 && (
+          <>
+            <Separator />
+            <div className="p-2">
+              <Link 
+                to={ROUTES.NOTIFICATIONS} 
+                onClick={() => setIsOpen(false)}
+                className="block w-full"
               >
-                <Eye size={16} className="mr-2" />
-                Voir toutes les notifications
-              </Button>
-            </Link>
-          </div>
-        </>
+                <Button 
+                  variant="ghost" 
+                  className="w-full justify-center text-xs text-blue-600 hover:bg-blue-50 h-8"
+                >
+                  Voir tout
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
