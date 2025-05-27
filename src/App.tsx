@@ -14,7 +14,6 @@ import { EditDimonaPage } from "./pages/EditDimonaPage";
 import { DocumentsPage } from "./pages/DocumentsPage.tsx";
 import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
 // import SettingsPage from "./pages/SettingsPage.tsx";
-import DashboardPage from "./pages/DashboardPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
 import PendingAccountGuard from "./components/PendingAccountGuard.tsx";
@@ -23,6 +22,7 @@ import { Toaster } from "./components/ui/sonner.tsx";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import SocialSecretariatDetailsPage from "./pages/SocialSecretriatDetailsPage.tsx";
 import { NotificationsPage } from "./pages/NotificationsPage";
+import { SecretariatAdminDashboard } from "./pages";
 import AdminUsersPage from "./pages/AdminUsersPage.tsx";
 import CreateCompanyContactPage from "./pages/CreateCompanyContactPage.tsx";
 import AdminUserDetailsPage from "./pages/AdminUserDetailsPage.tsx";
@@ -39,7 +39,7 @@ function App() {
           {/* Routes protégées avec MainLayout */}
           <Route element={<ProtectedRoute />}>
             <Route element={<PendingAccountGuard><MainLayout /></PendingAccountGuard>}>
-              <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+              <Route path={ROUTES.DASHBOARD} element={<SecretariatAdminDashboard />} />
               <Route path={ROUTES.PROFILE} element={<ProfilePage />} />
               <Route path={ROUTES.DIMONA} element={<DimonaPage />} />
               <Route
@@ -88,6 +88,7 @@ function App() {
                 path={ROUTES.NOTIFICATIONS}
                 element={<NotificationsPage />}
               />
+              
 
               {/* Routes avec rôle spécifique */}
               <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>

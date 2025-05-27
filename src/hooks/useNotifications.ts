@@ -4,7 +4,7 @@ import { NotificationDto } from "@/types/notification";
 import { toast } from "sonner";
 
 interface UseNotificationsOptions {
-  mode?: 'dropdown' | 'page'; // Mode dropdown (5 récentes non lues) ou page (toutes)
+  mode?: 'dropdown' | 'page' | 'dashboard'; // Mode dropdown (5 récentes non lues), page (toutes) ou dashboard (toutes récentes)
   autoRefresh?: boolean; // Auto-refresh du compteur
 }
 
@@ -46,6 +46,11 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
         // Pour le dropdown : 5 notifications non lues récentes
         const unreadNotifications = await NotificationService.getUnreadNotifications();
         setNotifications(unreadNotifications.slice(0, 5));
+      } else if (mode === 'dashboard') {
+        // Pour le dashboard : toutes les notifications récentes (lues et non lues)
+        const allNotifs = await NotificationService.getAllNotifications();
+        setAllNotifications(allNotifs);
+        setNotifications(allNotifs.slice(0, 10)); // Limiter à 10 pour le dashboard
       } else {
         // Pour la page : toutes les notifications
         const allNotifs = await NotificationService.getAllNotifications();
@@ -82,7 +87,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
         )
       );
       
-      if (mode === 'page') {
+      if (mode === 'page' || mode === 'dashboard') {
         setAllNotifications(prev => 
           prev.map(notif => 
             notif.id === notificationId 
@@ -117,7 +122,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
         prev.map(notif => ({ ...notif, read: true }))
       );
       
-      if (mode === 'page') {
+      if (mode === 'page' || mode === 'dashboard') {
         setAllNotifications(prev => 
           prev.map(notif => ({ ...notif, read: true }))
         );
@@ -151,7 +156,7 @@ export function useNotifications(options: UseNotificationsOptions = {}): UseNoti
       // Optimistic update pour les deux listes
       setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
       
-      if (mode === 'page') {
+      if (mode === 'page' || mode === 'dashboard') {
         setAllNotifications(prev => prev.filter(notif => notif.id !== notificationId));
       }
       
