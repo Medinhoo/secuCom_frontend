@@ -19,6 +19,7 @@ import {
   Zap
 } from 'lucide-react';
 import { DimonaDto, DimonaStatus } from '@/types/DimonaTypes';
+import { ROUTES } from '@/config/routes.config';
 
 export const AlertsAndActionsSection: React.FC = () => {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ export const AlertsAndActionsSection: React.FC = () => {
       severity: 'high' as const,
       icon: <XCircle className="h-4 w-4" />,
       color: 'red',
-      action: () => navigate('/dimona'),
+      action: () => navigate(ROUTES.DIMONA),
     },
     {
       id: 'rejected',
@@ -68,7 +69,7 @@ export const AlertsAndActionsSection: React.FC = () => {
       severity: 'medium' as const,
       icon: <AlertTriangle className="h-4 w-4" />,
       color: 'orange',
-      action: () => navigate('/dimona'),
+      action: () => navigate(ROUTES.DIMONA),
     },
     {
       id: 'unread',
@@ -77,7 +78,7 @@ export const AlertsAndActionsSection: React.FC = () => {
       severity: 'low' as const,
       icon: <Clock className="h-4 w-4" />,
       color: 'blue',
-      action: () => navigate('/notifications'),
+      action: () => navigate(ROUTES.NOTIFICATIONS),
     },
   ].filter(alert => alert.count > 0);
 
@@ -88,7 +89,7 @@ export const AlertsAndActionsSection: React.FC = () => {
       description: 'Ajouter un collaborateur',
       icon: <Users className="h-4 w-4" />,
       color: 'blue',
-      action: () => navigate('/collaborator/create'),
+      action: () => navigate(ROUTES.COLLABORATOR_CREATE),
     },
     {
       id: 'new-dimona',
@@ -96,7 +97,7 @@ export const AlertsAndActionsSection: React.FC = () => {
       description: 'Créer une déclaration',
       icon: <FileText className="h-4 w-4" />,
       color: 'green',
-      action: () => navigate('/dimona/create'),
+      action: () => navigate(ROUTES.CREATE_DIMONA),
     },
     {
       id: 'companies',
@@ -104,7 +105,7 @@ export const AlertsAndActionsSection: React.FC = () => {
       description: 'Gérer les entreprises',
       icon: <Building2 className="h-4 w-4" />,
       color: 'purple',
-      action: () => navigate('/company'),
+      action: () => navigate(ROUTES.COMPANIES),
     },
     {
       id: 'all-dimonas',
@@ -112,7 +113,7 @@ export const AlertsAndActionsSection: React.FC = () => {
       description: 'Voir toutes les déclarations',
       icon: <FileText className="h-4 w-4" />,
       color: 'gray',
-      action: () => navigate('/dimona'),
+      action: () => navigate(ROUTES.DIMONA),
     },
   ];
 

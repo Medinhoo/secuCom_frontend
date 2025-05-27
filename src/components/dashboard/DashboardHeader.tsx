@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { UserPlus, FileUp, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/config/routes.config';
 
 interface DashboardHeaderProps {
   onRefresh?: () => void;
@@ -15,11 +16,11 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   const navigate = useNavigate();
 
   const handleCreateCollaborator = () => {
-    navigate('/collaborator/create');
+    navigate(ROUTES.COLLABORATOR_CREATE);
   };
 
   const handleCreateDimona = () => {
-    navigate('/dimona/create');
+    navigate(ROUTES.CREATE_DIMONA);
   };
 
   return (

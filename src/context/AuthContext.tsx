@@ -158,7 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       await AuthService.logout();
       setUser(null);
       setToken(null);
-      navigate("/login");
+      navigate(ROUTES.LOGIN);
     } catch (error) {
       console.error("Logout error:", error);
     }

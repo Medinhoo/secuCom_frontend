@@ -362,7 +362,7 @@ export function CollaboratorDetailsPage() {
         } catch (error) {
           toast.error("Échec du chargement du collaborateur");
           console.error(error);
-          navigate("/personnel");
+          navigate(ROUTES.COLLABORATORS);
         } finally {
           setLoading(false);
         }

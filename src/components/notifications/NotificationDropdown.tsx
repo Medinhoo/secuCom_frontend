@@ -16,6 +16,7 @@ import {
   Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ROUTES } from "@/config/routes.config";
 
 interface NotificationDropdownProps {
   notifications: NotificationDto[];
@@ -164,7 +165,7 @@ export function NotificationDropdown({
             <Separator />
             <div className="p-3 bg-gray-50">
               <Link 
-                to="/notifications" 
+                to={ROUTES.NOTIFICATIONS}
                 onClick={() => setIsOpen(false)}
                 className="block w-full"
               >

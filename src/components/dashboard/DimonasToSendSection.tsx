@@ -6,6 +6,7 @@ import { Clock, Eye, Send, AlertTriangle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDimonasToSend } from '@/hooks/useDimonasToSend';
 import { DimonaType } from '@/types/DimonaTypes';
+import { ROUTES } from '@/config/routes.config';
 
 export const DimonasToSendSection: React.FC = () => {
   const { dimonas, sendToONSS, getDaysOld } = useDimonasToSend();
@@ -113,18 +114,22 @@ export const DimonasToSendSection: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                    <Link to={`/dimona/${dimona.id}`}>
-                      <Button variant="outline" size="sm" className="h-7 px-2 text-xs border-blue-300 text-blue-700 hover:bg-blue-100">
-                        <Eye className="h-3 w-3" />
+                    <Link to={ROUTES.DIMONA_DETAILS(dimona.id)}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 border-blue-300 text-blue-700 hover:bg-blue-100 hover:border-blue-400"
+                      >
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </Link>
                     
                     <Button
                       onClick={() => handleSendToONSS(dimona.id)}
                       size="sm"
-                      className="h-7 px-2 text-xs bg-blue-600 hover:bg-blue-700 text-white"
+                      className="h-8 w-8 p-0 bg-blue-600 hover:bg-blue-700 text-white"
                     >
-                      <Send className="h-3 w-3" />
+                      <Send className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -133,7 +138,7 @@ export const DimonasToSendSection: React.FC = () => {
             
             {dimonas.length > 8 && (
               <div className="text-center pt-2 border-t border-blue-200">
-                <Link to="/dimona?status=TO_SEND">
+                <Link to={`${ROUTES.DIMONA}?status=TO_SEND`}>
                   <Button variant="ghost" size="sm" className="text-blue-600 hover:bg-blue-100 text-xs">
                     +{dimonas.length - 8} autres
                   </Button>

@@ -6,6 +6,7 @@ import { Loader2, Eye, CheckCircle, XCircle, AlertTriangle, ExternalLink } from 
 import { Link } from 'react-router-dom';
 import { useDimonasInProgress } from '@/hooks/useDimonasInProgress';
 import { DimonaType } from '@/types/DimonaTypes';
+import { ROUTES } from '@/config/routes.config';
 
 export const DimonasInProgressSection: React.FC = () => {
   const { 
@@ -136,27 +137,31 @@ export const DimonasInProgressSection: React.FC = () => {
                   </div>
 
                   <div className="flex items-center gap-1 ml-2 flex-shrink-0">
-                    <Link to={`/dimona/${dimona.id}`}>
-                      <Button variant="outline" size="sm" className="h-7 px-2 text-xs border-purple-300 text-purple-700 hover:bg-purple-100">
-                        <Eye className="h-3 w-3" />
+                    <Link to={ROUTES.DIMONA_DETAILS(dimona.id)}>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="h-8 w-8 p-0 border-purple-300 text-purple-700 hover:bg-purple-100 hover:border-purple-400"
+                      >
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </Link>
                     
                     <Button
                       onClick={() => handleMarkAsAccepted(dimona.id)}
                       size="sm"
-                      className="h-7 px-2 text-xs bg-green-600 hover:bg-green-700 text-white"
+                      className="h-8 w-8 p-0 bg-green-600 hover:bg-green-700 text-white"
                     >
-                      <CheckCircle className="h-3 w-3" />
+                      <CheckCircle className="h-4 w-4" />
                     </Button>
                     
                     <Button
                       onClick={() => handleMarkAsRejected(dimona.id)}
                       size="sm"
                       variant="outline"
-                      className="h-7 px-2 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                      className="h-8 w-8 p-0 text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
                     >
-                      <XCircle className="h-3 w-3" />
+                      <XCircle className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -165,7 +170,7 @@ export const DimonasInProgressSection: React.FC = () => {
             
             {dimonas.length > 8 && (
               <div className="text-center pt-2 border-t border-purple-200">
-                <Link to="/dimona?status=IN_PROGRESS">
+                <Link to={`${ROUTES.DIMONA}?status=IN_PROGRESS`}>
                   <Button variant="ghost" size="sm" className="text-purple-600 hover:bg-purple-100 text-xs">
                     +{dimonas.length - 8} autres
                   </Button>
