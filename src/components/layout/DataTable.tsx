@@ -1,22 +1,12 @@
 import {
   Search,
   Loader2,
-  Trash2,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -37,7 +27,6 @@ interface DataTableProps<T extends { id: string }> {
   data: T[];
   columns: Column<T>[];
   loading?: boolean;
-  onDelete?: (id: string) => Promise<void>;
   detailsRoute?: (id: string) => string;
   emptyStateMessage?: {
     title?: string;
@@ -53,7 +42,6 @@ export function DataTable<T extends { id: string }>({
   data,
   columns,
   loading = false,
-  onDelete,
   detailsRoute,
   emptyStateMessage = {
     title: "Aucun élément trouvé",
@@ -62,8 +50,6 @@ export function DataTable<T extends { id: string }>({
   rowClassName = "hover:bg-slate-50/50 border-b border-slate-100",
   detailsButtonLabel = "Voir détails",
 }: DataTableProps<T>) {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState<number>(20);
   const [currentPage, setCurrentPage] = useState(1);
   const [containerHeight, setContainerHeight] = useState<number>(600);
@@ -122,21 +108,6 @@ export function DataTable<T extends { id: string }>({
     setCurrentPage(1);
   };
 
-  const handleDelete = async () => {
-    if (!itemToDelete || !onDelete) return;
-
-    try {
-      await onDelete(itemToDelete);
-      toast.success("Élément supprimé avec succès");
-    } catch (error) {
-      toast.error("Échec de la suppression");
-      console.error(error);
-    } finally {
-      setDeleteDialogOpen(false);
-      setItemToDelete(null);
-    }
-  };
-
   const renderCell = (item: T, column: Column<T>) => {
     if (typeof column.accessor === "function") {
       return column.accessor(item);
@@ -144,7 +115,7 @@ export function DataTable<T extends { id: string }>({
     return item[column.accessor] as React.ReactNode;
   };
 
-  const hasActions = !!onDelete || !!detailsRoute;
+  const hasActions = !!detailsRoute;
 
   // Generate grid template columns with custom widths
   const generateGridColumns = () => {
@@ -233,19 +204,6 @@ export function DataTable<T extends { id: string }>({
                             </Link>
                           </Button>
                         )}
-                        {onDelete && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            className="bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700"
-                            onClick={() => {
-                              setItemToDelete(item.id);
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
                       </div>
                     )}
                   </div>
@@ -309,30 +267,6 @@ export function DataTable<T extends { id: string }>({
           </div>
         </div>
       </div>
-
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
-            <DialogDescription>
-              Êtes-vous sûr de vouloir supprimer cet élément ? Cette action est
-              irréversible.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setDeleteDialogOpen(false)}
-            >
-              Annuler
-            </Button>
-            <Button variant="destructive" onClick={handleDelete}>
-              Supprimer
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

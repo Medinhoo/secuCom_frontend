@@ -186,17 +186,6 @@ export function CollaboratorPage() {
           data={filteredCollaborators}
           columns={columns}
           loading={loading}
-          onDelete={async (id) => {
-            try {
-              await collaboratorService.deleteCollaborator(id);
-              setCollaborators((prev) => prev.filter((c) => c.id !== id));
-              toast.success("Collaborateur supprimé avec succès");
-            } catch (error) {
-              toast.error("Échec de la suppression du collaborateur");
-              console.error(error);
-              throw error;
-            }
-          }}
           detailsRoute={ROUTES.COLLABORATOR_DETAILS}
           detailsButtonLabel="Voir détails"
         />

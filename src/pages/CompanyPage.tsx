@@ -161,17 +161,6 @@ export function CompanyPage() {
           data={filteredCompanies}
           columns={columns}
           loading={loading}
-          onDelete={async (id) => {
-            try {
-              await companyService.deleteCompany(id);
-              setCompanies((prev) => prev.filter((c) => c.id !== id));
-              toast.success("Entreprise supprimée avec succès");
-            } catch (error) {
-              toast.error("Échec de la suppression de l'entreprise");
-              console.error(error);
-              throw error;
-            }
-          }}
           detailsRoute={ROUTES.COMPANY_DETAILS}
           detailsButtonLabel="Détails"
         />
