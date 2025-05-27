@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import { 
   Users, 
-  Plus,
   Eye,
   UserPlus,
   Calendar,
@@ -88,14 +87,6 @@ export const CompanyCollaboratorsSection: React.FC<CompanyCollaboratorsSectionPr
 
   const handleViewCollaborator = (collaboratorId: string) => {
     navigate(`/collaborators/${collaboratorId}`);
-  };
-
-  const handleCreateCollaborator = () => {
-    navigate(`/collaborators/create?companyId=${companyId}`);
-  };
-
-  const handleViewAllCollaborators = () => {
-    navigate(`/collaborators?companyId=${companyId}`);
   };
 
   // Get recent collaborators (last 30 days)
