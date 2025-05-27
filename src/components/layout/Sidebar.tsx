@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import {
   Home,
   Users,
-  Settings,
+  // Settings,
   FileText,
   Building2,
   ChevronRight,
@@ -267,12 +267,6 @@ export function Sidebar({ isCollapsed, toggleCollapse }: SidebarProps) {
         isActive: isActivePath(ROUTES.ADMIN_USERS),
       },
     ] : []),
-    {
-      href: ROUTES.SETTINGS,
-      icon: <Settings size={20} />,
-      label: "Paramètres",
-      isActive: pathname === ROUTES.SETTINGS,
-    },
   ];
 
   useEffect(() => {

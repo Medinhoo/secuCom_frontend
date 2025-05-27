@@ -13,7 +13,7 @@ import { CreateDimonaPage } from "./pages/CreateDimonaPage";
 import { EditDimonaPage } from "./pages/EditDimonaPage";
 import { DocumentsPage } from "./pages/DocumentsPage.tsx";
 import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
-import SettingsPage from "./pages/SettingsPage.tsx";
+// import SettingsPage from "./pages/SettingsPage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import ProtectedRoute from "./components/ProtectedRoute.tsx";
@@ -91,7 +91,7 @@ function App() {
 
               {/* Routes avec rôle spécifique */}
               <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
-                <Route path={ROUTES.SETTINGS} element={<SettingsPage />} />
+                {/* <Route path={ROUTES.SETTINGS} element={<SettingsPage />} /> */}
                 <Route path={ROUTES.ADMIN_USERS} element={<AdminUsersPage />} />
                 <Route 
                   path={ROUTES.ADMIN_USERS_CREATE_COMPANY_CONTACT} 

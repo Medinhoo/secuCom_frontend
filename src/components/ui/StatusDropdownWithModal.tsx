@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronDown, Edit3 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusChangeModal } from "@/components/ui/StatusChangeModal";
 import { DimonaStatus } from "@/types/DimonaTypes";
@@ -87,7 +87,6 @@ export function StatusDropdownWithModal({
       >
         {getStatusBadge(currentStatus)}
         <div className="flex items-center gap-1 ml-1">
-          <Edit3 className="h-3 w-3" />
           <ChevronDown className="h-3 w-3" />
         </div>
       </Button>
