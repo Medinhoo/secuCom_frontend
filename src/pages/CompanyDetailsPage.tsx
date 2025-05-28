@@ -956,8 +956,8 @@ export function CompanyDetailsPage() {
 
         {/* Personnel Tab */}
         <TabsContent value="personnel">
-          <Card className="border-0 shadow-sm bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100">
+          <Card className="pb-0 border-0 shadow-sm bg-white overflow-hidden">
+            <CardHeader className=" border-slate-100">
               <div className="flex justify-between items-start">
                 <div>
                   <CardTitle className="text-blue-700">Personnel</CardTitle>
@@ -975,7 +975,7 @@ export function CompanyDetailsPage() {
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="p-0">
+            <CardContent className="px-0">
               <DataTable
                 data={collaborators}
                 columns={collaboratorColumns}
