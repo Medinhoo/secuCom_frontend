@@ -51,7 +51,7 @@ const LoginPage = () => {
             Bienvenue sur Secucom
           </h1>
           <p className="text-gray-600 text-lg">
-            Votre plateforme de gestion sécurisée
+            Votre plateforme de gestion pour votre secretariat social
           </p>
         </div>
 

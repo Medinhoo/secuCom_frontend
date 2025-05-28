@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { UserPlus, FileUp, RefreshCw, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useCompanyStats } from '@/hooks/useCompanyStats';
+import { ROUTES } from '@/config/routes.config';
 
 interface CompanyDashboardHeaderProps {
   companyId: string;
@@ -18,12 +19,13 @@ export const CompanyDashboardHeader: React.FC<CompanyDashboardHeaderProps> = ({
   const navigate = useNavigate();
   const { stats } = useCompanyStats(companyId);
 
+ 
   const handleCreateCollaborator = () => {
-    navigate(`/collaborators/create?companyId=${companyId}`);
+    navigate(ROUTES.COLLABORATOR_CREATE);
   };
 
   const handleCreateDimona = () => {
-    navigate(`/dimonas/create?companyId=${companyId}`);
+    navigate(ROUTES.CREATE_DIMONA);
   };
 
   return (
