@@ -132,39 +132,12 @@ export const CompanyCollaboratorsSection: React.FC<CompanyCollaboratorsSectionPr
           <Calendar className="h-3 w-3" />
           <span>Entrée: {formatDate(collaborator.serviceEntryDate)}</span>
         </div>
-        {collaborator.nationalNumber && (
-          <div className="text-xs text-gray-500">
-            N° National: {collaborator.nationalNumber}
-          </div>
-        )}
       </div>
     </div>
   );
 
-  if (isLoading) {
-    return (
-      <Card className="flex flex-col h-full">
-        <CardContent className="flex items-center justify-center h-32">
-          <LoadingSpinner />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card className="border-red-200 flex flex-col h-full">
-        <CardContent className="flex items-center justify-center h-32">
-          <div className="text-red-600 text-center">
-            <p>Erreur: {error}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="border border-slate-200 shadow-sm bg-green-50 flex flex-col h-full">
+    <Card className="border border-slate-200 shadow-sm bg--50 flex flex-col h-full">
       <CardHeader className="pb-3 flex-shrink-0 border-b-0">
         <CardTitle className="text-lg font-bold text-green-700 flex items-center justify-between">
           <div className="flex items-center gap-2">
