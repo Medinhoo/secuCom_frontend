@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
@@ -56,6 +57,37 @@ import { companyService } from "@/services/api/companyService";
 import type { CompanyDto } from "@/types/CompanyTypes";
 import { ROUTES } from "@/config/routes.config";
 import { useAuth } from "@/context/AuthContext";
+import { useCompanyValidation } from "@/hooks/useCompanyValidation";
+import { ValidationError } from "@/components/ui/ValidationError";
+
+// Options for select fields
+const LEGAL_FORMS = [
+  "SPRL", "SA", "SNC", "SCS", "SCRL", "ASBL", "Fondation", "GIE", "EEIG", "Autre"
+];
+
+const CATEGORIES = [
+  "Micro-entreprise", "Petite entreprise", "Moyenne entreprise", "Grande entreprise"
+];
+
+const ACTIVITY_SECTORS = [
+  "Construction", "Transport", "Horeca", "Commerce", "Services"
+];
+
+const JOINT_COMMITTEES = [
+  "100", "102", "106", "111", "112", "116", "118", "120", "124", "140", "200", "201", "202", "209", "210", "218", "220", "224", "226"
+];
+
+const WORK_REGIMES = [
+  "Temps plein", "Temps partiel", "Horaire flexible", "Télétravail", "Mixte"
+];
+
+const DECLARATION_FREQUENCIES = [
+  "Mensuelle", "Trimestrielle", "Annuelle"
+];
+
+const SUBSCRIPTION_FORMULAS = [
+  "Basique", "Standard", "Premium", "Enterprise"
+];
 
 // Helper function to get sector color
 const getSectorLightColor = (sector: string | undefined) => {
@@ -84,6 +116,9 @@ export function CompanyDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [loadingCollaborators, setLoadingCollaborators] = useState(false);
+  
+  // Validation hook
+  const validation = useCompanyValidation(formData, company);
   
   // Define columns for the collaborators table
   const collaboratorColumns: Column<Collaborator>[] = [
@@ -178,6 +213,10 @@ export function CompanyDetailsPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
   };
 
@@ -335,7 +374,8 @@ export function CompanyDetailsPage() {
                   <div className="flex space-x-2">
                     <Button
                       onClick={handleSave}
-                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                      disabled={!validation.isValid || Object.values(validation.validating).some(Boolean)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Save className="mr-2 h-4 w-4" /> Enregistrer
                     </Button>
@@ -372,6 +412,7 @@ export function CompanyDetailsPage() {
                             onChange={handleInputChange}
                             className="border-slate-200 focus-visible:ring-blue-500"
                           />
+                          <ValidationError error={validation.errors.name} />
                         </div>
                         <div className="space-y-2">
                           <Label
@@ -392,25 +433,42 @@ export function CompanyDetailsPage() {
                           <Label htmlFor="legalForm" className="text-blue-700">
                             Forme juridique
                           </Label>
-                          <Input
-                            id="legalForm"
-                            name="legalForm"
+                          <Select
                             value={formData.legalForm || ""}
-                            onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
-                          />
+                            onValueChange={(value) => handleSelectChange("legalForm", value)}
+                          >
+                            <SelectTrigger className="border-slate-200 focus:ring-blue-500">
+                              <SelectValue placeholder="Sélectionnez une forme juridique" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {LEGAL_FORMS.map((form) => (
+                                <SelectItem key={form} value={form}>
+                                  {form}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <ValidationError error={validation.errors.legalForm} />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="category" className="text-blue-700">
                             Catégorie
                           </Label>
-                          <Input
-                            id="category"
-                            name="category"
+                          <Select
                             value={formData.category || ""}
-                            onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
-                          />
+                            onValueChange={(value) => handleSelectChange("category", value)}
+                          >
+                            <SelectTrigger className="border-slate-200 focus:ring-blue-500">
+                              <SelectValue placeholder="Sélectionnez une catégorie" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {CATEGORIES.map((category) => (
+                                <SelectItem key={category} value={category}>
+                                  {category}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
                           <Label
@@ -419,13 +477,22 @@ export function CompanyDetailsPage() {
                           >
                             Secteur d'activité
                           </Label>
-                          <Input
-                            id="activitySector"
-                            name="activitySector"
+                          <Select
                             value={formData.activitySector || ""}
-                            onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
-                          />
+                            onValueChange={(value) => handleSelectChange("activitySector", value)}
+                          >
+                            <SelectTrigger className="border-slate-200 focus:ring-blue-500">
+                              <SelectValue placeholder="Sélectionnez un secteur d'activité" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ACTIVITY_SECTORS.map((sector) => (
+                                <SelectItem key={sector} value={sector}>
+                                  {sector}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <ValidationError error={validation.errors.activitySector} />
                         </div>
                         <div className="space-y-2">
                           <Label
@@ -434,26 +501,31 @@ export function CompanyDetailsPage() {
                           >
                             Commissions paritaires
                           </Label>
-                          <Input
-                            id="jointCommittees"
-                            name="jointCommittees"
-                            value={formData.jointCommittees?.join(", ") || ""}
-                            onChange={(e) => {
-                              const value = e.target.value;
+                          <Select
+                            value={formData.jointCommittees?.[0] || ""}
+                            onValueChange={(value) => {
                               setFormData((prev) =>
                                 prev
                                   ? {
                                       ...prev,
-                                      jointCommittees: value
-                                        .split(",")
-                                        .map((s) => s.trim())
-                                        .filter(Boolean),
+                                      jointCommittees: value ? [value] : [],
                                     }
                                   : null
                               );
                             }}
-                            className="border-slate-200 focus-visible:ring-blue-500"
-                          />
+                          >
+                            <SelectTrigger className="border-slate-200 focus:ring-blue-500">
+                              <SelectValue placeholder="Sélectionnez une commission paritaire" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {JOINT_COMMITTEES.map((committee) => (
+                                <SelectItem key={committee} value={committee}>
+                                  {committee}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <ValidationError error={validation.errors.jointCommittees} />
                         </div>
                         <div className="space-y-2">
                           <Label
@@ -476,6 +548,7 @@ export function CompanyDetailsPage() {
                             onChange={handleInputChange}
                             className="border-slate-200 focus-visible:ring-blue-500"
                           />
+                          <ValidationError error={validation.errors.creationDate} />
                         </div>
                         <div className="space-y-2">
                           <Label
@@ -498,6 +571,7 @@ export function CompanyDetailsPage() {
                             onChange={handleInputChange}
                             className="border-slate-200 focus-visible:ring-blue-500"
                           />
+                          <ValidationError error={validation.errors.collaborationStartDate} />
                         </div>
                       </div>
                     </div>
@@ -520,6 +594,7 @@ export function CompanyDetailsPage() {
                             onChange={handleInputChange}
                             className="border-slate-200 focus-visible:ring-blue-500"
                           />
+                          <ValidationError error={validation.errors.email} />
                         </div>
                         <div className="space-y-2">
                           <Label
@@ -535,6 +610,7 @@ export function CompanyDetailsPage() {
                             onChange={handleInputChange}
                             className="border-slate-200 focus-visible:ring-blue-500"
                           />
+                          <ValidationError error={validation.errors.phoneNumber} />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="IBAN" className="text-blue-700">
@@ -547,6 +623,7 @@ export function CompanyDetailsPage() {
                             onChange={handleInputChange}
                             className="border-slate-200 focus-visible:ring-blue-500"
                           />
+                          <ValidationError error={validation.errors.iban} />
                         </div>
                       </div>
                     </div>
@@ -569,6 +646,10 @@ export function CompanyDetailsPage() {
                             onChange={handleInputChange}
                             className="border-slate-200 focus-visible:ring-blue-500"
                           />
+                          <ValidationError 
+                            error={validation.errors.bceNumber} 
+                            isValidating={validation.validating.bceNumber}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="onssNumber" className="text-blue-700">
@@ -581,6 +662,10 @@ export function CompanyDetailsPage() {
                             onChange={handleInputChange}
                             className="border-slate-200 focus-visible:ring-blue-500"
                           />
+                          <ValidationError 
+                            error={validation.errors.onssNumber} 
+                            isValidating={validation.validating.onssNumber}
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="vatNumber" className="text-blue-700">
@@ -592,6 +677,10 @@ export function CompanyDetailsPage() {
                             value={formData.vatNumber || ""}
                             onChange={handleInputChange}
                             className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                          <ValidationError 
+                            error={validation.errors.vatNumber} 
+                            isValidating={validation.validating.vatNumber}
                           />
                         </div>
                       </div>
@@ -637,13 +726,21 @@ export function CompanyDetailsPage() {
                           <Label htmlFor="workRegime" className="text-blue-700">
                             Régime de travail
                           </Label>
-                          <Input
-                            id="workRegime"
-                            name="workRegime"
+                          <Select
                             value={formData.workRegime || ""}
-                            onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
-                          />
+                            onValueChange={(value) => handleSelectChange("workRegime", value)}
+                          >
+                            <SelectTrigger className="border-slate-200 focus:ring-blue-500">
+                              <SelectValue placeholder="Sélectionnez un régime de travail" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {WORK_REGIMES.map((regime) => (
+                                <SelectItem key={regime} value={regime}>
+                                  {regime}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
                           <Label
@@ -676,13 +773,21 @@ export function CompanyDetailsPage() {
                           >
                             Formule d'abonnement
                           </Label>
-                          <Input
-                            id="subscriptionFormula"
-                            name="subscriptionFormula"
+                          <Select
                             value={formData.subscriptionFormula || ""}
-                            onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
-                          />
+                            onValueChange={(value) => handleSelectChange("subscriptionFormula", value)}
+                          >
+                            <SelectTrigger className="border-slate-200 focus:ring-blue-500">
+                              <SelectValue placeholder="Sélectionnez une formule d'abonnement" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {SUBSCRIPTION_FORMULAS.map((formula) => (
+                                <SelectItem key={formula} value={formula}>
+                                  {formula}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
                           <Label
@@ -691,13 +796,21 @@ export function CompanyDetailsPage() {
                           >
                             Fréquence de déclaration
                           </Label>
-                          <Input
-                            id="declarationFrequency"
-                            name="declarationFrequency"
+                          <Select
                             value={formData.declarationFrequency || ""}
-                            onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
-                          />
+                            onValueChange={(value) => handleSelectChange("declarationFrequency", value)}
+                          >
+                            <SelectTrigger className="border-slate-200 focus:ring-blue-500">
+                              <SelectValue placeholder="Sélectionnez une fréquence de déclaration" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {DECLARATION_FREQUENCIES.map((frequency) => (
+                                <SelectItem key={frequency} value={frequency}>
+                                  {frequency}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="space-y-2">
                           <Label
