@@ -131,7 +131,7 @@ export function CollaboratorPage() {
       ),
     },
     {
-      header: "Email",
+      header: "Numéro national",
       accessor: (collaborator) => (
         <div className="flex items-center">
           <Mail className="h-3 w-3 text-slate-400 mr-1" />
