@@ -14,6 +14,7 @@ import { Collaborator, CollaboratorType } from '@/types/CollaboratorTypes';
 import { useNavigate } from 'react-router-dom';
 import { collaboratorService } from '@/services/api/collaboratorService';
 import { useState, useEffect } from 'react';
+import { ROUTES } from '@/config/routes.config';
 
 interface CompanyCollaboratorsSectionProps {
   companyId: string;
@@ -86,7 +87,7 @@ export const CompanyCollaboratorsSection: React.FC<CompanyCollaboratorsSectionPr
   };
 
   const handleViewCollaborator = (collaboratorId: string) => {
-    navigate(`/collaborators/${collaboratorId}`);
+    navigate(ROUTES.COLLABORATOR_DETAILS(collaboratorId));
   };
 
   // Get recent collaborators (last 30 days)
