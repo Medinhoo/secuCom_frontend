@@ -85,13 +85,13 @@ const LoginPage = () => {
                   className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
                   <BuildingIcon className="h-4 w-4" />
-                  Nom de votre entreprise
+                  Nom d'utilisateur
                 </Label>
                 <div className="relative group">
                   <Input
                     id="username"
                     type="text"
-                    placeholder="Entrez le nom de votre entreprise"
+                    placeholder="Entrez votre nom d'utilisateur"
                     className="pl-4 pr-4 py-3 text-base border-gray-200 rounded-xl focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent transition-all duration-200 group-hover:border-gray-300"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -186,9 +186,9 @@ const LoginPage = () => {
           {/* Card Footer */}
           <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-100 text-center">
             <p className="text-gray-600 text-sm">
-              Besoin d'aide?{" "}
+              Besoin d'aide ?{" "}
               <button className="text-blue-600 hover:text-blue-700 font-medium transition-colors hover:underline">
-                Contactez le support technique
+                Contactez l'administrateur
               </button>
             </p>
           </div>
