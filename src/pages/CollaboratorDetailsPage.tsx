@@ -14,8 +14,6 @@ import {
   Calendar,
   Download,
   Plus,
-  Mail,
-  Phone,
   MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -88,7 +86,7 @@ function getDaysInMonth(year: number, month: number): number {
 
 // Calendar Component
 const PrestationsCalendar = ({ employeeId }: { employeeId: string }) => {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate] = useState(new Date());
   const [year, setYear] = useState(currentDate.getFullYear());
   const [month, setMonth] = useState(currentDate.getMonth());
 
@@ -461,14 +459,6 @@ export function CollaboratorDetailsPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50 shadow-sm"
-          >
-            <Download className="mr-2 h-4 w-4" /> Exporter
-          </Button>
-        </div>
       </div>
 
       {/* Tabs */}

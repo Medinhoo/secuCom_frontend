@@ -14,7 +14,6 @@ import {
   Info,
   ChevronLeft,
   Trash2,
-  Download,
   Plus,
   Building2,
   Phone,
@@ -298,14 +297,6 @@ export function CompanyDetailsPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50 shadow-sm"
-            >
-              <Download className="mr-2 h-4 w-4" /> Exporter
-            </Button>
-          </div>
         </div>
       </div>
 

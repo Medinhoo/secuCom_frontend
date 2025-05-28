@@ -168,7 +168,6 @@ export function CollaboratorPage() {
             ? `Gérez les collaborateurs de ${user?.companyName || 'votre entreprise'}`
             : "Gérez les collaborateurs enregistrés dans le secrétariat social"
         }
-        onExport={() => {}}
         addNewButton={{
           label: "Ajouter un collaborateur",
           route: ROUTES.COLLABORATOR_CREATE,

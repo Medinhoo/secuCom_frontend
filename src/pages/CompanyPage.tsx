@@ -143,7 +143,6 @@ export function CompanyPage() {
             ? `Gérez les informations de ${user?.companyName || 'votre entreprise'}`
             : "Gérez les entrepries enregistrées dans le secrétariat social"
         }
-        onExport={() => {}}
         addNewButton={{
           label: "Ajouter une entreprise",
           route: ROUTES.COMPANY_CREATE,

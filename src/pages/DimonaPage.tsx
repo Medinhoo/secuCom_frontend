@@ -166,7 +166,6 @@ export function DimonaPage() {
             ? `Gérez les déclarations Dimona pour les employés de ${user?.companyName || 'votre entreprise'}`
             : "Gérez les déclarations Dimona pour vos employés"
         }
-        onExport={() => {}}
         addNewButton={{
           label: "Nouvelle déclaration",
           route: ROUTES.CREATE_DIMONA,
