@@ -6,8 +6,9 @@ import {
   EyeIcon,
   EyeOffIcon,
   LockIcon,
-  MailIcon,
+  BuildingIcon,
   AlertCircle,
+  ShieldCheckIcon,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -29,43 +30,69 @@ const LoginPage = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-blue-50 to-white">
-      <div className="w-full max-w-xl px-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      
+      <div className="relative w-full max-w-md">
+        {/* Logo and Header Section */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-blue-700">
-            Secrétariat Social
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <img 
+                src="/secucomLogo.png" 
+                alt="Secucom Logo" 
+                className="h-20 w-auto object-contain drop-shadow-lg"
+              />
+              <div className="absolute -inset-2 bg-white/20 rounded-full blur-xl"></div>
+            </div>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Bienvenue sur Secucom
           </h1>
-          <p className="text-xl text-slate-500 mt-2">
-            Accédez à votre espace partagé
+          <p className="text-gray-600 text-lg">
+            Votre plateforme de gestion sécurisée
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg border border-slate-100">
-          <div className="p-8">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6">Connexion</h2>
+        {/* Login Card */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 overflow-hidden">
+          {/* Card Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6">
+            <div className="flex items-center justify-center gap-3">
+              <ShieldCheckIcon className="h-6 w-6 text-white" />
+              <h2 className="text-xl font-semibold text-white">Connexion sécurisée</h2>
+            </div>
+          </div>
 
+          {/* Card Body */}
+          <div className="p-8">
             {error && (
-              <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6 flex items-center gap-3">
+              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl mb-6 flex items-center gap-3 animate-in slide-in-from-top-2">
                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
-                <span>Connexion échouée</span>
+                <div>
+                  <p className="font-medium">Erreur de connexion</p>
+                  <p className="text-sm text-red-600">Vérifiez vos identifiants et réessayez</p>
+                </div>
               </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Username Field */}
               <div className="space-y-2">
                 <Label
                   htmlFor="username"
-                  className="text-lg text-slate-700 font-medium"
+                  className="text-sm font-medium text-gray-700 flex items-center gap-2"
                 >
+                  <BuildingIcon className="h-4 w-4" />
                   Nom de votre entreprise
                 </Label>
-                <div className="relative">
-                  <MailIcon className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
+                <div className="relative group">
                   <Input
-                    id="name"
+                    id="username"
                     type="text"
-                    placeholder="mon enteprise"
-                    className="pl-12 py-6 text-lg border-slate-200 rounded-lg focus-visible:ring-blue-500"
+                    placeholder="Entrez le nom de votre entreprise"
+                    className="pl-4 pr-4 py-3 text-base border-gray-200 rounded-xl focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent transition-all duration-200 group-hover:border-gray-300"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
@@ -73,28 +100,30 @@ const LoginPage = () => {
                 </div>
               </div>
 
+              {/* Password Field */}
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label
                     htmlFor="password"
-                    className="text-lg text-slate-700 font-medium"
+                    className="text-sm font-medium text-gray-700 flex items-center gap-2"
                   >
+                    <LockIcon className="h-4 w-4" />
                     Mot de passe
                   </Label>
                   <Button
                     variant="link"
-                    className="text-blue-600 p-0 h-auto text-base font-medium"
+                    className="text-blue-600 hover:text-blue-700 p-0 h-auto text-sm font-medium transition-colors"
                     type="button"
                   >
                     Mot de passe oublié?
                   </Button>
                 </div>
-                <div className="relative">
-                  <LockIcon className="absolute left-4 top-3.5 h-5 w-5 text-slate-400" />
+                <div className="relative group">
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
-                    className="pl-12 pr-12 py-6 text-lg border-slate-200 rounded-lg focus-visible:ring-blue-500"
+                    placeholder="Entrez votre mot de passe"
+                    className="pl-4 pr-12 py-3 text-base border-gray-200 rounded-xl focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-transparent transition-all duration-200 group-hover:border-gray-300"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -103,27 +132,28 @@ const LoginPage = () => {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 p-0"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100 rounded-lg transition-colors"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <EyeOffIcon className="h-5 w-5 text-slate-500" />
+                      <EyeOffIcon className="h-4 w-4 text-gray-500" />
                     ) : (
-                      <EyeIcon className="h-5 w-5 text-slate-500" />
+                      <EyeIcon className="h-4 w-4 text-gray-500" />
                     )}
                   </Button>
                 </div>
               </div>
 
+              {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md py-6 text-lg font-medium rounded-lg"
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg py-3 text-base font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
                     <svg
-                      className="animate-spin h-5 w-5 text-white mr-2"
+                      className="animate-spin h-5 w-5 text-white"
                       viewBox="0 0 24 24"
                     >
                       <circle
@@ -144,20 +174,32 @@ const LoginPage = () => {
                     Connexion en cours...
                   </div>
                 ) : (
-                  "Se connecter"
+                  <div className="flex items-center justify-center gap-2">
+                    <ShieldCheckIcon className="h-5 w-5" />
+                    Se connecter
+                  </div>
                 )}
               </Button>
             </form>
           </div>
 
-          <div className="px-8 py-5 bg-slate-50 border-t border-slate-100 text-center rounded-b-xl">
-            <p className="text-slate-500">
-              Problème de connexion?{" "}
-              <span className="text-blue-600 font-medium">
-                Contactez votre administrateur
-              </span>
+          {/* Card Footer */}
+          <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-100 text-center">
+            <p className="text-gray-600 text-sm">
+              Besoin d'aide?{" "}
+              <button className="text-blue-600 hover:text-blue-700 font-medium transition-colors hover:underline">
+                Contactez le support technique
+              </button>
             </p>
           </div>
+        </div>
+
+        {/* Security Notice */}
+        <div className="mt-6 text-center">
+          <p className="text-xs text-gray-500 flex items-center justify-center gap-1">
+            <ShieldCheckIcon className="h-3 w-3" />
+            Secucom V1.0
+          </p>
         </div>
       </div>
     </div>
