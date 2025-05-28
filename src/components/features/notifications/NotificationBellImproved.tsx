@@ -1,5 +1,4 @@
 import React from "react";
-import { NotificationItemMinimal } from "./NotificationItemMinimal";
 import { Button } from "@/components/ui/button";
 import { 
   DropdownMenu,
@@ -15,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useNotifications } from "@/hooks/useNotifications";
 import { ROUTES } from "@/config/routes.config";
+import { NotificationItemMinimal } from "./NotificationItemMinimal";
 
 interface NotificationBellImprovedProps {
   variant?: "header" | "sidebar";

@@ -18,7 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { DimonaStatus } from "@/types/DimonaTypes";
 import { AlertTriangle, CheckCircle } from "lucide-react";
-import { Textarea } from "./textarea";
+import { Textarea } from "@/components/ui/textarea";
 
 interface StatusChangeModalProps {
   isOpen: boolean;

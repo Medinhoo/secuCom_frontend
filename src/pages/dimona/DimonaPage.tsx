@@ -11,7 +11,7 @@ import { ROUTES } from "@/config/routes.config";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { DataTable, Column } from "@/components/layout/DataTable";
-import { StatusDropdownWithModal } from "@/components/ui/StatusDropdownWithModal";
+import { StatusDropdownWithModal } from "@/components/common/status/StatusDropdownWithModal";
 import type { Collaborator } from "@/types/CollaboratorTypes";
 import type { CompanyDto } from "@/types/CompanyTypes";
 

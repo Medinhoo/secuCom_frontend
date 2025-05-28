@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext";
 import {
   UserService,
   CompanyContactUpdateDto,
@@ -25,10 +24,11 @@ import {
   Star,
 } from "lucide-react";
 
-import PasswordChange from "../components/layout/PasswordChange";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/config/routes.config";
+import { useAuth } from "@/context/AuthContext";
+import { PasswordChange } from "@/components/layout";
 
 interface ProfileForm {
   firstName: string;

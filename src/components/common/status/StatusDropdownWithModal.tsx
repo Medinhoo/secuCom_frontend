@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { StatusChangeModal } from "@/components/ui/StatusChangeModal";
 import { DimonaStatus } from "@/types/DimonaTypes";
 import { getStatusBadge } from "@/utils/dimonaUtils";
 import { dimonaService } from "@/services/api/dimonaService";
 import { toast } from "sonner";
+import { StatusChangeModal } from "../modals";
 
 interface StatusDropdownWithModalProps {
   dimonaId: string;

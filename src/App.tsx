@@ -1,32 +1,31 @@
 import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
-import { ROUTES } from "./config/routes.config";
-import { MainLayout } from "./components/layout/MainLayout";
-import { CompanyPage } from "./pages/CompanyPage.tsx";
-import { CompanyDetailsPage } from "./pages/CompanyDetailsPage";
-import { CreateCompanyPage } from "./pages/CreateCompanyPage";
-import { CollaboratorDetailsPage } from "./pages/CollaboratorDetailsPage";
-import { CollaboratorPage } from "./pages/CollaboratorPage.tsx";
-import { CreateCollaboratorPage } from "./pages/CreateCollaboratorPage";
-import { DimonaPage } from "./pages/DimonaPage.tsx";
-import { DimonaDetailsPage } from "./pages/DimonaDetailsPage";
-import { CreateDimonaPage } from "./pages/CreateDimonaPage";
-import { EditDimonaPage } from "./pages/EditDimonaPage";
-import { DocumentsPage } from "./pages/DocumentsPage.tsx";
-import { DocumentsListPage } from "./pages/DocumentsListPage.tsx";
-// import SettingsPage from "./pages/SettingsPage.tsx";
-import LoginPage from "./pages/LoginPage.tsx";
-import ProtectedRoute from "./components/ProtectedRoute.tsx";
-import PendingAccountGuard from "./components/PendingAccountGuard.tsx";
-import { AuthProvider } from "./context/AuthContext.tsx";
-import { Toaster } from "./components/ui/sonner.tsx";
-import ProfilePage from "./pages/ProfilePage.tsx";
-import SocialSecretariatDetailsPage from "./pages/SocialSecretriatDetailsPage.tsx";
-import { NotificationsPage } from "./pages/NotificationsPage";
-import { CompanyDashboard, SecretariatAdminDashboard } from "./pages";
-import DashboardRouter from "./components/dashboard/DashboardRouter";
-import AdminUsersPage from "./pages/AdminUsersPage.tsx";
-import CreateCompanyContactPage from "./pages/CreateCompanyContactPage.tsx";
-import AdminUserDetailsPage from "./pages/AdminUserDetailsPage.tsx";
+import { ROUTES } from "@/config/routes.config";
+import { MainLayout } from "@/components/layout";
+import {
+  LoginPage,
+  CompanyPage,
+  CompanyDetailsPage,
+  CreateCompanyPage,
+  CollaboratorDetailsPage,
+  CollaboratorPage,
+  CreateCollaboratorPage,
+  DimonaPage,
+  DimonaDetailsPage,
+  CreateDimonaPage,
+  EditDimonaPage,
+  DocumentsPage,
+  DocumentsListPage,
+  ProfilePage,
+  SocialSecretariatDetailsPage,
+  NotificationsPage,
+  DashboardRouter,
+  AdminUsersPage,
+  CreateCompanyContactPage,
+  AdminUserDetailsPage,
+} from "@/pages";
+import { ProtectedRoute, PendingAccountGuard } from "@/components/guards";
+import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "@/components/ui";
 
 function App() {
   return (
@@ -93,7 +92,6 @@ function App() {
 
               {/* Routes avec rôle spécifique */}
               <Route element={<ProtectedRoute requiredRole="ROLE_ADMIN" />}>
-                {/* <Route path={ROUTES.SETTINGS} element={<SettingsPage />} /> */}
                 <Route path={ROUTES.ADMIN_USERS} element={<AdminUsersPage />} />
                 <Route 
                   path={ROUTES.ADMIN_USERS_CREATE_COMPANY_CONTACT} 

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
-import { NotificationItem } from "@/components/notifications/NotificationItem";
+import { NotificationItem } from "@/components/features/notifications/NotificationItem";
 import { useNotifications } from "@/hooks/useNotifications";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { Bell, RefreshCw, Filter, CheckCircle, Circle, Mail, MailOpen } from "lucide-react";

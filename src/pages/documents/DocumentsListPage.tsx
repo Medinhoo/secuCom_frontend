@@ -25,6 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { ROUTES } from "@/config/routes.config";
 import {
   Card,
   CardContent,

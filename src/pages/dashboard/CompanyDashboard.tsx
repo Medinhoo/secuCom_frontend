@@ -1,11 +1,8 @@
 import React from 'react';
-import { CompanyDashboardHeader } from '@/components/dashboard/CompanyDashboardHeader';
-import { CompanyStatsSection } from '@/components/dashboard/CompanyStatsSection';
-import { CompanyDimonasSection } from '@/components/dashboard/CompanyDimonasSection';
-import { CompanyCollaboratorsSection } from '@/components/dashboard/CompanyCollaboratorsSection';
-import { CompanyRecentActivitySection } from '@/components/dashboard/CompanyRecentActivitySection';
+
 import { useCompanyStats } from '@/hooks/useCompanyStats';
 import { useAuth } from '@/context/AuthContext';
+import { CompanyCollaboratorsSection, CompanyDashboardHeader, CompanyDimonasSection, CompanyRecentActivitySection, CompanyStatsSection } from '@/components/features/dashboard';
 
 const CompanyDashboard: React.FC = () => {
   const { user } = useAuth();

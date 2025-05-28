@@ -57,7 +57,7 @@ import type { CompanyDto } from "@/types/CompanyTypes";
 import { ROUTES } from "@/config/routes.config";
 import { useAuth } from "@/context/AuthContext";
 import { useCompanyValidation } from "@/hooks/useCompanyValidation";
-import { ValidationError } from "@/components/ui/ValidationError";
+import { ValidationError } from "@/components/common/forms";
 
 // Options for select fields
 const LEGAL_FORMS = [

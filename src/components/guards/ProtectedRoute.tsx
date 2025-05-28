@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import LoadingSpinner from "./layout/LoadingSpinner";
+import LoadingSpinner from "@/components/layout/LoadingSpinner";
 import { ROUTES } from "@/config/routes.config";
 
 interface ProtectedRouteProps {

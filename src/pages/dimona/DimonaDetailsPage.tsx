@@ -33,7 +33,7 @@ import { DimonaDto, DimonaStatus } from "@/types/DimonaTypes";
 import { getStatusBadge, getTypeBadge } from "@/utils/dimonaUtils";
 import { ROUTES } from "@/config/routes.config";
 import LoadingSpinner from "@/components/layout/LoadingSpinner";
-import { StatusHistory } from "@/components/ui/StatusHistory";
+import { StatusHistory } from "@/components/common/status/StatusHistory";
 
 export function DimonaDetailsPage() {
   const { id } = useParams<{ id: string }>();

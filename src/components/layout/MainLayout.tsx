@@ -1,6 +1,6 @@
 // src/components/layout/MainLayout.tsx
 import React, { useState } from "react";
-import { Sidebar } from "./Sidebar";
+import { Sidebar } from "@/components/layout/Sidebar";
 import { Outlet } from "react-router-dom"; // Assurez-vous d'importer Outlet
 
 export function MainLayout() {

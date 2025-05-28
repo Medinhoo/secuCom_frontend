@@ -22,7 +22,7 @@ import {
 import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/config/routes.config";
-import { NotificationBellImproved } from "@/components/notifications/NotificationBellImproved";
+import { NotificationBellImproved } from "@/components/features/notifications/NotificationBellImproved";
 import { useAccountRestrictions } from "@/hooks/useAccountRestrictions";
 
 interface SidebarLinkProps {

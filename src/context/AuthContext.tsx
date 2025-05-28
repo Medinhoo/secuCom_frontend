@@ -2,8 +2,8 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "@/services/api/authService";
 import { ROUTES } from "@/config/routes.config";
-import PendingAccountModal from "@/components/ui/PendingAccountModal";
-import StatusChangeHandler from "@/components/StatusChangeHandler";
+import PendingAccountModal from "@/components/common/modals/PendingAccountModal";
+import StatusChangeHandler from "@/components/common/StatusChangeHandler";
 
 // Updated User interface to match backend entity
 export interface User {

@@ -1,9 +1,9 @@
 import React from 'react';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { GlobalStatsSection } from '@/components/dashboard/GlobalStatsSection';
-import { RecentActivitySection } from '@/components/dashboard/RecentActivitySection';
-import { DimonasToSendSection } from '@/components/dashboard/DimonasToSendSection';
-import { DimonasInProgressSection } from '@/components/dashboard/DimonasInProgressSection';
+import { DashboardHeader } from '@/components/features/dashboard/DashboardHeader';
+import { GlobalStatsSection } from '@/components/features/dashboard/GlobalStatsSection';
+import { RecentActivitySection } from '@/components/features/dashboard/RecentActivitySection';
+import { DimonasToSendSection } from '@/components/features/dashboard/DimonasToSendSection';
+import { DimonasInProgressSection } from '@/components/features/dashboard/DimonasInProgressSection';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useGlobalStats } from '@/hooks/useGlobalStats';
 
