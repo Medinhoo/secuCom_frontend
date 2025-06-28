@@ -2,7 +2,6 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import { 
   Users, 
   Eye,
@@ -23,19 +22,15 @@ interface CompanyCollaboratorsSectionProps {
 export const CompanyCollaboratorsSection: React.FC<CompanyCollaboratorsSectionProps> = ({ companyId }) => {
   const navigate = useNavigate();
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCollaborators = async () => {
       try {
-        setIsLoading(true);
         const data = await collaboratorService.getCollaboratorsByCompany(companyId);
         setCollaborators(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erreur lors du chargement des collaborateurs');
-      } finally {
-        setIsLoading(false);
       }
     };
 

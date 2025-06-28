@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import { useGlobalStats } from '@/hooks/useGlobalStats';
 import { 
   FileText, 
@@ -18,15 +17,6 @@ import {
 export const GlobalStatsSection: React.FC = () => {
   const { stats, isLoading, error } = useGlobalStats();
 
-  if (isLoading) {
-    return (
-      <Card className="col-span-full">
-        <CardContent className="flex items-center justify-center h-32">
-          <LoadingSpinner />
-        </CardContent>
-      </Card>
-    );
-  }
 
   if (error) {
     return (

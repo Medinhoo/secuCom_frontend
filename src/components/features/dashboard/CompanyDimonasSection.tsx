@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import { useDimonasInProgress } from '@/hooks/useDimonasInProgress';
 import { useDimonasToConfirm } from '@/hooks/useDimonasToConfirm';
 import { collaboratorService } from '@/services/api/collaboratorService';
@@ -168,15 +167,9 @@ export const CompanyDimonasSection: React.FC<CompanyDimonasSectionProps> = ({ co
                 À confirmer ({companyDimonasToConfirm.length})
               </h4>
               <div className="space-y-2">
-                {loadingToConfirm ? (
-                  <div className="flex items-center justify-center h-16">
-                    <LoadingSpinner />
-                  </div>
-                ) : (
-                  companyDimonasToConfirm.slice(0, 3).map((dimona) => (
-                    <DimonaItem key={dimona.id} dimona={dimona} />
-                  ))
-                )}
+                {companyDimonasToConfirm.slice(0, 3).map((dimona) => (
+                  <DimonaItem key={dimona.id} dimona={dimona} />
+                ))}
                 {companyDimonasToConfirm.length > 3 && (
                   <div className="text-center">
                     <Button
@@ -201,15 +194,9 @@ export const CompanyDimonasSection: React.FC<CompanyDimonasSectionProps> = ({ co
                 En cours ({companyDimonasInProgress.length})
               </h4>
               <div className="space-y-2">
-                {loadingInProgress ? (
-                  <div className="flex items-center justify-center h-16">
-                    <LoadingSpinner />
-                  </div>
-                ) : (
-                  companyDimonasInProgress.slice(0, 3).map((dimona) => (
-                    <DimonaItem key={dimona.id} dimona={dimona} />
-                  ))
-                )}
+                {companyDimonasInProgress.slice(0, 3).map((dimona) => (
+                  <DimonaItem key={dimona.id} dimona={dimona} />
+                ))}
                 {companyDimonasInProgress.length > 3 && (
                   <div className="text-center">
                     <Button

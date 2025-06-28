@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import { useDimonasInProgress } from '@/hooks/useDimonasInProgress';
 import { useDimonasToConfirm } from '@/hooks/useDimonasToConfirm';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -146,15 +145,6 @@ export const CompanyRecentActivitySection: React.FC<CompanyRecentActivitySection
     }
   };
 
-  if (isLoading) {
-    return (
-      <Card className="h-full">
-        <CardContent className="flex items-center justify-center h-32">
-          <LoadingSpinner />
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card className="h-full">

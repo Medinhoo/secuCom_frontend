@@ -1,7 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import LoadingSpinner from '@/components/layout/LoadingSpinner';
 import { useGlobalStats } from '@/hooks/useGlobalStats';
 import { useDimonasInProgress } from '@/hooks/useDimonasInProgress';
 import { useDimonasToSend } from '@/hooks/useDimonasToSend';
@@ -25,15 +24,6 @@ export const RecentActivitySection: React.FC = () => {
 
   const isLoading = statsLoading || inProgressLoading || toSendLoading || notificationsLoading;
 
-  if (isLoading) {
-    return (
-      <Card className="h-full">
-        <CardContent className="flex items-center justify-center h-32">
-          <LoadingSpinner />
-        </CardContent>
-      </Card>
-    );
-  }
 
   // Combine and sort recent dimonas by entry date
   const allRecentDimonas = [...(inProgressDimonas || []), ...(toSendDimonas || [])]
