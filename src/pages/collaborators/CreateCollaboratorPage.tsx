@@ -32,6 +32,79 @@ interface FormErrors {
   [key: string]: string;
 }
 
+// Utility functions for national number handling
+const formatNationalNumber = (value: string): string => {
+  // Remove all non-digits
+  const digits = value.replace(/\D/g, '');
+  
+  // Apply formatting: xx.xx.xx-xxx.xx
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+  if (digits.length <= 6) return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4, 6)}-${digits.slice(6)}`;
+  return `${digits.slice(0, 2)}.${digits.slice(2, 4)}.${digits.slice(4, 6)}-${digits.slice(6, 9)}.${digits.slice(9, 11)}`;
+};
+
+const extractBirthDateFromNationalNumber = (nationalNumber: string): string | null => {
+  // Remove formatting to get just digits
+  const digits = nationalNumber.replace(/\D/g, '');
+  
+  if (digits.length < 6) return null;
+  
+  const year = digits.slice(0, 2);
+  const month = digits.slice(2, 4);
+  const day = digits.slice(4, 6);
+  
+  // Convert 2-digit year to 4-digit year
+  // Belgian national numbers: if year >= 00 and <= current year's last 2 digits, it's 20xx
+  // Otherwise it's 19xx
+  const currentYear = new Date().getFullYear();
+  const currentYearLastTwoDigits = currentYear % 100;
+  const yearNum = parseInt(year, 10);
+  
+  let fullYear: number;
+  if (yearNum <= currentYearLastTwoDigits) {
+    fullYear = 2000 + yearNum;
+  } else {
+    fullYear = 1900 + yearNum;
+  }
+  
+  // Validate month and day
+  const monthNum = parseInt(month, 10);
+  const dayNum = parseInt(day, 10);
+  
+  if (monthNum < 1 || monthNum > 12 || dayNum < 1 || dayNum > 31) {
+    return null;
+  }
+  
+  // Create date and validate it exists (handles leap years, etc.)
+  const date = new Date(fullYear, monthNum - 1, dayNum);
+  if (date.getFullYear() !== fullYear || date.getMonth() !== monthNum - 1 || date.getDate() !== dayNum) {
+    return null;
+  }
+  
+  // Return in YYYY-MM-DD format for HTML date input
+  return `${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+};
+
+const validateNationalNumberWithBirthDate = (nationalNumber: string, birthDate: string): boolean => {
+  if (!nationalNumber || !birthDate) return true; // Skip validation if either is empty
+  
+  const extractedDate = extractBirthDateFromNationalNumber(nationalNumber);
+  if (!extractedDate) return true; // Skip validation if national number is invalid
+  
+  return extractedDate === birthDate;
+};
+
+const validateIban = (iban: string): string | undefined => {
+  if (!iban) return undefined;
+  const ibanRegex = /^BE\d{14}$/;
+  if (!ibanRegex.test(iban.replace(/\s/g, ''))) {
+    return 'Format IBAN belge invalide (ex: BE12 3456 7890 1234)';
+  }
+  return undefined;
+};
+
 export function CreateCollaboratorPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -362,6 +435,87 @@ export function CreateCollaboratorPage() {
     navigate(ROUTES.COLLABORATOR_DETAILS(createdCollaboratorId));
   };
 
+  // National number and birth date handlers
+  const handleNationalNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatNationalNumber(e.target.value);
+    setNationalNumber(formatted);
+    
+    // Clear validation errors when typing
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.nationalNumber;
+      delete newErrors.birthDate; // Also clear birth date errors when national number changes
+      return newErrors;
+    });
+    
+    // Auto-fill birth date if national number is complete and birth date is empty
+    if (formatted.length === 15 && !birthDate) { // Full format: XX.XX.XX-XXX.XX
+      const extractedDate = extractBirthDateFromNationalNumber(formatted);
+      if (extractedDate) {
+        setBirthDate(extractedDate);
+        toast.success("Date de naissance remplie automatiquement à partir du numéro national");
+      }
+    }
+    
+    // Re-validate coherence if birth date is already filled
+    if (formatted.length === 15 && birthDate) {
+      const isCoherent = validateNationalNumberWithBirthDate(formatted, birthDate);
+      if (!isCoherent) {
+        setErrors(prev => ({ 
+          ...prev, 
+          birthDate: "La date de naissance ne correspond pas au numéro national" 
+        }));
+      }
+    }
+  };
+
+  const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newBirthDate = e.target.value;
+    setBirthDate(newBirthDate);
+    
+    // Clear any existing birth date error first
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.birthDate;
+      return newErrors;
+    });
+    
+    // Validate coherence with national number if both are filled
+    if (nationalNumber && newBirthDate) {
+      const isCoherent = validateNationalNumberWithBirthDate(nationalNumber, newBirthDate);
+      if (!isCoherent) {
+        setErrors(prev => ({ 
+          ...prev, 
+          birthDate: "La date de naissance ne correspond pas au numéro national" 
+        }));
+        toast.error("La date de naissance ne correspond pas au numéro national");
+      }
+    }
+  };
+
+  const handleIbanChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newIban = e.target.value;
+    setIban(newIban);
+    
+    // Clear any existing IBAN error first
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors.iban;
+      return newErrors;
+    });
+    
+    // Validate IBAN format if not empty
+    if (newIban) {
+      const ibanError = validateIban(newIban);
+      if (ibanError) {
+        setErrors(prev => ({ 
+          ...prev, 
+          iban: ibanError 
+        }));
+      }
+    }
+  };
+
   const handleCancel = () => {
     navigate(ROUTES.COLLABORATORS);
   };
@@ -457,24 +611,41 @@ export function CreateCollaboratorPage() {
             <Input
               id="nationalNumber"
               value={nationalNumber}
-              onChange={(e) => setNationalNumber(e.target.value)}
+              onChange={handleNationalNumberChange}
               className={`bg-white ${errors.nationalNumber ? "border-red-500" : ""}`}
               placeholder="XX.XX.XX-XXX.XX"
+              maxLength={15}
             />
             {errors.nationalNumber && (
               <p className="text-sm text-red-500">{errors.nationalNumber}</p>
             )}
+            <p className="text-xs text-gray-500">
+              Le format sera automatiquement appliqué pendant la saisie
+            </p>
           </div>
 
           <div className="space-y-3">
-            <Label htmlFor="birthDate" className="block">Date de naissance</Label>
+            <Label htmlFor="birthDate" className="block">
+              Date de naissance
+              {birthDate && nationalNumber && (
+                <Badge variant="secondary" className="ml-2">Auto-rempli</Badge>
+              )}
+            </Label>
             <Input
               id="birthDate"
               type="date"
               value={birthDate}
-              onChange={(e) => setBirthDate(e.target.value)}
-              className="bg-white"
+              onChange={handleBirthDateChange}
+              className={`bg-white ${errors.birthDate ? "border-red-500" : ""}`}
             />
+            {errors.birthDate && (
+              <p className="text-sm text-red-500">{errors.birthDate}</p>
+            )}
+            {birthDate && nationalNumber && validateNationalNumberWithBirthDate(nationalNumber, birthDate) && (
+              <p className="text-xs text-green-600">
+                ✓ Date cohérente avec le numéro national
+              </p>
+            )}
           </div>
 
           <div className="space-y-3">
@@ -982,10 +1153,16 @@ export function CreateCollaboratorPage() {
             <Input
               id="iban"
               value={iban}
-              onChange={(e) => setIban(e.target.value)}
-              className="bg-white"
+              onChange={handleIbanChange}
+              className={`bg-white ${errors.iban ? "border-red-500" : ""}`}
               placeholder="BE68 5390 0754 7034"
             />
+            {errors.iban && (
+              <p className="text-sm text-red-500">{errors.iban}</p>
+            )}
+            <p className="text-xs text-gray-500">
+              Format belge requis (ex: BE12 3456 7890 1234)
+            </p>
           </div>
 
           <div className="space-y-3">
