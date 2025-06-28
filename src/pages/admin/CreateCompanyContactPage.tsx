@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, User, Check, AlertCircle, Plus, Search, Copy, CheckCircle } from "lucide-react";
+import { ArrowLeft, Building2, User, Check, AlertCircle, Plus, Search, Copy, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,10 @@ export function CreateCompanyContactPage() {
     password: string;
   } | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  
+  // Individual field visibility state
+  const [showUsername, setShowUsername] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Load existing companies when component mounts
   useEffect(() => {
@@ -269,6 +273,10 @@ Veuillez conserver ces informations en sécurité.`;
   const handleModalClose = () => {
     setShowCredentialsModal(false);
     setCreatedUserCredentials(null);
+    // Reset visibility state
+    setShowUsername(false);
+    setShowPassword(false);
+    setCopiedField(null);
     navigate(ROUTES.ADMIN_USERS);
   };
 
@@ -652,25 +660,107 @@ Veuillez conserver ces informations en sécurité.`;
               Voici les identifiants de connexion du nouveau contact. Vous pouvez les copier pour les envoyer à l'utilisateur.
             </p>
             
-            {/* All Credentials Input */}
-            <div className="space-y-2">
-              <Label className="text-sm font-medium">Identifiants de connexion</Label>
-              <div className="relative">
-                <textarea
-                  value={`Nom d'utilisateur :\n${createdUserCredentials?.username || ""}\n\nMot de passe :\n${createdUserCredentials?.password || ""}`}
-                  readOnly
-                  className="w-full min-h-[120px] px-3 py-2 pr-12 text-sm border border-input bg-gray-50 rounded-md resize-none"
-                />
+            {/* Individual Credential Fields */}
+            <div className="space-y-4">
+              {/* Username Field */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Nom d'utilisateur</Label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    value={showUsername ? (createdUserCredentials?.username || "") : "••••••••••••"}
+                    readOnly
+                    className="pr-20 bg-gray-50 font-mono text-sm"
+                  />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 hover:bg-gray-200"
+                      onClick={() => setShowUsername(!showUsername)}
+                    >
+                      {showUsername ? (
+                        <EyeOff className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 hover:bg-gray-200"
+                      onClick={() => copyToClipboard(createdUserCredentials?.username || "", "username")}
+                    >
+                      {copiedField === "username" ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Field */}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Mot de passe</Label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    value={showPassword ? (createdUserCredentials?.password || "") : "••••••••••••"}
+                    readOnly
+                    className="pr-20 bg-gray-50 font-mono text-sm"
+                  />
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 hover:bg-gray-200"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4 text-gray-500" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 w-7 p-0 hover:bg-gray-200"
+                      onClick={() => copyToClipboard(createdUserCredentials?.password || "", "password")}
+                    >
+                      {copiedField === "password" ? (
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <Copy className="h-4 w-4 text-gray-500" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Copy All Button */}
+              <div className="pt-2">
                 <Button
-                  size="sm"
                   variant="outline"
                   onClick={copyAllCredentials}
-                  className="absolute top-2 right-2 h-8 w-8 p-0"
+                  className="w-full"
                 >
                   {copiedField === "all" ? (
-                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
+                      Tous les identifiants copiés !
+                    </>
                   ) : (
-                    <Copy className="h-4 w-4" />
+                    <>
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copier tous les identifiants
+                    </>
                   )}
                 </Button>
               </div>
