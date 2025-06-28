@@ -14,6 +14,7 @@ export interface UpdateDimonaRequest {
   exitReason?: string;
   collaboratorId?: string;
   companyId?: string;
+  onssReference?: string;
 }
 
 export const dimonaService = {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Trash2, Clock, Info, CheckCircle, Edit, AlertCircle } from "lucide-react";
+import { ArrowLeft, Trash2, Clock, Info, CheckCircle, Edit, AlertCircle, Save, X } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 
@@ -27,6 +27,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 
 import { dimonaService } from "@/services/api/dimonaService";
 import { DimonaDto, DimonaStatus } from "@/types/DimonaTypes";
@@ -45,6 +46,11 @@ export function DimonaDetailsPage() {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [historyCount, setHistoryCount] = useState<number>(0);
+  
+  // Inline editing states
+  const [isEditingReference, setIsEditingReference] = useState(false);
+  const [editedReference, setEditedReference] = useState("");
+  const [savingReference, setSavingReference] = useState(false);
 
   useEffect(() => {
     const fetchDimona = async () => {
@@ -101,6 +107,46 @@ export function DimonaDetailsPage() {
   const handleModifyDimona = () => {
     if (!id) return;
     navigate(ROUTES.EDIT_DIMONA(id));
+  };
+
+  const handleEditReference = () => {
+    if (!dimona) return;
+    setEditedReference(dimona.onssReference);
+    setIsEditingReference(true);
+  };
+
+  const handleCancelEditReference = () => {
+    setIsEditingReference(false);
+    setEditedReference("");
+  };
+
+  const handleSaveReference = async () => {
+    if (!id || !dimona || !editedReference || !editedReference.trim()) return;
+
+    try {
+      setSavingReference(true);
+      const updatedDimona = await dimonaService.updateDimona(id, {
+        type: dimona.type,
+        entryDate: new Date(dimona.entryDate).toISOString().split('T')[0],
+        exitDate: new Date(dimona.exitDate).toISOString().split('T')[0],
+        exitReason: dimona.exitReason || undefined,
+        collaboratorId: dimona.collaboratorId,
+        companyId: dimona.companyId,
+        onssReference: editedReference.trim(),
+      });
+      setDimona(updatedDimona);
+      setIsEditingReference(false);
+      setEditedReference("");
+      toast.success("Référence ONSS mise à jour avec succès");
+    } catch (error: any) {
+      if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Erreur lors de la mise à jour de la référence ONSS");
+      }
+    } finally {
+      setSavingReference(false);
+    }
   };
 
   // Check if user can perform actions on this dimona
@@ -234,12 +280,54 @@ export function DimonaDetailsPage() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-slate-500">
-                    Référence ONSS
-                  </p>
-                  <p className="font-mono text-blue-800">
-                    {dimona.onssReference}
-                  </p>
+                  <div className="flex items-center gap-1">
+                    <p className="text-sm font-medium text-slate-500">
+                      Référence ONSS
+                    </p>
+                    {canPerformActions && !isEditingReference && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleEditReference}
+                        className="h-4 w-4 p-0 text-slate-400 hover:text-slate-600"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                  {isEditingReference ? (
+                    <div className="flex items-center gap-2 mt-1">
+                      <Input
+                        value={editedReference}
+                        onChange={(e) => setEditedReference(e.target.value)}
+                        className="font-mono text-sm"
+                        placeholder="Référence ONSS"
+                        disabled={savingReference}
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleSaveReference}
+                        disabled={savingReference || !editedReference || !editedReference.trim()}
+                        className="h-8 w-8 p-0 text-green-600 hover:text-green-700"
+                      >
+                        <Save className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCancelEditReference}
+                        disabled={savingReference}
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <p className="font-mono text-blue-800">
+                      {dimona.onssReference}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-slate-500">Type</p>

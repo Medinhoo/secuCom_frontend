@@ -43,6 +43,9 @@ export function CreateDimonaPage() {
   const [filteredCollaborators, setFilteredCollaborators] = useState<Collaborator[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   
+  // Validation errors
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
+  
   const [formData, setFormData] = useState<CreateDimonaRequest>({
     type: DimonaType.IN,
     entryDate: new Date(),
@@ -102,16 +105,65 @@ export function CreateDimonaPage() {
     fetchData();
   }, [user, hasRole]);
 
+  const validateDates = (entryDate: Date, exitDate: Date) => {
+    const errors: {[key: string]: string} = {};
+    
+    if (entryDate && exitDate) {
+      if (exitDate <= entryDate) {
+        errors.exitDate = "La date de sortie doit être ultérieure à la date d'entrée";
+      }
+    }
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      ...errors
+    }));
+    
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {};
+    
+    // Validate required fields
+    if (!formData.type) errors.type = "Le type de déclaration est requis";
+    if (!formData.collaboratorId) errors.collaboratorId = "Le collaborateur est requis";
+    if (!formData.companyId) errors.companyId = "L'entreprise est requise";
+    if (!formData.entryDate) errors.entryDate = "La date d'entrée est requise";
+    if (!formData.exitDate) errors.exitDate = "La date de sortie est requise";
+    
+    // Validate dates
+    if (formData.entryDate && formData.exitDate) {
+      if (formData.exitDate <= formData.entryDate) {
+        errors.exitDate = "La date de sortie doit être ultérieure à la date d'entrée";
+      }
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate form before submission
+    if (!validateForm()) {
+      toast.error("Veuillez corriger les erreurs dans le formulaire");
+      return;
+    }
+
     setLoading(true);
 
     try {
       await dimonaService.createDimona(formData);
       toast.success("Déclaration Dimona créée avec succès");
       navigate(ROUTES.DIMONA);
-    } catch (error) {
-      toast.error("Erreur lors de la création de la déclaration");
+    } catch (error: any) {
+      if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Erreur lors de la création de la déclaration");
+      }
     } finally {
       setLoading(false);
     }
@@ -136,6 +188,21 @@ export function CreateDimonaPage() {
         [field]: value,
       };
     });
+
+    // Clear validation errors when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
+
+    // Validate dates in real-time
+    if (field === 'entryDate' || field === 'exitDate') {
+      const entryDate = field === 'entryDate' ? value as Date : formData.entryDate;
+      const exitDate = field === 'exitDate' ? value as Date : formData.exitDate;
+      validateDates(entryDate, exitDate);
+    }
   };
 
   if (loadingData) {
@@ -208,9 +275,12 @@ export function CreateDimonaPage() {
                   onChange={(e) =>
                     handleInputChange("entryDate", new Date(e.target.value))
                   }
-                  className="bg-white"
+                  className={`bg-white ${validationErrors.entryDate ? 'border-red-500' : ''}`}
                   required
                 />
+                {validationErrors.entryDate && (
+                  <p className="text-sm text-red-600">{validationErrors.entryDate}</p>
+                )}
               </div>
               <div className="space-y-3">
                 <Label htmlFor="exitDate" className="block">Date de sortie *</Label>
@@ -223,9 +293,12 @@ export function CreateDimonaPage() {
                   onChange={(e) =>
                     handleInputChange("exitDate", new Date(e.target.value))
                   }
-                  className="bg-white"
+                  className={`bg-white ${validationErrors.exitDate ? 'border-red-500' : ''}`}
                   required
                 />
+                {validationErrors.exitDate && (
+                  <p className="text-sm text-red-600">{validationErrors.exitDate}</p>
+                )}
               </div>
             </div>
 

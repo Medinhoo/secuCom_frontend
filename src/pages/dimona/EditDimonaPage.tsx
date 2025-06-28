@@ -47,7 +47,11 @@ export function EditDimonaPage() {
     exitDate: "",
     exitReason: "",
     collaboratorId: "",
+    onssReference: "",
   });
+
+  // Validation errors
+  const [validationErrors, setValidationErrors] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +73,7 @@ export function EditDimonaPage() {
           exitDate: new Date(dimonaData.exitDate).toISOString().split('T')[0],
           exitReason: dimonaData.exitReason || "",
           collaboratorId: dimonaData.collaboratorId,
+          onssReference: dimonaData.onssReference,
         });
         
       } catch (error) {
@@ -98,12 +103,75 @@ export function EditDimonaPage() {
       ...prev,
       [field]: value
     }));
+
+    // Clear validation errors when user starts typing
+    if (validationErrors[field]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
+
+    // Validate dates in real-time
+    if (field === 'entryDate' || field === 'exitDate') {
+      validateDates(field === 'entryDate' ? value : formData.entryDate, field === 'exitDate' ? value : formData.exitDate);
+    }
+  };
+
+  const validateDates = (entryDate: string, exitDate: string) => {
+    const errors: {[key: string]: string} = {};
+    
+    if (entryDate && exitDate) {
+      const entry = new Date(entryDate);
+      const exit = new Date(exitDate);
+      
+      if (exit <= entry) {
+        errors.exitDate = "La date de sortie doit être ultérieure à la date d'entrée";
+      }
+    }
+    
+    setValidationErrors(prev => ({
+      ...prev,
+      ...errors
+    }));
+    
+    return Object.keys(errors).length === 0;
+  };
+
+  const validateForm = () => {
+    const errors: {[key: string]: string} = {};
+    
+    // Validate required fields
+    if (!formData.type) errors.type = "Le type de déclaration est requis";
+    if (!formData.collaboratorId) errors.collaboratorId = "L'employé est requis";
+    if (!formData.entryDate) errors.entryDate = "La date d'entrée est requise";
+    if (!formData.exitDate) errors.exitDate = "La date de sortie est requise";
+    if (!formData.onssReference) errors.onssReference = "La référence ONSS est requise";
+    
+    // Validate dates
+    if (formData.entryDate && formData.exitDate) {
+      const entry = new Date(formData.entryDate);
+      const exit = new Date(formData.exitDate);
+      
+      if (exit <= entry) {
+        errors.exitDate = "La date de sortie doit être ultérieure à la date d'entrée";
+      }
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!id || !dimona) return;
+
+    // Validate form before submission
+    if (!validateForm()) {
+      toast.error("Veuillez corriger les erreurs dans le formulaire");
+      return;
+    }
     
     try {
       setSaving(true);
@@ -115,6 +183,7 @@ export function EditDimonaPage() {
         exitReason: formData.exitReason || undefined,
         collaboratorId: formData.collaboratorId,
         companyId: dimona.companyId, // Keep the same company
+        onssReference: formData.onssReference,
       };
       
       await dimonaService.updateDimona(id, updateRequest);
@@ -122,8 +191,12 @@ export function EditDimonaPage() {
       toast.success("Déclaration modifiée avec succès");
       navigate(ROUTES.DIMONA_DETAILS(id));
       
-    } catch (error) {
-      toast.error("Erreur lors de la modification de la déclaration");
+    } catch (error: any) {
+      if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Erreur lors de la modification de la déclaration");
+      }
     } finally {
       setSaving(false);
     }
@@ -229,10 +302,13 @@ export function EditDimonaPage() {
                     type="date"
                     value={formData.entryDate}
                     onChange={(e) => handleInputChange('entryDate', e.target.value)}
-                    className="pl-10"
+                    className={`pl-10 ${validationErrors.entryDate ? 'border-red-500' : ''}`}
                     required
                   />
                 </div>
+                {validationErrors.entryDate && (
+                  <p className="text-sm text-red-600">{validationErrors.entryDate}</p>
+                )}
               </div>
 
               {/* Exit Date */}
@@ -245,10 +321,26 @@ export function EditDimonaPage() {
                     type="date"
                     value={formData.exitDate}
                     onChange={(e) => handleInputChange('exitDate', e.target.value)}
-                    className="pl-10"
+                    className={`pl-10 ${validationErrors.exitDate ? 'border-red-500' : ''}`}
                     required
                   />
                 </div>
+                {validationErrors.exitDate && (
+                  <p className="text-sm text-red-600">{validationErrors.exitDate}</p>
+                )}
+              </div>
+
+              {/* ONSS Reference */}
+              <div className="space-y-2">
+                <Label htmlFor="onssReference">Référence ONSS</Label>
+                <Input
+                  id="onssReference"
+                  type="text"
+                  value={formData.onssReference}
+                  onChange={(e) => handleInputChange('onssReference', e.target.value)}
+                  placeholder="Référence ONSS"
+                  required
+                />
               </div>
             </div>
 
