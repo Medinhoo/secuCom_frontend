@@ -15,6 +15,7 @@ import {
   EditDimonaPage,
   DocumentsPage,
   DocumentsListPage,
+  DocumentGenerationPage,
   ProfilePage,
   SocialSecretariatDetailsPage,
   NotificationsPage,
@@ -55,6 +56,10 @@ function App() {
                 element={<DimonaDetailsPage />}
               />
               <Route path={ROUTES.DOCUMENTS} element={<DocumentsPage />} />
+              <Route
+                path={`${ROUTES.DOCUMENTS}/generate/:templateName`}
+                element={<DocumentGenerationPage />}
+              />
               <Route
                 path={`${ROUTES.DOCUMENTS}/:categoryId`}
                 element={<DocumentsListPage />}

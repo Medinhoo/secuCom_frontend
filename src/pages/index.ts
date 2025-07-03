@@ -23,6 +23,7 @@ export { EditDimonaPage } from "./dimona/EditDimonaPage";
 // Documents
 export { DocumentsPage } from "./documents/DocumentsPage";
 export { DocumentsListPage } from "./documents/DocumentsListPage";
+export { DocumentGenerationPage } from "./documents/DocumentGenerationPage";
 
 // Admin
 export { default as AdminUsersPage } from "./admin/AdminUsersPage";

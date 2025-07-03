@@ -89,3 +89,16 @@ export const NOTIFICATION_ENDPOINTS = {
   MARK_ALL_AS_READ: "/notifications/read-all",
   DELETE: (id: string) => `/notifications/${id}`,
 } as const;
+
+// Document endpoints
+export const DOCUMENT_ENDPOINTS = {
+  GET_TEMPLATES: "/documents/templates",
+  GET_TEMPLATE_BY_ID: (id: string) => `/documents/templates/${id}`,
+  GET_TEMPLATE_VARIABLES: (id: string) => `/documents/templates/${id}/variables`,
+  GET_TEMPLATE_VARIABLES_BY_NAME: (name: string) => `/documents/templates/by-name/${name}/variables`,
+  GENERATE_DOCUMENT: "/documents/generate",
+  GET_GENERATIONS: "/documents/generations",
+  GET_GENERATION_BY_ID: (id: string) => `/documents/generations/${id}`,
+  DOWNLOAD_DOCUMENT: (id: string) => `/documents/generations/${id}/download-pdf`,
+  DOWNLOAD_DOCUMENT_PDF: (id: string) => `/documents/generations/${id}/download-pdf`,
+} as const;

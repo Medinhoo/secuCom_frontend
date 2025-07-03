@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { TemplateSelectionModal } from "@/components/features/documents/TemplateSelectionModal";
 
 // Types et données fictives pour les catégories de documents
 interface DocumentCategory {
@@ -88,6 +89,7 @@ const documentCategories: DocumentCategory[] = [
 
 export function DocumentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const navigate = useNavigate();
 
   // Filtrer les catégories en fonction du terme de recherche
@@ -121,8 +123,11 @@ export function DocumentsPage() {
           >
             <Download className="mr-2 h-4 w-4" /> Exporter
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-            <FilePlus className="mr-2 h-4 w-4" /> Nouveau document
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+            onClick={() => setIsTemplateModalOpen(true)}
+          >
+            <FilePlus className="mr-2 h-4 w-4" /> Générer un document
           </Button>
         </div>
       </div>
@@ -198,6 +203,12 @@ export function DocumentsPage() {
           ))
         )}
       </div>
+
+      {/* Template Selection Modal */}
+      <TemplateSelectionModal
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+      />
     </div>
   );
 }

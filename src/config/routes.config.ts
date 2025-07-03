@@ -13,6 +13,7 @@ export const ROUTES = {
   // Document routes
   DOCUMENTS: "/documents",
   DOCUMENTS_LIST: (categoryId: string) => `/documents/${categoryId}`,
+  DOCUMENT_GENERATE: (templateName: string) => `/documents/generate/${templateName}`,
 
   // Company routes
   COMPANIES: "/companies",
