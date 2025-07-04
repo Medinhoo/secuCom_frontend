@@ -99,6 +99,6 @@ export const DOCUMENT_ENDPOINTS = {
   GENERATE_DOCUMENT: "/documents/generate",
   GET_GENERATIONS: "/documents/generations",
   GET_GENERATION_BY_ID: (id: string) => `/documents/generations/${id}`,
-  DOWNLOAD_DOCUMENT: (id: string) => `/documents/generations/${id}/download-pdf`,
+  DOWNLOAD_DOCUMENT: (id: string) => `/documents/generations/${id}/download-docx`,
   DOWNLOAD_DOCUMENT_PDF: (id: string) => `/documents/generations/${id}/download-pdf`,
 } as const;

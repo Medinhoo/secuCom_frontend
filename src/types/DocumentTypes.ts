@@ -39,6 +39,7 @@ export interface DocumentGeneration {
   collaboratorName?: string;
   generatedByName: string;
   generatedFileName: string;
+  pdfFileName?: string;
   status: DocumentGenerationStatus;
   errorMessage?: string;
   createdAt: string;

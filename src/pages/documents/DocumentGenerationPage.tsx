@@ -61,17 +61,32 @@ export function DocumentGenerationPage() {
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownloadPdf = async () => {
+    if (!generatedDocument) return;
+
+    try {
+      const blob = await documentService.downloadDocumentPdf(generatedDocument.id);
+      const fileName = generatedDocument.pdfFileName || generatedDocument.generatedFileName.replace('.docx', '.pdf');
+      documentService.downloadFile(blob, fileName);
+      
+      toast.success('Téléchargement PDF démarré');
+    } catch (error) {
+      console.error('Erreur lors du téléchargement PDF:', error);
+      toast.error('Erreur lors du téléchargement du PDF');
+    }
+  };
+
+  const handleDownloadDocx = async () => {
     if (!generatedDocument) return;
 
     try {
       const blob = await documentService.downloadDocument(generatedDocument.id);
       documentService.downloadFile(blob, generatedDocument.generatedFileName);
       
-      toast.success('Téléchargement démarré');
+      toast.success('Téléchargement DOCX démarré');
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
-      toast.error('Erreur lors du téléchargement');
+      console.error('Erreur lors du téléchargement DOCX:', error);
+      toast.error('Erreur lors du téléchargement du DOCX');
     }
   };
 
@@ -169,11 +184,20 @@ export function DocumentGenerationPage() {
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4">
               <Button
-                onClick={handleDownload}
+                onClick={handleDownloadPdf}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Download className="mr-2 h-4 w-4" />
-                Télécharger le document
+                Télécharger le PDF
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={handleDownloadDocx}
+                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Télécharger le DOCX
               </Button>
               
               <Button
