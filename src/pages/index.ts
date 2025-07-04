@@ -25,6 +25,7 @@ export { DocumentsPage } from "./documents/DocumentsPage";
 export { DocumentsListPage } from "./documents/DocumentsListPage";
 export { DocumentGenerationPage } from "./documents/DocumentGenerationPage";
 export { DocumentViewPage } from "./documents/DocumentViewPage";
+export { TemplateUploadPage } from "./documents/TemplateUploadPage";
 
 // Admin
 export { default as AdminUsersPage } from "./admin/AdminUsersPage";

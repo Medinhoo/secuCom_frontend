@@ -17,6 +17,7 @@ import {
   DocumentsListPage,
   DocumentGenerationPage,
   DocumentViewPage,
+  TemplateUploadPage,
   ProfilePage,
   SocialSecretariatDetailsPage,
   NotificationsPage,
@@ -57,6 +58,10 @@ function App() {
                 element={<DimonaDetailsPage />}
               />
               <Route path={ROUTES.DOCUMENTS} element={<DocumentsPage />} />
+              <Route
+                path={`${ROUTES.DOCUMENTS}/create-template`}
+                element={<TemplateUploadPage />}
+              />
               <Route
                 path={`${ROUTES.DOCUMENTS}/generate/:templateName`}
                 element={<DocumentGenerationPage />}

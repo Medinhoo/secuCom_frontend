@@ -16,8 +16,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import LoadingSpinner from '@/components/layout/LoadingSpinner';
-import { FileText, AlertCircle } from 'lucide-react';
+import { FileText, AlertCircle, Plus } from 'lucide-react';
 import { documentService } from '@/services/api/documentService';
 import type { DocumentTemplate } from '@/types/DocumentTypes';
 import { toast } from 'sonner';
@@ -79,6 +80,12 @@ export function TemplateSelectionModal({ isOpen, onClose }: TemplateSelectionMod
   const handleClose = () => {
     setSelectedTemplateId('');
     onClose();
+  };
+
+  const handleCreateTemplate = () => {
+    // Fermer la modal et naviguer vers la page de création de template
+    onClose();
+    navigate('/documents/create-template');
   };
 
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
@@ -154,6 +161,29 @@ export function TemplateSelectionModal({ isOpen, onClose }: TemplateSelectionMod
               )}
             </>
           )}
+
+          {/* Séparateur et bouton pour créer un template */}
+          <Separator />
+          
+          <div className="bg-gray-50 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-gray-900">Créer un template personnalisé</h4>
+                <p className="text-sm text-gray-600">
+                  Uploadez votre propre fichier DOCX et configurez les variables
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={handleCreateTemplate}
+                disabled={isLoading}
+                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Créer
+              </Button>
+            </div>
+          </div>
         </div>
 
         <DialogFooter>

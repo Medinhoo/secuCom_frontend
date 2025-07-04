@@ -101,4 +101,9 @@ export const DOCUMENT_ENDPOINTS = {
   GET_GENERATION_BY_ID: (id: string) => `/documents/generations/${id}`,
   DOWNLOAD_DOCUMENT: (id: string) => `/documents/generations/${id}/download-docx`,
   DOWNLOAD_DOCUMENT_PDF: (id: string) => `/documents/generations/${id}/download-pdf`,
+  // Nouveaux endpoints pour la création de templates
+  ANALYZE_TEMPLATE: "/documents/templates/analyze",
+  GET_ENTITY_METADATA: "/documents/templates/metadata",
+  CHECK_TEMPLATE_NAME: (name: string) => `/documents/templates/check-name/${encodeURIComponent(name)}`,
+  CREATE_TEMPLATE: "/documents/templates/create",
 } as const;
