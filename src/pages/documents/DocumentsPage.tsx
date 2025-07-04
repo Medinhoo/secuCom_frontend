@@ -1,5 +1,5 @@
 // src/pages/DocumentsPage.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Download,
   FileText,
@@ -24,6 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { TemplateSelectionModal } from "@/components/features/documents/TemplateSelectionModal";
+import { documentService } from "@/services/api/documentService";
 
 // Types et données fictives pour les catégories de documents
 interface DocumentCategory {
@@ -35,62 +36,64 @@ interface DocumentCategory {
   color: string;
 }
 
-// Données fictives pour les catégories de documents
-const documentCategories: DocumentCategory[] = [
-  {
-    id: "contracts",
-    title: "Contrats",
-    description: "Contrats de travail, avenants et documents contractuels",
-    count: 24,
-    icon: <FileText className="h-8 w-8" />,
-    color: "bg-blue-50 text-blue-700 border-blue-200",
-  },
-  {
-    id: "administratif",
-    title: "Documents administratifs",
-    description: "Formulaires administratifs et documents officiels",
-    count: 15,
-    icon: <File className="h-8 w-8" />,
-    color: "bg-green-50 text-green-700 border-green-200",
-  },
-  {
-    id: "salary",
-    title: "Fiches de paie",
-    description: "Fiches de salaire mensuelles et annuelles",
-    count: 33,
-    icon: <FileSpreadsheet className="h-8 w-8" />,
-    color: "bg-purple-50 text-purple-700 border-purple-200",
-  },
-  {
-    id: "employee",
-    title: "Dossiers employés",
-    description: "Documents personnels des employés",
-    count: 28,
-    icon: <FolderOpen className="h-8 w-8" />,
-    color: "bg-amber-50 text-amber-700 border-amber-200",
-  },
-  {
-    id: "certificates",
-    title: "Certificats",
-    description: "Certificats médicaux et attestations diverses",
-    count: 12,
-    icon: <FileArchive className="h-8 w-8" />,
-    color: "bg-red-50 text-red-700 border-red-200",
-  },
-  {
-    id: "templates",
-    title: "Modèles de documents",
-    description: "Templates et modèles réutilisables",
-    count: 8,
-    icon: <FileImage className="h-8 w-8" />,
-    color: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  },
-];
-
 export function DocumentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [contractsCount, setContractsCount] = useState(0);
+  const [isLoadingCounts, setIsLoadingCounts] = useState(true);
   const navigate = useNavigate();
+
+  // Données des catégories de documents avec compteurs dynamiques
+  const documentCategories: DocumentCategory[] = [
+    {
+      id: "contracts",
+      title: "Contrats",
+      description: "Contrats de travail, avenants et documents contractuels",
+      count: contractsCount,
+      icon: <FileText className="h-8 w-8" />,
+      color: "bg-blue-50 text-blue-700 border-blue-200",
+    },
+    {
+      id: "administratif",
+      title: "Documents administratifs",
+      description: "Formulaires administratifs et documents officiels",
+      count: 0,
+      icon: <File className="h-8 w-8" />,
+      color: "bg-green-50 text-green-700 border-green-200",
+    },
+    {
+      id: "salary",
+      title: "Fiches de paie",
+      description: "Fiches de salaire mensuelles et annuelles",
+      count: 0,
+      icon: <FileSpreadsheet className="h-8 w-8" />,
+      color: "bg-purple-50 text-purple-700 border-purple-200",
+    },
+    {
+      id: "employee",
+      title: "Dossiers employés",
+      description: "Documents personnels des employés",
+      count: 0,
+      icon: <FolderOpen className="h-8 w-8" />,
+      color: "bg-amber-50 text-amber-700 border-amber-200",
+    },
+    {
+      id: "certificates",
+      title: "Certificats",
+      description: "Certificats médicaux et attestations diverses",
+      count: 0,
+      icon: <FileArchive className="h-8 w-8" />,
+      color: "bg-red-50 text-red-700 border-red-200",
+    },
+    {
+      id: "templates",
+      title: "Modèles de documents",
+      description: "Templates et modèles réutilisables",
+      count: 0,
+      icon: <FileImage className="h-8 w-8" />,
+      color: "bg-indigo-50 text-indigo-700 border-indigo-200",
+    },
+  ];
 
   // Filtrer les catégories en fonction du terme de recherche
   const filteredCategories = documentCategories.filter(
@@ -98,6 +101,24 @@ export function DocumentsPage() {
       category.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       category.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Charger le nombre de contrats depuis l'API
+  useEffect(() => {
+    const loadContractsCount = async () => {
+      setIsLoadingCounts(true);
+      try {
+        const generations = await documentService.getGenerations();
+        setContractsCount(generations.length);
+      } catch (error) {
+        console.error('Erreur lors du chargement du nombre de contrats:', error);
+        // En cas d'erreur, on garde le compteur à 0
+      } finally {
+        setIsLoadingCounts(false);
+      }
+    };
+
+    loadContractsCount();
+  }, []);
 
   const handleCategoryClick = (categoryId: string) => {
     navigate(`/documents/${categoryId}`);

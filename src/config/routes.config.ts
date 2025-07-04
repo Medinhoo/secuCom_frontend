@@ -14,6 +14,7 @@ export const ROUTES = {
   DOCUMENTS: "/documents",
   DOCUMENTS_LIST: (categoryId: string) => `/documents/${categoryId}`,
   DOCUMENT_GENERATE: (templateName: string) => `/documents/generate/${templateName}`,
+  DOCUMENT_VIEW: (generationId: string) => `/documents/generation/${generationId}/view`,
 
   // Company routes
   COMPANIES: "/companies",

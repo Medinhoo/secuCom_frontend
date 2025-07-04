@@ -13,6 +13,7 @@ import {
   FileArchive,
   FileImage,
   ArrowDownUp,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +42,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { documentService } from "@/services/api/documentService";
+import type { DocumentGeneration } from "@/types/DocumentTypes";
+import { toast } from "sonner";
 
 // Types fictifs pour les documents
 interface Document {
@@ -124,95 +128,21 @@ const documentCategories: DocumentCategory[] = [
   },
 ];
 
-// Données fictives pour les documents
-const mockDocuments: Document[] = [
-  {
-    id: "doc1",
-    name: "Contrat de travail - Jean Dupont",
+// Fonction utilitaire pour convertir DocumentGeneration en Document
+const convertGenerationToDocument = (generation: DocumentGeneration): Document => {
+  return {
+    id: generation.id,
+    name: generation.templateDisplayName + (generation.collaboratorName ? ` - ${generation.collaboratorName}` : ''),
     type: "PDF",
     category: "contracts",
-    dateUpload: "12/01/2023",
-    size: "1.2 MB",
-    enterprise: "Acme Inc.",
-    employee: "Jean Dupont",
-    status: "active",
-  },
-  {
-    id: "doc2",
-    name: "Avenant - Modification horaire",
-    type: "DOCX",
-    category: "contracts",
-    dateUpload: "15/02/2023",
-    size: "560 KB",
-    enterprise: "Acme Inc.",
-    employee: "Marie Martin",
-    status: "active",
-  },
-  {
-    id: "doc3",
-    name: "Contrat CDD - Paul Bernard",
-    type: "PDF",
-    category: "contracts",
-    dateUpload: "05/03/2023",
-    size: "950 KB",
-    enterprise: "Tech Solutions",
-    employee: "Paul Bernard",
-    status: "active",
-  },
-  {
-    id: "doc4",
-    name: "Attestation employeur",
-    type: "PDF",
-    category: "administratif",
-    dateUpload: "22/01/2023",
-    size: "450 KB",
-    enterprise: "Tech Solutions",
-    employee: "Sophie Legrand",
-    status: "active",
-  },
-  {
-    id: "doc5",
-    name: "Fiche de paie - Janvier 2023",
-    type: "PDF",
-    category: "salary",
-    dateUpload: "02/02/2023",
-    size: "320 KB",
-    enterprise: "Acme Inc.",
-    employee: "Jean Dupont",
-    status: "archive",
-  },
-  {
-    id: "doc6",
-    name: "Certificat médical - Arrêt maladie",
-    type: "PDF",
-    category: "certificates",
-    dateUpload: "17/03/2023",
-    size: "280 KB",
-    enterprise: "Tech Solutions",
-    employee: "Paul Bernard",
-    status: "pending",
-  },
-  {
-    id: "doc7",
-    name: "Dossier complet - Marie Martin",
-    type: "ZIP",
-    category: "employee",
-    dateUpload: "10/01/2023",
-    size: "4.5 MB",
-    enterprise: "Acme Inc.",
-    employee: "Marie Martin",
-    status: "active",
-  },
-  {
-    id: "doc8",
-    name: "Template - Contrat CDI",
-    type: "DOCX",
-    category: "templates",
-    dateUpload: "05/01/2023",
-    size: "780 KB",
-    status: "active",
-  },
-];
+    dateUpload: new Date(generation.createdAt).toLocaleDateString('fr-FR'),
+    size: "N/A", // Taille non disponible dans l'API
+    enterprise: generation.companyName,
+    employee: generation.collaboratorName,
+    status: generation.status === 'COMPLETED' ? 'active' : 
+             generation.status === 'FAILED' ? 'archive' : 'pending',
+  };
+};
 
 export function DocumentsListPage() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -220,11 +150,41 @@ export function DocumentsListPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Obtenir les informations de la catégorie actuelle
   const currentCategory = documentCategories.find(
     (category) => category.id === categoryId
   );
+
+  // Charger les documents depuis l'API
+  useEffect(() => {
+    const loadDocuments = async () => {
+      if (categoryId === 'contracts') {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const generations = await documentService.getGenerations();
+          const convertedDocuments = generations.map(convertGenerationToDocument);
+          setDocuments(convertedDocuments);
+        } catch (err) {
+          console.error('Erreur lors du chargement des documents:', err);
+          setError('Erreur lors du chargement des documents');
+          toast.error('Erreur lors du chargement des documents');
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        // Pour les autres catégories, pas de documents pour l'instant
+        setDocuments([]);
+        setIsLoading(false);
+      }
+    };
+
+    loadDocuments();
+  }, [categoryId]);
 
   // Effet pour rediriger si la catégorie n'existe pas
   useEffect(() => {
@@ -238,13 +198,8 @@ export function DocumentsListPage() {
     return <div>Chargement des documents...</div>;
   }
 
-  // Filtrer les documents en fonction de la catégorie, de la recherche et des filtres
-  const filteredDocuments = mockDocuments.filter((document) => {
-    // Filtrer par catégorie
-    if (document.category !== categoryId) {
-      return false;
-    }
-
+  // Filtrer les documents en fonction de la recherche et des filtres
+  const filteredDocuments = documents.filter((document: Document) => {
     // Filtrer par recherche
     const matchesSearch =
       document.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -268,11 +223,29 @@ export function DocumentsListPage() {
   // Obtenir les types de documents uniques pour le filtre
   const documentTypes = Array.from(
     new Set(
-      mockDocuments
-        .filter((doc) => doc.category === categoryId)
-        .map((doc) => doc.type)
+      documents.map((doc: Document) => doc.type)
     )
   );
+
+  // Fonction pour télécharger un document
+  const handleDownloadDocument = async (documentId: string) => {
+    try {
+      const blob = await documentService.downloadDocumentPdf(documentId);
+      // Trouver le document pour obtenir son nom
+      const document = documents.find(doc => doc.id === documentId);
+      const fileName = document ? `${document.name}.pdf` : `document_${documentId}.pdf`;
+      documentService.downloadFile(blob, fileName);
+      toast.success('Téléchargement démarré');
+    } catch (error) {
+      console.error('Erreur lors du téléchargement:', error);
+      toast.error('Erreur lors du téléchargement du document');
+    }
+  };
+
+  // Fonction pour voir les détails d'un document
+  const handleViewDocument = (documentId: string) => {
+    navigate(ROUTES.DOCUMENT_VIEW(documentId));
+  };
 
   // Icône de statut
   const getStatusBadge = (status?: string) => {
@@ -310,7 +283,7 @@ export function DocumentsListPage() {
           </div>
           <div className="flex items-center">
             <Badge className={currentCategory.color.replace("border-", "")}>
-              {currentCategory.count} documents
+              {isLoading ? '...' : documents.length} documents
             </Badge>
             <span className="ml-2 text-sm text-slate-500">
               {currentCategory.description}
@@ -417,7 +390,19 @@ export function DocumentsListPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredDocuments.length === 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={categoryId !== "templates" ? 8 : 6}
+                    className="text-center py-10 text-slate-500"
+                  >
+                    <div className="flex flex-col items-center justify-center">
+                      <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-2" />
+                      <p>Chargement des documents...</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredDocuments.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={categoryId !== "templates" ? 8 : 6}
@@ -425,9 +410,17 @@ export function DocumentsListPage() {
                   >
                     <div className="flex flex-col items-center justify-center">
                       <Search className="h-10 w-10 text-slate-300 mb-2" />
-                      <p>Aucun document trouvé</p>
+                      <p>
+                        {categoryId === 'contracts' 
+                          ? 'Aucun contrat trouvé' 
+                          : 'Cette catégorie ne contient pas encore de documents'
+                        }
+                      </p>
                       <p className="text-sm text-slate-400 mt-1">
-                        Essayez de modifier vos critères de recherche
+                        {categoryId === 'contracts' 
+                          ? 'Essayez de modifier vos critères de recherche ou générez votre premier contrat'
+                          : 'Les documents de cette catégorie seront disponibles prochainement'
+                        }
                       </p>
                     </div>
                   </TableCell>
@@ -498,6 +491,9 @@ export function DocumentsListPage() {
                           variant="secondary"
                           size="sm"
                           className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
+                          onClick={() => handleDownloadDocument(document.id)}
+                          disabled={document.status === 'pending'}
+                          title="Télécharger le PDF"
                         >
                           <Download className="h-4 w-4" />
                         </Button>
@@ -505,6 +501,9 @@ export function DocumentsListPage() {
                           variant="secondary"
                           size="sm"
                           className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
+                          onClick={() => handleViewDocument(document.id)}
+                          disabled={document.status === 'pending'}
+                          title="Voir le document"
                         >
                           Voir
                         </Button>

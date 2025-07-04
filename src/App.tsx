@@ -16,6 +16,7 @@ import {
   DocumentsPage,
   DocumentsListPage,
   DocumentGenerationPage,
+  DocumentViewPage,
   ProfilePage,
   SocialSecretariatDetailsPage,
   NotificationsPage,
@@ -59,6 +60,10 @@ function App() {
               <Route
                 path={`${ROUTES.DOCUMENTS}/generate/:templateName`}
                 element={<DocumentGenerationPage />}
+              />
+              <Route
+                path={`${ROUTES.DOCUMENTS}/generation/:generationId/view`}
+                element={<DocumentViewPage />}
               />
               <Route
                 path={`${ROUTES.DOCUMENTS}/:categoryId`}
