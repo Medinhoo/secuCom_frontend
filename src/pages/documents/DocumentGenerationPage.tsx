@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, CheckCircle, Download, Eye } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Download, Eye, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DocumentGenerationForm } from '@/components/features/documents/DocumentGenerationForm';
+import { EmailModal } from '@/components/features/documents/EmailModal';
 import { documentService } from '@/services/api/documentService';
 import type { DocumentGenerationFormData, DocumentGeneration } from '@/types/DocumentTypes';
 import { toast } from 'sonner';
@@ -14,6 +15,7 @@ export function DocumentGenerationPage() {
   const navigate = useNavigate();
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedDocument, setGeneratedDocument] = useState<DocumentGeneration | null>(null);
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
 
   if (!templateName) {
     return (
@@ -202,6 +204,15 @@ export function DocumentGenerationPage() {
               
               <Button
                 variant="outline"
+                onClick={() => setIsEmailModalOpen(true)}
+                className="border-green-200 text-green-600 hover:bg-green-50"
+              >
+                <Mail className="mr-2 h-4 w-4" />
+                Envoyer par email
+              </Button>
+              
+              <Button
+                variant="outline"
                 onClick={handleViewInContracts}
                 className="border-blue-200 text-blue-600 hover:bg-blue-50"
               >
@@ -238,6 +249,17 @@ export function DocumentGenerationPage() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Email Modal */}
+      {generatedDocument && (
+        <EmailModal
+          isOpen={isEmailModalOpen}
+          onClose={() => setIsEmailModalOpen(false)}
+          documentGenerationId={generatedDocument.id}
+          documentName={generatedDocument.generatedFileName}
+          templateDisplayName={generatedDocument.templateDisplayName}
+        />
       )}
     </div>
   );

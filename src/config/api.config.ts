@@ -106,4 +106,7 @@ export const DOCUMENT_ENDPOINTS = {
   GET_ENTITY_METADATA: "/documents/templates/metadata",
   CHECK_TEMPLATE_NAME: (name: string) => `/documents/templates/check-name/${encodeURIComponent(name)}`,
   CREATE_TEMPLATE: "/documents/templates/create",
+  // Endpoints pour l'envoi d'emails
+  GET_EMAIL_TEMPLATE: (generationId: string) => `/documents/generations/${generationId}/email-template`,
+  SEND_EMAIL: "/documents/send-email",
 } as const;

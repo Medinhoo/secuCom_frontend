@@ -25,6 +25,12 @@ export interface CreateTemplateRequest {
   description?: string;
   docxFile: File;
   mappings: VariableMapping[];
+  // Email configuration fields
+  emailEnabled?: boolean;
+  defaultEmailSubject?: string;
+  defaultEmailBody?: string;
+  defaultRecipients?: string; // JSON string
+  defaultCcRecipients?: string; // JSON string
 }
 
 export interface EntityMetadata {

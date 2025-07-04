@@ -51,6 +51,23 @@ export const templateService = {
     }
     formData.append('docxFile', request.docxFile);
     formData.append('mappings', JSON.stringify(request.mappings));
+    
+    // Ajouter les champs email
+    if (request.emailEnabled !== undefined) {
+      formData.append('emailEnabled', request.emailEnabled.toString());
+    }
+    if (request.defaultEmailSubject) {
+      formData.append('defaultEmailSubject', request.defaultEmailSubject);
+    }
+    if (request.defaultEmailBody) {
+      formData.append('defaultEmailBody', request.defaultEmailBody);
+    }
+    if (request.defaultRecipients) {
+      formData.append('defaultRecipients', request.defaultRecipients);
+    }
+    if (request.defaultCcRecipients) {
+      formData.append('defaultCcRecipients', request.defaultCcRecipients);
+    }
 
     const response = await fetch(`${import.meta.env.VITE_SECUCOM_API}${DOCUMENT_ENDPOINTS.CREATE_TEMPLATE}`, {
       method: 'POST',

@@ -5,6 +5,9 @@ import type {
   TemplateVariable,
   DocumentGenerationRequest,
   DocumentGeneration,
+  EmailTemplate,
+  SendEmailRequest,
+  SendEmailResponse,
 } from '@/types/DocumentTypes';
 
 export const documentService = {
@@ -96,4 +99,18 @@ export const documentService = {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
   },
+
+  // ===== MÉTHODES EMAIL =====
+
+  // Récupérer le template d'email pour une génération
+  getEmailTemplate: (generationId: string) =>
+    apiClient.get<EmailTemplate>(DOCUMENT_ENDPOINTS.GET_EMAIL_TEMPLATE(generationId), {
+      requiresAuth: true,
+    }),
+
+  // Envoyer un document par email
+  sendEmail: (request: SendEmailRequest) =>
+    apiClient.post<SendEmailResponse>(DOCUMENT_ENDPOINTS.SEND_EMAIL, request, {
+      requiresAuth: true,
+    }),
 };

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Upload, FileText, Settings, CheckCircle } from 'lucide-react';
+import { ChevronLeft, Upload, FileText, Settings, CheckCircle, Mail, Users, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { templateService } from '@/services/api/templateService';
 import { VariableMappingForm } from '@/components/features/documents/VariableMappingForm';
@@ -19,7 +20,7 @@ import type {
 } from '@/types/TemplateTypes';
 import type { DocumentTemplate } from '@/types/DocumentTypes';
 
-type Step = 'upload' | 'mapping' | 'success';
+type Step = 'upload' | 'mapping' | 'email' | 'success';
 
 export function TemplateUploadPage() {
   const navigate = useNavigate();
@@ -39,8 +40,66 @@ export function TemplateUploadPage() {
   const [entityMetadata, setEntityMetadata] = useState<EntityMetadata | null>(null);
   const [variableMappings, setVariableMappings] = useState<VariableMapping[]>([]);
   
+  // Email configuration state
+  const [emailEnabled, setEmailEnabled] = useState(true);
+  const [defaultEmailSubject, setDefaultEmailSubject] = useState('');
+  const [defaultEmailBody, setDefaultEmailBody] = useState('');
+  const [defaultRecipients, setDefaultRecipients] = useState<string[]>([]);
+  const [defaultCcRecipients, setDefaultCcRecipients] = useState<string[]>([]);
+  const [currentRecipient, setCurrentRecipient] = useState('');
+  const [currentCcRecipient, setCurrentCcRecipient] = useState('');
+  
   // Success state
   const [createdTemplate, setCreatedTemplate] = useState<DocumentTemplate | null>(null);
+
+  // Initialize default email values when moving to email step
+  useEffect(() => {
+    if (currentStep === 'email' && displayName) {
+      setDefaultEmailSubject(`Document généré - ${displayName}`);
+      setDefaultEmailBody('Bonjour,\n\nVeuillez trouver ci-joint le document généré.\n\nCordialement');
+    }
+  }, [currentStep, displayName]);
+
+  const isValidEmail = (email: string) => {
+    return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+  };
+
+  const addRecipient = () => {
+    if (currentRecipient && isValidEmail(currentRecipient) && !defaultRecipients.includes(currentRecipient)) {
+      setDefaultRecipients(prev => [...prev, currentRecipient]);
+      setCurrentRecipient('');
+    } else if (!isValidEmail(currentRecipient)) {
+      toast.error('Veuillez entrer une adresse email valide');
+    } else if (defaultRecipients.includes(currentRecipient)) {
+      toast.error('Cette adresse email est déjà dans la liste');
+    }
+  };
+
+  const removeRecipient = (email: string) => {
+    setDefaultRecipients(prev => prev.filter(r => r !== email));
+  };
+
+  const addCcRecipient = () => {
+    if (currentCcRecipient && isValidEmail(currentCcRecipient) && !defaultCcRecipients.includes(currentCcRecipient)) {
+      setDefaultCcRecipients(prev => [...prev, currentCcRecipient]);
+      setCurrentCcRecipient('');
+    } else if (!isValidEmail(currentCcRecipient)) {
+      toast.error('Veuillez entrer une adresse email valide');
+    } else if (defaultCcRecipients.includes(currentCcRecipient)) {
+      toast.error('Cette adresse email est déjà dans la liste');
+    }
+  };
+
+  const removeCcRecipient = (email: string) => {
+    setDefaultCcRecipients(prev => prev.filter(r => r !== email));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent, action: () => void) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      action();
+    }
+  };
 
   // Check template name availability
   useEffect(() => {
@@ -132,6 +191,11 @@ export function TemplateUploadPage() {
         description: description.trim() || undefined,
         docxFile: selectedFile,
         mappings: variableMappings,
+        emailEnabled: emailEnabled,
+        defaultEmailSubject: emailEnabled ? defaultEmailSubject : undefined,
+        defaultEmailBody: emailEnabled ? defaultEmailBody : undefined,
+        defaultRecipients: emailEnabled && defaultRecipients.length > 0 ? JSON.stringify(defaultRecipients) : undefined,
+        defaultCcRecipients: emailEnabled && defaultCcRecipients.length > 0 ? JSON.stringify(defaultCcRecipients) : undefined,
       };
 
       const createdTemplate = await templateService.createTemplate(request);
@@ -294,6 +358,152 @@ export function TemplateUploadPage() {
         </Button>
         
         <Button
+          onClick={() => setCurrentStep('email')}
+          disabled={isLoading}
+        >
+          Suivant
+        </Button>
+      </div>
+    </div>
+  );
+
+  const renderEmailStep = () => (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Mail className="h-5 w-5" />
+            Configuration des emails par défaut
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Email enabled checkbox */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="emailEnabled"
+              checked={emailEnabled}
+              onCheckedChange={(checked) => setEmailEnabled(checked as boolean)}
+            />
+            <Label htmlFor="emailEnabled" className="text-sm font-medium">
+              Activer l'envoi par email pour ce template
+            </Label>
+          </div>
+
+          {emailEnabled && (
+            <>
+              {/* Default subject */}
+              <div className="space-y-2">
+                <Label htmlFor="defaultEmailSubject">Objet par défaut</Label>
+                <Input
+                  id="defaultEmailSubject"
+                  value={defaultEmailSubject}
+                  onChange={(e) => setDefaultEmailSubject(e.target.value)}
+                  placeholder="ex: Document généré - {templateDisplayName}"
+                />
+                <p className="text-xs text-gray-500">
+                  Variables disponibles : {'{templateDisplayName}'}, {'{companyName}'}, {'{collaboratorName}'}
+                </p>
+              </div>
+
+              {/* Default body */}
+              <div className="space-y-2">
+                <Label htmlFor="defaultEmailBody">Message par défaut</Label>
+                <Textarea
+                  id="defaultEmailBody"
+                  value={defaultEmailBody}
+                  onChange={(e) => setDefaultEmailBody(e.target.value)}
+                  placeholder="Bonjour,&#10;&#10;Veuillez trouver ci-joint le document généré.&#10;&#10;Cordialement"
+                  rows={4}
+                />
+              </div>
+
+              {/* Default recipients */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Destinataires par défaut
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="Ajouter une adresse email..."
+                    value={currentRecipient}
+                    onChange={(e) => setCurrentRecipient(e.target.value)}
+                    onKeyPress={(e) => handleKeyPress(e, addRecipient)}
+                    className="flex-1"
+                  />
+                  <Button onClick={addRecipient} size="sm" type="button">
+                    Ajouter
+                  </Button>
+                </div>
+                {defaultRecipients.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {defaultRecipients.map((email) => (
+                      <Badge key={email} variant="secondary" className="flex items-center gap-1">
+                        {email}
+                        <button
+                          onClick={() => removeRecipient(email)}
+                          className="ml-1 hover:text-red-600"
+                          type="button"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Default CC recipients */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-700">
+                  Destinataires en copie (CC) par défaut
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="Ajouter une adresse email en copie..."
+                    value={currentCcRecipient}
+                    onChange={(e) => setCurrentCcRecipient(e.target.value)}
+                    onKeyPress={(e) => handleKeyPress(e, addCcRecipient)}
+                    className="flex-1"
+                  />
+                  <Button onClick={addCcRecipient} size="sm" variant="outline" type="button">
+                    Ajouter
+                  </Button>
+                </div>
+                {defaultCcRecipients.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {defaultCcRecipients.map((email) => (
+                      <Badge key={email} variant="outline" className="flex items-center gap-1">
+                        {email}
+                        <button
+                          onClick={() => removeCcRecipient(email)}
+                          className="ml-1 hover:text-red-600"
+                          type="button"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-between">
+        <Button
+          variant="outline"
+          onClick={() => setCurrentStep('mapping')}
+        >
+          <ChevronLeft className="h-4 w-4 mr-2" />
+          Retour
+        </Button>
+        
+        <Button
           onClick={handleCreateTemplate}
           disabled={isLoading}
         >
@@ -389,28 +599,37 @@ export function TemplateUploadPage() {
 
       {/* Steps indicator */}
       <div className="flex items-center justify-center mb-8">
-        <div className="flex items-center space-x-4">
-          <div className={`flex items-center ${currentStep === 'upload' ? 'text-blue-600' : currentStep === 'mapping' || currentStep === 'success' ? 'text-green-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'upload' ? 'bg-blue-100 text-blue-600' : currentStep === 'mapping' || currentStep === 'success' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+        <div className="flex items-center space-x-2">
+          <div className={`flex items-center ${currentStep === 'upload' ? 'text-blue-600' : (currentStep === 'mapping' || currentStep === 'email' || currentStep === 'success') ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'upload' ? 'bg-blue-100 text-blue-600' : (currentStep === 'mapping' || currentStep === 'email' || currentStep === 'success') ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
               1
             </div>
             <span className="ml-2 text-sm font-medium">Upload</span>
           </div>
           
-          <div className={`w-8 h-0.5 ${currentStep === 'mapping' || currentStep === 'success' ? 'bg-green-600' : 'bg-gray-200'}`} />
+          <div className={`w-6 h-0.5 ${(currentStep === 'mapping' || currentStep === 'email' || currentStep === 'success') ? 'bg-green-600' : 'bg-gray-200'}`} />
           
-          <div className={`flex items-center ${currentStep === 'mapping' ? 'text-blue-600' : currentStep === 'success' ? 'text-green-600' : 'text-gray-400'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'mapping' ? 'bg-blue-100 text-blue-600' : currentStep === 'success' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+          <div className={`flex items-center ${currentStep === 'mapping' ? 'text-blue-600' : (currentStep === 'email' || currentStep === 'success') ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'mapping' ? 'bg-blue-100 text-blue-600' : (currentStep === 'email' || currentStep === 'success') ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
               2
             </div>
-            <span className="ml-2 text-sm font-medium">Configuration</span>
+            <span className="ml-2 text-sm font-medium">Variables</span>
           </div>
           
-          <div className={`w-8 h-0.5 ${currentStep === 'success' ? 'bg-green-600' : 'bg-gray-200'}`} />
+          <div className={`w-6 h-0.5 ${(currentStep === 'email' || currentStep === 'success') ? 'bg-green-600' : 'bg-gray-200'}`} />
+          
+          <div className={`flex items-center ${currentStep === 'email' ? 'text-blue-600' : currentStep === 'success' ? 'text-green-600' : 'text-gray-400'}`}>
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'email' ? 'bg-blue-100 text-blue-600' : currentStep === 'success' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
+              3
+            </div>
+            <span className="ml-2 text-sm font-medium">Email</span>
+          </div>
+          
+          <div className={`w-6 h-0.5 ${currentStep === 'success' ? 'bg-green-600' : 'bg-gray-200'}`} />
           
           <div className={`flex items-center ${currentStep === 'success' ? 'text-green-600' : 'text-gray-400'}`}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${currentStep === 'success' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-400'}`}>
-              3
+              4
             </div>
             <span className="ml-2 text-sm font-medium">Terminé</span>
           </div>
@@ -420,6 +639,7 @@ export function TemplateUploadPage() {
       {/* Content */}
       {currentStep === 'upload' && renderUploadStep()}
       {currentStep === 'mapping' && renderMappingStep()}
+      {currentStep === 'email' && renderEmailStep()}
       {currentStep === 'success' && renderSuccessStep()}
     </div>
   );
