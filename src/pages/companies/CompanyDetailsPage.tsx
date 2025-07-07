@@ -21,6 +21,7 @@ import {
   Factory,
   Users2,
   Loader2,
+  MapPin,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -213,6 +214,25 @@ export function CompanyDetailsPage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
+  };
+
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => 
+      prev ? {
+        ...prev,
+        address: {
+          street: prev.address?.street || "",
+          number: prev.address?.number || "",
+          box: prev.address?.box || "",
+          postalCode: prev.address?.postalCode || "",
+          city: prev.address?.city || "",
+          country: prev.address?.country || "",
+          ...prev.address,
+          [name]: value
+        }
+      } : null
+    );
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -619,6 +639,87 @@ export function CompanyDetailsPage() {
                       </div>
                     </div>
 
+                    {/* Address Information */}
+                    <div className="space-y-4 md:col-span-2">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <MapPin className="h-5 w-5" /> Adresse
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="street" className="text-blue-700">
+                            Rue
+                          </Label>
+                          <Input
+                            id="street"
+                            name="street"
+                            value={formData.address?.street || ""}
+                            onChange={handleAddressChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="number" className="text-blue-700">
+                            Numéro
+                          </Label>
+                          <Input
+                            id="number"
+                            name="number"
+                            value={formData.address?.number || ""}
+                            onChange={handleAddressChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="box" className="text-blue-700">
+                            Boîte (optionnel)
+                          </Label>
+                          <Input
+                            id="box"
+                            name="box"
+                            value={formData.address?.box || ""}
+                            onChange={handleAddressChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="postalCode" className="text-blue-700">
+                            Code postal
+                          </Label>
+                          <Input
+                            id="postalCode"
+                            name="postalCode"
+                            value={formData.address?.postalCode || ""}
+                            onChange={handleAddressChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="city" className="text-blue-700">
+                            Ville
+                          </Label>
+                          <Input
+                            id="city"
+                            name="city"
+                            value={formData.address?.city || ""}
+                            onChange={handleAddressChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="country" className="text-blue-700">
+                            Pays
+                          </Label>
+                          <Input
+                            id="country"
+                            name="country"
+                            value={formData.address?.country || ""}
+                            onChange={handleAddressChange}
+                            className="border-slate-200 focus-visible:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Registration Numbers */}
                     <div className="space-y-4 md:col-span-2">
                       <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
@@ -939,6 +1040,34 @@ export function CompanyDetailsPage() {
                           </h4>
                           <p className="text-lg font-mono text-slate-800">
                             {company.iban || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Address Information */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-blue-700 flex items-center gap-2">
+                        <MapPin className="h-5 w-5" /> Adresse
+                      </h3>
+                      <div className="grid gap-4 grid-cols-1 md:grid-cols-1">
+                        <div className="p-4 bg-slate-50 rounded-lg">
+                          <h4 className="text-sm font-medium text-blue-600 mb-1">
+                            Adresse complète
+                          </h4>
+                          <p className="text-lg text-slate-800">
+                            {company.address ? (
+                              <>
+                                {company.address.number} {company.address.street}
+                                {company.address.box && `, Boîte ${company.address.box}`}
+                                <br />
+                                {company.address.postalCode} {company.address.city}
+                                <br />
+                                {company.address.country}
+                              </>
+                            ) : (
+                              "N/A"
+                            )}
                           </p>
                         </div>
                       </div>

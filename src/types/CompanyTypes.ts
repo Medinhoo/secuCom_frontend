@@ -1,9 +1,19 @@
+export interface Address {
+  street: string;
+  number: string;
+  box?: string;
+  postalCode: string;
+  city: string;
+  country: string;
+}
+
 export interface CompanyDto {
   id: string;
   name: string; // nom
   phoneNumber?: string; // numeroTel
   email?: string;
   iban?: string;
+  address?: Address; // adresse
   securityFund?: string; // fondDeSecuriteDexistance
   workAccidentInsurance?: string; // assuranceAccidentDeTravail
   bceNumber: string; // numeroBCE
