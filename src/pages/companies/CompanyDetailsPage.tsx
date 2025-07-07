@@ -59,10 +59,12 @@ import { ROUTES } from "@/config/routes.config";
 import { useAuth } from "@/context/AuthContext";
 import { useCompanyValidation } from "@/hooks/useCompanyValidation";
 import { ValidationError } from "@/components/common/forms";
+import { CompanyLookupField } from "@/components/features/company-lookup";
+import type { CompanyFormData } from "@/types/CompanyLookupTypes";
 
 // Options for select fields
 const LEGAL_FORMS = [
-  "SPRL", "SA", "SNC", "SCS", "SCRL", "ASBL", "Fondation", "GIE", "EEIG", "Autre"
+  "SPRL", "SA", "SRL", "SNC", "SCS", "SCRL", "ASBL", "Fondation", "GIE", "EEIG", "Autre"
 ];
 
 const CATEGORIES = [
@@ -116,6 +118,12 @@ export function CompanyDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
   const [loadingCollaborators, setLoadingCollaborators] = useState(false);
+  
+  // État pour tracker les champs préremplis
+  const [prefilledFields, setPrefilledFields] = useState<Set<string>>(new Set());
+  
+  // État pour tracker les champs synchronisés depuis l'autre champ
+  const [syncedFields, setSyncedFields] = useState<Set<string>>(new Set());
   
   // Validation hook
   const validation = useCompanyValidation(formData, company);
@@ -245,6 +253,10 @@ export function CompanyDetailsPage() {
         const updatedCompany = await companyService.updateCompany(id, formData);
         setCompany(updatedCompany);
         setEditMode(false);
+        
+        // Réinitialiser les champs préremplis après la sauvegarde
+        setPrefilledFields(new Set());
+        
         toast.success("Entreprise mise à jour avec succès");
         
         // Re-fetch user details if this is the user's company to detect status changes
@@ -277,6 +289,93 @@ export function CompanyDetailsPage() {
   const handleCancel = () => {
     setFormData(company);
     setEditMode(false);
+  };
+
+  const handleCompanyLookupConfirmed = (lookupData: CompanyFormData) => {
+    if (!formData) return;
+
+    // Tracker les champs préremplis
+    const newPrefilledFields = new Set<string>();
+    const newSyncedFields = new Set<string>();
+    
+    // Ajouter les champs qui seront préremplis
+    if (lookupData.name) newPrefilledFields.add('name');
+    if (lookupData.companyName) newPrefilledFields.add('companyName');
+    if (lookupData.legalForm) newPrefilledFields.add('legalForm');
+    if (lookupData.bceNumber) {
+      newPrefilledFields.add('bceNumber');
+      // Le numéro TVA est automatiquement généré à partir du BCE
+      newPrefilledFields.add('vatNumber');
+      // Marquer le champ TVA comme synchronisé depuis BCE
+      newSyncedFields.add('vatNumber');
+    }
+    if (lookupData.email) newPrefilledFields.add('email');
+    if (lookupData.phoneNumber) newPrefilledFields.add('phoneNumber');
+    if (lookupData.street) newPrefilledFields.add('street');
+    if (lookupData.number) newPrefilledFields.add('number');
+    if (lookupData.postalCode) newPrefilledFields.add('postalCode');
+    if (lookupData.city) newPrefilledFields.add('city');
+    if (lookupData.creationDate) newPrefilledFields.add('creationDate');
+
+    setPrefilledFields(newPrefilledFields);
+    setSyncedFields(newSyncedFields);
+
+    // Pré-remplir les champs avec les données du lookup
+    setFormData(prev => prev ? {
+      ...prev,
+      name: lookupData.name,
+      companyName: lookupData.companyName,
+      legalForm: lookupData.legalForm,
+      bceNumber: lookupData.bceNumber,
+      vatNumber: lookupData.bceNumber ? `BE${lookupData.bceNumber}` : prev.vatNumber,
+      email: lookupData.email || prev.email,
+      phoneNumber: lookupData.phoneNumber || prev.phoneNumber,
+      address: {
+        street: lookupData.street,
+        number: lookupData.number,
+        box: prev.address?.box || "",
+        postalCode: lookupData.postalCode,
+        city: lookupData.city,
+        country: prev.address?.country || "Belgique",
+      },
+      creationDate: lookupData.creationDate ? new Date(lookupData.creationDate) : prev.creationDate,
+    } : null);
+
+    toast.success("Données pré-remplies avec succès", {
+      description: "Les informations de l'entreprise ont été mises à jour"
+    });
+  };
+
+  const handleSyncField = (field: string, value: string) => {
+    setFormData(prev => prev ? { ...prev, [field]: value } : null);
+  };
+
+  const handleRemoveFromPrefilled = (field: string) => {
+    setPrefilledFields(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(field);
+      return newSet;
+    });
+  };
+
+  // Fonction utilitaire pour déterminer si un champ est prérempli
+  const getInputClassName = (fieldName: string) => {
+    const baseClasses = "border-slate-200 focus-visible:ring-blue-500";
+    const prefilledClasses = "bg-green-50 border-green-300 focus-visible:ring-green-500";
+    
+    return prefilledFields.has(fieldName) 
+      ? `${baseClasses} ${prefilledClasses}` 
+      : baseClasses;
+  };
+
+  // Fonction utilitaire pour les Select préremplis
+  const getSelectClassName = (fieldName: string) => {
+    const baseClasses = "border-slate-200 focus:ring-blue-500";
+    const prefilledClasses = "bg-green-50 border-green-300 focus:ring-green-500";
+    
+    return prefilledFields.has(fieldName) 
+      ? `${baseClasses} ${prefilledClasses}` 
+      : baseClasses;
   };
 
   return (
@@ -421,7 +520,7 @@ export function CompanyDetailsPage() {
                             name="name"
                             value={formData.name}
                             onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            className={getInputClassName("name")}
                           />
                           <ValidationError error={validation.errors.name} />
                         </div>
@@ -437,7 +536,7 @@ export function CompanyDetailsPage() {
                             name="companyName"
                             value={formData.companyName || ""}
                             onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            className={getInputClassName("companyName")}
                           />
                         </div>
                         <div className="space-y-2">
@@ -448,7 +547,7 @@ export function CompanyDetailsPage() {
                             value={formData.legalForm || ""}
                             onValueChange={(value) => handleSelectChange("legalForm", value)}
                           >
-                            <SelectTrigger className="border-slate-200 focus:ring-blue-500">
+                            <SelectTrigger className={getSelectClassName("legalForm")}>
                               <SelectValue placeholder="Sélectionnez une forme juridique" />
                             </SelectTrigger>
                             <SelectContent>
@@ -557,7 +656,7 @@ export function CompanyDetailsPage() {
                                 : ""
                             }
                             onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            className={getInputClassName("creationDate")}
                           />
                           <ValidationError error={validation.errors.creationDate} />
                         </div>
@@ -603,7 +702,7 @@ export function CompanyDetailsPage() {
                             type="email"
                             value={formData.email || ""}
                             onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            className={getInputClassName("email")}
                           />
                           <ValidationError error={validation.errors.email} />
                         </div>
@@ -619,7 +718,7 @@ export function CompanyDetailsPage() {
                             name="phoneNumber"
                             value={formData.phoneNumber || ""}
                             onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            className={getInputClassName("phoneNumber")}
                           />
                           <ValidationError error={validation.errors.phoneNumber} />
                         </div>
@@ -654,7 +753,7 @@ export function CompanyDetailsPage() {
                             name="street"
                             value={formData.address?.street || ""}
                             onChange={handleAddressChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            className={getInputClassName("street")}
                           />
                         </div>
                         <div className="space-y-2">
@@ -666,7 +765,7 @@ export function CompanyDetailsPage() {
                             name="number"
                             value={formData.address?.number || ""}
                             onChange={handleAddressChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            className={getInputClassName("number")}
                           />
                         </div>
                         <div className="space-y-2">
@@ -690,7 +789,7 @@ export function CompanyDetailsPage() {
                             name="postalCode"
                             value={formData.address?.postalCode || ""}
                             onChange={handleAddressChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            className={getInputClassName("postalCode")}
                           />
                         </div>
                         <div className="space-y-2">
@@ -702,7 +801,7 @@ export function CompanyDetailsPage() {
                             name="city"
                             value={formData.address?.city || ""}
                             onChange={handleAddressChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            className={getInputClassName("city")}
                           />
                         </div>
                         <div className="space-y-2">
@@ -728,15 +827,16 @@ export function CompanyDetailsPage() {
                       </h3>
                       <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
                         <div className="space-y-2">
-                          <Label htmlFor="bceNumber" className="text-blue-700">
-                            Numéro BCE
-                          </Label>
-                          <Input
-                            id="bceNumber"
-                            name="bceNumber"
+                          <CompanyLookupField
+                            type="bce"
                             value={formData.bceNumber}
-                            onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            onChange={(value) => setFormData(prev => prev ? { ...prev, bceNumber: value } : null)}
+                            onDataConfirmed={handleCompanyLookupConfirmed}
+                            onSyncField={handleSyncField}
+                            onRemoveFromPrefilled={handleRemoveFromPrefilled}
+                            isSyncedFromOtherField={syncedFields.has('bceNumber')}
+                            placeholder="Ex: 0751.606.280"
+                            isPrefilledField={prefilledFields.has('bceNumber')}
                           />
                           <ValidationError 
                             error={validation.errors.bceNumber} 
@@ -760,15 +860,16 @@ export function CompanyDetailsPage() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="vatNumber" className="text-blue-700">
-                            Numéro TVA
-                          </Label>
-                          <Input
-                            id="vatNumber"
-                            name="vatNumber"
+                          <CompanyLookupField
+                            type="vat"
                             value={formData.vatNumber || ""}
-                            onChange={handleInputChange}
-                            className="border-slate-200 focus-visible:ring-blue-500"
+                            onChange={(value) => setFormData(prev => prev ? { ...prev, vatNumber: value } : null)}
+                            onDataConfirmed={handleCompanyLookupConfirmed}
+                            onSyncField={handleSyncField}
+                            onRemoveFromPrefilled={handleRemoveFromPrefilled}
+                            isSyncedFromOtherField={syncedFields.has('vatNumber')}
+                            placeholder="Ex: BE0751.606.280"
+                            isPrefilledField={prefilledFields.has('vatNumber')}
                           />
                           <ValidationError 
                             error={validation.errors.vatNumber} 

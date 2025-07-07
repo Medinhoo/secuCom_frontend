@@ -77,6 +77,8 @@ export const COMPANY_ENDPOINTS = {
   CHECK_BCE: (bceNumber: string) => `/company/check/bce/${bceNumber}`,
   CHECK_ONSS: (onssNumber: string) => `/company/check/onss/${onssNumber}`,
   CHECK_VAT: (vatNumber: string) => `/company/check/vat/${vatNumber}`,
+  LOOKUP_BCE: (bceNumber: string) => `/company/lookup/bce/${bceNumber}`,
+  LOOKUP_VAT: (vatNumber: string) => `/company/lookup/vat/${vatNumber}`,
 } as const;
 
 // Notification endpoints

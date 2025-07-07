@@ -1,6 +1,7 @@
 import { apiClient } from "./baseApi";
 import { COMPANY_ENDPOINTS } from "@/config/api.config";
 import type { CompanyDto } from "@/types/CompanyTypes";
+import type { CompanyLookupDto } from "@/types/CompanyLookupTypes";
 
 export const companyService = {
   getAllCompanies: () =>
@@ -38,6 +39,16 @@ export const companyService = {
 
   checkVatNumberExists: (vatNumber: string) =>
     apiClient.get<boolean>(COMPANY_ENDPOINTS.CHECK_VAT(vatNumber), {
+      requiresAuth: true,
+    }),
+
+  lookupCompanyByBce: (bceNumber: string) =>
+    apiClient.get<CompanyLookupDto>(COMPANY_ENDPOINTS.LOOKUP_BCE(bceNumber), {
+      requiresAuth: true,
+    }),
+
+  lookupCompanyByVat: (vatNumber: string) =>
+    apiClient.get<CompanyLookupDto>(COMPANY_ENDPOINTS.LOOKUP_VAT(vatNumber), {
       requiresAuth: true,
     }),
 };

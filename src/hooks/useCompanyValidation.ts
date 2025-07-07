@@ -28,7 +28,7 @@ interface ValidationState {
 }
 
 const VALID_SECTORS = ['Construction', 'Transport', 'Horeca', 'Commerce', 'Services'];
-const VALID_LEGAL_FORMS = ['SPRL', 'SA', 'SNC', 'SCS', 'SCRL', 'ASBL', 'Fondation', 'GIE', 'EEIG', 'Autre'];
+const VALID_LEGAL_FORMS = ['SPRL', 'SA', 'SRL', 'SNC', 'SCS', 'SCRL', 'ASBL', 'Fondation', 'GIE', 'EEIG', 'Autre'];
 
 // Debounce utility
 const useDebounce = (value: string, delay: number) => {
