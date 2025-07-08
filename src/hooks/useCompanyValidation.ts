@@ -58,10 +58,74 @@ export const useCompanyValidation = (formData: CompanyDto | null, originalData?:
     isValid: false,
   });
 
+  // Track which fields have been touched by the user
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+
   // Debounced values for API calls
   const debouncedBceNumber = useDebounce(formData?.bceNumber || '', 500);
   const debouncedOnssNumber = useDebounce(formData?.onssNumber || '', 500);
   const debouncedVatNumber = useDebounce(formData?.vatNumber || '', 500);
+
+  // Mark fields as touched when they have values
+  useEffect(() => {
+    if (!formData) return;
+    
+    setTouchedFields(prev => {
+      const newTouchedFields = new Set(prev);
+      let hasChanges = false;
+      
+      if (formData.name && !newTouchedFields.has('name')) {
+        newTouchedFields.add('name');
+        hasChanges = true;
+      }
+      if (formData.bceNumber && !newTouchedFields.has('bceNumber')) {
+        newTouchedFields.add('bceNumber');
+        hasChanges = true;
+      }
+      if (formData.onssNumber && !newTouchedFields.has('onssNumber')) {
+        newTouchedFields.add('onssNumber');
+        hasChanges = true;
+      }
+      if (formData.vatNumber && !newTouchedFields.has('vatNumber')) {
+        newTouchedFields.add('vatNumber');
+        hasChanges = true;
+      }
+      if (formData.email && !newTouchedFields.has('email')) {
+        newTouchedFields.add('email');
+        hasChanges = true;
+      }
+      if (formData.phoneNumber && !newTouchedFields.has('phoneNumber')) {
+        newTouchedFields.add('phoneNumber');
+        hasChanges = true;
+      }
+      if (formData.iban && !newTouchedFields.has('iban')) {
+        newTouchedFields.add('iban');
+        hasChanges = true;
+      }
+      if (formData.creationDate && !newTouchedFields.has('creationDate')) {
+        newTouchedFields.add('creationDate');
+        hasChanges = true;
+      }
+      if (formData.collaborationStartDate && !newTouchedFields.has('collaborationStartDate')) {
+        newTouchedFields.add('collaborationStartDate');
+        hasChanges = true;
+      }
+      if (formData.activitySector && !newTouchedFields.has('activitySector')) {
+        newTouchedFields.add('activitySector');
+        hasChanges = true;
+      }
+      if (formData.legalForm && !newTouchedFields.has('legalForm')) {
+        newTouchedFields.add('legalForm');
+        hasChanges = true;
+      }
+      if (formData.jointCommittees && formData.jointCommittees.length > 0 && !newTouchedFields.has('jointCommittees')) {
+        newTouchedFields.add('jointCommittees');
+        hasChanges = true;
+      }
+      
+      return hasChanges ? newTouchedFields : prev;
+    });
+  }, [formData]);
 
   // Validation functions
   const validateEmail = (email: string): string | undefined => {
@@ -109,12 +173,25 @@ export const useCompanyValidation = (formData: CompanyDto | null, originalData?:
     return undefined;
   };
 
-  const validateVatNumber = (vat: string): string | undefined => {
+  const validateVatNumber = (vat: string, bceNumber?: string): string | undefined => {
     if (!vat) return undefined;
     const vatRegex = /^BE\d{10}$/;
-    if (!vatRegex.test(vat.replace(/\s/g, ''))) {
+    const cleanVat = vat.replace(/\s/g, '');
+    
+    if (!vatRegex.test(cleanVat)) {
       return 'Format TVA belge invalide (ex: BE0123456789)';
     }
+    
+    // Vérifier la cohérence entre TVA et BCE si les deux sont présents
+    if (bceNumber) {
+      const cleanBce = bceNumber.replace(/\./g, ''); // Enlever les points du BCE
+      const expectedVat = `BE${cleanBce}`;
+      
+      if (cleanVat !== expectedVat) {
+        return `Le numéro TVA doit être BE${cleanBce} (basé sur le numéro BCE)`;
+      }
+    }
+    
     return undefined;
   };
 
@@ -267,7 +344,7 @@ export const useCompanyValidation = (formData: CompanyDto | null, originalData?:
       errors.name = validateName(formData.name);
       errors.bceNumber = validateBceNumber(formData.bceNumber);
       errors.onssNumber = validateOnssNumber(formData.onssNumber);
-      errors.vatNumber = validateVatNumber(formData.vatNumber || '');
+      errors.vatNumber = validateVatNumber(formData.vatNumber || '', formData.bceNumber);
       errors.email = validateEmail(formData.email || '');
       errors.phoneNumber = validatePhoneNumber(formData.phoneNumber || '');
       errors.iban = validateIban(formData.iban || '');
@@ -284,9 +361,17 @@ export const useCompanyValidation = (formData: CompanyDto | null, originalData?:
         }
       });
 
+      // Only show errors for touched fields
+      const filteredErrors: ValidationErrors = {};
+      Object.keys(errors).forEach(key => {
+        if (touchedFields.has(key)) {
+          filteredErrors[key as keyof ValidationErrors] = errors[key as keyof ValidationErrors];
+        }
+      });
+
       setValidationState(prev => ({
         ...prev,
-        errors,
+        errors: filteredErrors,
         isValid: Object.keys(errors).length === 0 && !Object.values(prev.validating).some(Boolean)
       }));
     };
@@ -296,7 +381,7 @@ export const useCompanyValidation = (formData: CompanyDto | null, originalData?:
 
   // API validations with debounce
   useEffect(() => {
-    if (debouncedBceNumber && !validateBceNumber(debouncedBceNumber)) {
+    if (debouncedBceNumber && !validateBceNumber(debouncedBceNumber) && touchedFields.has('bceNumber')) {
       checkBceUniqueness(debouncedBceNumber).then(error => {
         setValidationState(prev => ({
           ...prev,
@@ -305,10 +390,10 @@ export const useCompanyValidation = (formData: CompanyDto | null, originalData?:
         }));
       });
     }
-  }, [debouncedBceNumber, checkBceUniqueness]);
+  }, [debouncedBceNumber, touchedFields, checkBceUniqueness]);
 
   useEffect(() => {
-    if (debouncedOnssNumber && !validateOnssNumber(debouncedOnssNumber)) {
+    if (debouncedOnssNumber && !validateOnssNumber(debouncedOnssNumber) && touchedFields.has('onssNumber')) {
       checkOnssUniqueness(debouncedOnssNumber).then(error => {
         setValidationState(prev => ({
           ...prev,
@@ -317,19 +402,19 @@ export const useCompanyValidation = (formData: CompanyDto | null, originalData?:
         }));
       });
     }
-  }, [debouncedOnssNumber, checkOnssUniqueness]);
+  }, [debouncedOnssNumber, touchedFields, checkOnssUniqueness]);
 
   useEffect(() => {
-    if (debouncedVatNumber && !validateVatNumber(debouncedVatNumber)) {
+    if (debouncedVatNumber && !validateVatNumber(debouncedVatNumber, formData?.bceNumber) && touchedFields.has('vatNumber')) {
       checkVatUniqueness(debouncedVatNumber).then(error => {
         setValidationState(prev => ({
           ...prev,
-          errors: { ...prev.errors, vatNumber: error },
+          errors: { ...prev.errors, vatNumber: error || validateVatNumber(debouncedVatNumber, formData?.bceNumber) },
           isValid: !error && Object.keys({ ...prev.errors, vatNumber: error }).filter(k => prev.errors[k as keyof ValidationErrors]).length === 0 && !Object.values(prev.validating).some(Boolean)
         }));
       });
     }
-  }, [debouncedVatNumber, checkVatUniqueness]);
+  }, [debouncedVatNumber, formData?.bceNumber, touchedFields, checkVatUniqueness]);
 
   return validationState;
 };
