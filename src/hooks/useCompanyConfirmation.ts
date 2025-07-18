@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { companyService } from '@/services/api/companyService';
 import type { CompanyDto, CompanyConfirmationHistoryDto } from '@/types/CompanyTypes';
 import { toast } from 'sonner';
@@ -8,7 +8,7 @@ export const useCompanyConfirmation = () => {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [confirmationHistory, setConfirmationHistory] = useState<CompanyConfirmationHistoryDto[]>([]);
 
-  const confirmCompanyData = async (companyId: string): Promise<CompanyDto | null> => {
+  const confirmCompanyData = useCallback(async (companyId: string): Promise<CompanyDto | null> => {
     setIsConfirming(true);
     try {
       const response = await companyService.confirmCompanyData(companyId);
@@ -21,9 +21,9 @@ export const useCompanyConfirmation = () => {
     } finally {
       setIsConfirming(false);
     }
-  };
+  }, []);
 
-  const loadConfirmationHistory = async (companyId: string) => {
+  const loadConfirmationHistory = useCallback(async (companyId: string) => {
     setIsLoadingHistory(true);
     try {
       const history = await companyService.getConfirmationHistory(companyId);
@@ -34,7 +34,7 @@ export const useCompanyConfirmation = () => {
     } finally {
       setIsLoadingHistory(false);
     }
-  };
+  }, []);
 
   return {
     confirmCompanyData,

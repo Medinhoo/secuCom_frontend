@@ -223,9 +223,9 @@ export function CompanyDetailsPage() {
     fetchCollaborators();
   }, [id]);
 
-  // Load confirmation history when settings tab is active
+  // Load confirmation history when confirmation-history tab is active
   useEffect(() => {
-    if (activeTab === 'settings' && id) {
+    if (activeTab === 'confirmation-history' && id) {
       loadConfirmationHistory(id);
     }
   }, [activeTab, id, loadConfirmationHistory]);
@@ -560,6 +560,15 @@ export function CompanyDetailsPage() {
               0
             </Badge>
           </TabsTrigger>
+          {/* Historique de confirmation tab - Only for SECRETARIAT/ADMIN */}
+          {(user?.roles?.includes('ROLE_SECRETARIAT') || user?.roles?.includes('ROLE_ADMIN')) && (
+            <TabsTrigger
+              value="confirmation-history"
+              className="rounded-md data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+            >
+              <FileCheck className="h-4 w-4 mr-2" /> Historique de confirmation
+            </TabsTrigger>
+          )}
           <TabsTrigger
             value="settings"
             className="rounded-md data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
@@ -1473,28 +1482,33 @@ export function CompanyDetailsPage() {
           </Card>
         </TabsContent>
 
+        {/* Confirmation History Tab - Only for SECRETARIAT/ADMIN */}
+        {(user?.roles?.includes('ROLE_SECRETARIAT') || user?.roles?.includes('ROLE_ADMIN')) && (
+          <TabsContent value="confirmation-history">
+            <Card className="border-0 shadow-sm bg-white">
+              <CardHeader className="pb-3 border-b border-slate-100">
+                <div>
+                  <CardTitle className="text-blue-700 flex items-center gap-2">
+                    <FileCheck className="h-5 w-5" />
+                    Historique des confirmations
+                  </CardTitle>
+                  <CardDescription>
+                    Historique complet des confirmations de données d'entreprise
+                  </CardDescription>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <CompanyConfirmationHistory 
+                  companyId={id || ''}
+                />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
         {/* Settings Tab */}
         <TabsContent value="settings">
           <div className="space-y-6">
-            {/* Confirmation History Section - Only for SECRETARIAT/ADMIN */}
-            {(user?.roles?.includes('ROLE_SECRETARIAT') || user?.roles?.includes('ROLE_ADMIN')) && (
-              <Card className="border-0 shadow-sm bg-white">
-                <CardHeader className="pb-3 border-b border-slate-100">
-                  <div>
-                    <CardTitle className="text-blue-700">Historique des confirmations</CardTitle>
-                    <CardDescription>
-                      Historique des confirmations de données d'entreprise
-                    </CardDescription>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <CompanyConfirmationHistory 
-                    companyId={id || ''}
-                  />
-                </CardContent>
-              </Card>
-            )}
-
             {/* Danger Zone */}
             <Card className="border-0 shadow-sm bg-white">
               <CardHeader className="pb-3 border-b border-slate-100">
