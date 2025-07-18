@@ -23,8 +23,6 @@ export interface CreateCompanyContactRequest {
 // Request interface for creating companies (minimal required fields)
 export interface CreateCompanyRequest {
   name: string;
-  bceNumber: string;
-  onssNumber: string;
 }
 
 // Response interface for company creation

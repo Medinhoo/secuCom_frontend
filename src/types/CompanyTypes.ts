@@ -31,4 +31,18 @@ export interface CompanyDto {
   collaborationStartDate?: Date; // dateDebutCollaboration
   subscriptionFormula?: string; // formuleSouscrite
   declarationFrequency?: string; // frequenceDeclarationPP
+  companyConfirmed?: boolean; // Indique si l'entreprise a confirmé ses données
+}
+
+export interface CompanyConfirmationHistoryDto {
+  id: string;
+  companyId: string;
+  confirmedByUserId: string;
+  confirmedByUserName: string;
+  confirmedAt: Date;
+}
+
+export interface CompanyUpdateResponse extends CompanyDto {
+  needsConfirmation?: boolean;
+  wasJustCompleted?: boolean;
 }

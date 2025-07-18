@@ -22,6 +22,7 @@ import {
   Users2,
   Loader2,
   MapPin,
+  CheckCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,13 +55,17 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { companyService } from "@/services/api/companyService";
-import type { CompanyDto } from "@/types/CompanyTypes";
+import type { CompanyDto, CompanyUpdateResponse } from "@/types/CompanyTypes";
 import { ROUTES } from "@/config/routes.config";
 import { useAuth } from "@/context/AuthContext";
 import { useCompanyValidation } from "@/hooks/useCompanyValidation";
 import { ValidationError } from "@/components/common/forms";
 import { CompanyLookupField } from "@/components/features/company-lookup";
 import type { CompanyFormData } from "@/types/CompanyLookupTypes";
+import { CompanyConfirmationBadge } from "@/components/features/company/CompanyConfirmationBadge";
+import { CompanyConfirmationModal } from "@/components/features/company/CompanyConfirmationModal";
+import { CompanyConfirmationHistory } from "@/components/features/company/CompanyConfirmationHistory";
+import { useCompanyConfirmation } from "@/hooks/useCompanyConfirmation";
 
 // Options for select fields
 const LEGAL_FORMS = [
@@ -106,10 +111,11 @@ const getSectorLightColor = (sector: string | undefined) => {
   return sectorColors[sector] || "bg-slate-100 text-slate-700";
 };
 
+
 export function CompanyDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, fetchUserDetails } = useAuth();
+  const { user, fetchUserDetails, notifyCompanySaved } = useAuth();
   const [company, setCompany] = useState<CompanyDto | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -127,6 +133,18 @@ export function CompanyDetailsPage() {
   
   // Validation hook
   const validation = useCompanyValidation(formData, company);
+  
+  // Company confirmation hook
+  const {
+    confirmCompanyData,
+    loadConfirmationHistory,
+    isConfirming,
+    isLoadingHistory,
+    confirmationHistory
+  } = useCompanyConfirmation();
+  
+  // State for confirmation modal
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   
   // Define columns for the collaborators table
   const collaboratorColumns: Column<Collaborator>[] = [
@@ -205,6 +223,25 @@ export function CompanyDetailsPage() {
     fetchCollaborators();
   }, [id]);
 
+  // Load confirmation history when settings tab is active
+  useEffect(() => {
+    if (activeTab === 'settings' && id) {
+      loadConfirmationHistory(id);
+    }
+  }, [activeTab, id, loadConfirmationHistory]);
+
+  // Handle company confirmation
+  const handleCompanyConfirmed = async (updatedCompany: CompanyDto) => {
+    setCompany(updatedCompany);
+    
+    // Force refresh of user details to update account restrictions
+    if (user?.id) {
+      await fetchUserDetails(user.id);
+    }
+    
+    toast.success("Données d'entreprise confirmées avec succès");
+  };
+
   if (loading) {
     return (
       <div className="w-full h-[50vh] flex items-center justify-center">
@@ -249,9 +286,50 @@ export function CompanyDetailsPage() {
 
   const handleSave = async () => {
     if (formData && id) {
+      // Vérifier s'il y a des erreurs de validation (format, unicité, etc.)
+      const hasValidationErrors = Object.keys(validation.errors).length > 0 || 
+                                  Object.values(validation.validating).some(Boolean);
+      
+      if (hasValidationErrors) {
+        toast.error("Erreurs de validation détectées", {
+          description: "Veuillez corriger les erreurs avant de sauvegarder"
+        });
+        return;
+      }
+      
+      // Pour les utilisateurs ROLE_COMPANY : vérifier si les champs obligatoires sont complétés
+      if (user?.roles?.includes("ROLE_COMPANY")) {
+        const { isComplete } = validation.checkMandatoryFields(formData);
+        
+        if (isComplete) {
+          // Si tous les champs obligatoires sont complétés, afficher la modal de confirmation
+          setIsConfirmationModalOpen(true);
+          return;
+        } else {
+          // Si des champs obligatoires manquent, sauvegarder directement sans modal
+          await performSave();
+          return;
+        }
+      }
+      
+      // Pour les autres rôles : sauvegarde directe
+      await performSave();
+    }
+  };
+
+  const performSave = async () => {
+    if (formData && id) {
       try {
-        const updatedCompany = await companyService.updateCompany(id, formData);
-        setCompany(updatedCompany);
+        // Notify AuthContext to suppress the company data required modal temporarily
+        notifyCompanySaved();
+        
+        const response = await companyService.updateCompany(id, formData);
+        
+        // Au lieu de faire confiance à la réponse, récupérer les données fraîches
+        // pour s'assurer que l'état local reflète l'état réel de la base de données
+        const freshCompanyData = await companyService.getCompanyById(id);
+        setCompany(freshCompanyData);
+        setFormData(freshCompanyData);
         setEditMode(false);
         
         // Réinitialiser les champs préremplis après la sauvegarde
@@ -405,6 +483,10 @@ export function CompanyDetailsPage() {
               >
                 {company.activitySector || "N/A"}
               </Badge>
+              <CompanyConfirmationBadge 
+                company={company}
+                className="text-xs"
+              />
               <span className="text-sm text-slate-500">
                 BCE: {company.bceNumber}
               </span>
@@ -415,6 +497,32 @@ export function CompanyDetailsPage() {
               )}
             </div>
           </div>
+
+          {/* Bouton de confirmation pour les utilisateurs COMPANY */}
+          {user?.roles?.includes("ROLE_COMPANY") && 
+           user?.companyId === company.id && 
+           !company.companyConfirmed && 
+           validation.checkMandatoryFields(company).isComplete && (
+            <div className="flex items-center">
+              <Button
+                onClick={() => setIsConfirmationModalOpen(true)}
+                className="bg-green-600 hover:bg-green-700 text-white shadow-sm"
+                disabled={isConfirming}
+              >
+                {isConfirming ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Confirmation...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    Confirmer les données
+                  </div>
+                )}
+              </Button>
+            </div>
+          )}
 
         </div>
       </div>
@@ -484,7 +592,7 @@ export function CompanyDetailsPage() {
                   <div className="flex space-x-2">
                     <Button
                       onClick={handleSave}
-                      disabled={!validation.isValid || Object.values(validation.validating).some(Boolean)}
+                      disabled={Object.values(validation.validating).some(Boolean)}
                       className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Save className="mr-2 h-4 w-4" /> Enregistrer
@@ -1367,27 +1475,49 @@ export function CompanyDetailsPage() {
 
         {/* Settings Tab */}
         <TabsContent value="settings">
-          <Card className="border-0 shadow-sm bg-white">
-            <CardHeader className="pb-3 border-b border-slate-100">
-              <div className="flex justify-between items-start">
+          <div className="space-y-6">
+            {/* Confirmation History Section - Only for SECRETARIAT/ADMIN */}
+            {(user?.roles?.includes('ROLE_SECRETARIAT') || user?.roles?.includes('ROLE_ADMIN')) && (
+              <Card className="border-0 shadow-sm bg-white">
+                <CardHeader className="pb-3 border-b border-slate-100">
+                  <div>
+                    <CardTitle className="text-blue-700">Historique des confirmations</CardTitle>
+                    <CardDescription>
+                      Historique des confirmations de données d'entreprise
+                    </CardDescription>
+                  </div>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <CompanyConfirmationHistory 
+                    companyId={id || ''}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Danger Zone */}
+            <Card className="border-0 shadow-sm bg-white">
+              <CardHeader className="pb-3 border-b border-slate-100">
                 <div>
-                  <CardTitle className="text-blue-700">Paramètres</CardTitle>
-                  <CardDescription>Paramètres de l'entreprie</CardDescription>
+                  <CardTitle className="text-red-700">Zone de danger</CardTitle>
+                  <CardDescription>
+                    Actions irréversibles sur l'entreprise
+                  </CardDescription>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <div className="space-y-6">
-                <Button
-                  variant="destructive"
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  className="bg-red-600 hover:bg-red-700 text-white shadow-sm"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Supprimer l'entreprie
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <Button
+                    variant="destructive"
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    className="bg-red-600 hover:bg-red-700 text-white shadow-sm"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Supprimer l'entreprise
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
 
@@ -1418,6 +1548,16 @@ export function CompanyDetailsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Company Confirmation Modal */}
+      <CompanyConfirmationModal
+        isOpen={isConfirmationModalOpen}
+        onClose={() => setIsConfirmationModalOpen(false)}
+        onConfirmed={handleCompanyConfirmed}
+        company={company}
+        onSaveAndConfirm={editMode ? performSave : undefined}
+        formData={formData}
+      />
     </>
   );
 }

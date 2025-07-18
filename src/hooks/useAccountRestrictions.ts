@@ -1,5 +1,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { ROUTES } from "@/config/routes.config";
+import { useState, useEffect } from "react";
+import { companyService } from "@/services/api/companyService";
 
 export interface AccountRestrictions {
   isPendingAccount: boolean;
@@ -11,11 +13,31 @@ export interface AccountRestrictions {
 
 export const useAccountRestrictions = (): AccountRestrictions => {
   const { user } = useAuth();
+  const [isCompanyConfirmed, setIsCompanyConfirmed] = useState<boolean>(true);
 
-  const isPendingAccount = user?.accountStatus === "PENDING" && 
-    (user?.isCompanyContact || user?.roles?.includes("ROLE_COMPANY"));
+  // Fetch company confirmation status for ROLE_COMPANY users
+  useEffect(() => {
+    const fetchCompanyStatus = async () => {
+      if (user?.roles?.includes("ROLE_COMPANY") && user?.companyId) {
+        try {
+          const company = await companyService.getCompanyById(user.companyId);
+          setIsCompanyConfirmed(Boolean(company.companyConfirmed));
+        } catch (error) {
+          console.error("Error fetching company status:", error);
+          setIsCompanyConfirmed(false);
+        }
+      } else {
+        setIsCompanyConfirmed(true); // Non-company users are not restricted
+      }
+    };
 
-  // Pages autorisées pour les comptes PENDING
+    fetchCompanyStatus();
+  }, [user?.companyId, user?.roles, user?.id]); // Add user.id to dependencies to trigger refresh
+
+  // Check if account is restricted based on company confirmation status
+  const isPendingAccount = Boolean(user?.roles?.includes("ROLE_COMPANY")) && !isCompanyConfirmed;
+
+  // Pages autorisées pour les entreprises non confirmées
   const allowedRoutesForPending = [
     ROUTES.DASHBOARD,
     ROUTES.PROFILE,
@@ -25,7 +47,7 @@ export const useAccountRestrictions = (): AccountRestrictions => {
     ROUTES.COMPANY_CREATE,
   ];
 
-  // Pages bloquées pour les comptes PENDING
+  // Pages bloquées pour les entreprises non confirmées
   const restrictedRoutesForPending = [
     ROUTES.COLLABORATORS,
     ROUTES.COLLABORATOR_CREATE,

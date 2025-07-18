@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "@/services/api/authService";
+import { companyService } from "@/services/api/companyService";
 import { ROUTES } from "@/config/routes.config";
-import PendingAccountModal from "@/components/common/modals/PendingAccountModal";
+import CompanyDataRequiredModal from "@/components/common/modals/CompanyDataRequiredModal";
 import StatusChangeHandler from "@/components/common/StatusChangeHandler";
 
 // Updated User interface to match backend entity
@@ -27,6 +28,7 @@ export interface User {
   companyId?: string;
   companyName?: string;
   isCompanyContact?: boolean;
+  companyConfirmed?: boolean; // Ajouter le statut de confirmation de l'entreprise
 }
 
 interface AuthContextType {
@@ -42,6 +44,8 @@ interface AuthContextType {
   fetchUserDetails: (userId: string) => Promise<boolean>;
   hasRole: (role: string) => boolean;
   isInitialized: boolean;
+  forceAccountRestrictionsRefresh: () => void;
+  notifyCompanySaved: () => void;
 }
 
 // Create context
@@ -56,7 +60,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [showPendingModal, setShowPendingModal] = useState(false);
+  const [showCompanyDataRequiredModal, setShowCompanyDataRequiredModal] = useState(false);
+  const [suppressCompanyDataModal, setSuppressCompanyDataModal] = useState(false);
+  const [accountRestrictionsRefreshTrigger, setAccountRestrictionsRefreshTrigger] = useState(0);
 
   const navigate = useNavigate();
 
@@ -109,12 +115,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     checkAuth();
   }, []); // Run once on mount
 
-  // Check for pending account status after user details are loaded
+  // Check for company confirmation status after user details are loaded
   useEffect(() => {
-    if (user && user.accountStatus === "PENDING" && (user.isCompanyContact || user.roles.includes("ROLE_COMPANY"))) {
-      setShowPendingModal(true);
-    }
-  }, [user]);
+    const checkCompanyConfirmation = async () => {
+      if (user && user.roles?.includes("ROLE_COMPANY") && user.companyId && !suppressCompanyDataModal) {
+        try {
+          // D'abord essayer d'utiliser les données utilisateur si disponibles
+          if (user.companyConfirmed !== undefined) {
+            if (user.companyConfirmed === false) {
+              setShowCompanyDataRequiredModal(true);
+            } else {
+              setShowCompanyDataRequiredModal(false);
+            }
+          } else {
+            // Fallback : appel API si les données ne sont pas dans l'utilisateur
+            const company = await companyService.getCompanyById(user.companyId);
+            if (!company.companyConfirmed) {
+              setShowCompanyDataRequiredModal(true);
+            } else {
+              setShowCompanyDataRequiredModal(false);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking company confirmation status:", error);
+        }
+      } else {
+        setShowCompanyDataRequiredModal(false);
+      }
+    };
+
+    checkCompanyConfirmation();
+  }, [user, suppressCompanyDataModal]);
 
   // Navigate when user becomes authenticated
   useEffect(() => {
@@ -217,18 +248,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return user?.roles?.includes(role) || false;
   };
 
-  // Handle pending modal actions
-  const handleClosePendingModal = () => {
-    setShowPendingModal(false);
+  // Function to notify that company data was just saved
+  const notifyCompanySaved = () => {
+    setSuppressCompanyDataModal(true);
+    setTimeout(() => setSuppressCompanyDataModal(false), 3000);
+  };
+
+  // Handle company data required modal actions
+  const handleCloseCompanyDataRequiredModal = () => {
+    setShowCompanyDataRequiredModal(false);
   };
 
   const handleCompleteProfile = () => {
-    setShowPendingModal(false);
+    setShowCompanyDataRequiredModal(false);
     if (user?.companyId) {
       navigate(ROUTES.COMPANY_DETAILS(user.companyId));
     } else {
       navigate(ROUTES.COMPANIES);
     }
+  };
+
+  // Function to force account restrictions refresh
+  const forceAccountRestrictionsRefresh = () => {
+    setAccountRestrictionsRefreshTrigger(prev => prev + 1);
   };
 
   // Context value
@@ -245,14 +287,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     fetchUserDetails,
     hasRole,
     isInitialized,
+    forceAccountRestrictionsRefresh,
+    notifyCompanySaved,
   };
 
   return (
     <AuthContext.Provider value={value}>
       {children}
-      <PendingAccountModal
-        isOpen={showPendingModal}
-        onClose={handleClosePendingModal}
+      <CompanyDataRequiredModal
+        isOpen={showCompanyDataRequiredModal}
+        onClose={handleCloseCompanyDataRequiredModal}
         onCompleteProfile={handleCompleteProfile}
       />
       <StatusChangeHandler />

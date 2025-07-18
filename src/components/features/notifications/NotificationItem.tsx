@@ -10,7 +10,10 @@ import {
   Trash2,
   Clock,
   Mail,
-  MailOpen
+  MailOpen,
+  Building,
+  CheckCircle,
+  AlertTriangle
 } from "lucide-react";
 import {
   Tooltip,
@@ -89,6 +92,12 @@ function getNotificationIcon(type: NotificationType, isRead: boolean) {
       return <FileText size={18} className={cn("text-blue-500", baseClasses)} />;
     case NotificationType.DIMONA_STATUS_CHANGED:
       return <RefreshCw size={18} className={cn("text-orange-500", baseClasses)} />;
+    case NotificationType.COMPANY_COMPLETED:
+      return <Building size={18} className={cn("text-blue-500", baseClasses)} />;
+    case NotificationType.COMPANY_DATA_CONFIRMED:
+      return <CheckCircle size={18} className={cn("text-green-500", baseClasses)} />;
+    case NotificationType.COMPANY_DATA_RECONFIRMATION_REQUIRED:
+      return <AlertTriangle size={18} className={cn("text-orange-500", baseClasses)} />;
     default:
       return <FileText size={18} className={cn("text-gray-500", baseClasses)} />;
   }

@@ -3,13 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Building2, FileText } from "lucide-react";
 
-interface PendingAccountModalProps {
+interface CompanyDataRequiredModalProps {
   isOpen: boolean;
   onClose: () => void;
   onCompleteProfile: () => void;
 }
 
-const PendingAccountModal: React.FC<PendingAccountModalProps> = ({
+const CompanyDataRequiredModal: React.FC<CompanyDataRequiredModalProps> = ({
   isOpen,
   onClose,
   onCompleteProfile,
@@ -22,15 +22,15 @@ const PendingAccountModal: React.FC<PendingAccountModalProps> = ({
             <AlertCircle className="w-8 h-8 text-orange-600" />
           </div>
           <DialogTitle className="text-xl font-semibold text-gray-900">
-            Compte en attente d'activation
+            Données d'entreprise requises
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-6 py-4">
           <div className="text-center space-y-3">
             <p className="text-gray-600 leading-relaxed">
-              Votre compte est actuellement en attente. Pour accéder à toutes les fonctionnalités de l'application, 
-              vous devez d'abord compléter toutes les informations de votre entreprise.
+              Pour accéder à toutes les fonctionnalités de l'application, 
+              vous devez d'abord compléter et confirmer toutes les informations de votre entreprise.
             </p>
           </div>
 
@@ -55,9 +55,8 @@ const PendingAccountModal: React.FC<PendingAccountModalProps> = ({
               <div>
                 <h4 className="font-medium text-green-900 mb-1">Prochaine étape :</h4>
                 <p className="text-sm text-green-800">
-                  Un employé du secrétariat social sera automatiquement notifié 
-                  lorsque vous aurez complété toutes les informations de votre entreprise 
-                  afin de prendre en main votre dossier.
+                  Après avoir complété toutes les informations, vous devrez confirmer 
+                  l'exactitude des données pour débloquer l'accès à toutes les fonctionnalités.
                 </p>
               </div>
             </div>
@@ -84,4 +83,4 @@ const PendingAccountModal: React.FC<PendingAccountModalProps> = ({
   );
 };
 
-export default PendingAccountModal;
+export default CompanyDataRequiredModal;

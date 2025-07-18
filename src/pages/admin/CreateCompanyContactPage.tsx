@@ -34,8 +34,6 @@ export function CreateCompanyContactPage() {
   // Step 1: Company form data
   const [companyData, setCompanyData] = useState<CreateCompanyRequest>({
     name: "",
-    bceNumber: "",
-    onssNumber: "",
   });
 
   // Step 2: User form data
@@ -116,18 +114,6 @@ export function CreateCompanyContactPage() {
       newErrors.name = "Le nom de l'entreprise est requis";
     }
 
-    if (!companyData.bceNumber.trim()) {
-      newErrors.bceNumber = "Le numéro BCE est requis";
-    } else if (!/^\d{10}$/.test(companyData.bceNumber.replace(/\D/g, ""))) {
-      newErrors.bceNumber = "Le numéro BCE doit contenir 10 chiffres";
-    }
-
-    if (!companyData.onssNumber.trim()) {
-      newErrors.onssNumber = "Le numéro ONSS est requis";
-    } else if (!/^\d{7}$/.test(companyData.onssNumber.replace(/\D/g, ""))) {
-      newErrors.onssNumber = "Le numéro ONSS doit contenir 7 chiffres";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -171,22 +157,6 @@ export function CreateCompanyContactPage() {
 
     try {
       setLoading(true);
-      
-      // Check for duplicate BCE and ONSS numbers
-      const [bceExists, onssExists] = await Promise.all([
-        AdminUserService.checkBceNumber(companyData.bceNumber),
-        AdminUserService.checkOnssNumber(companyData.onssNumber),
-      ]);
-
-      if (bceExists) {
-        setErrors({ bceNumber: "Ce numéro BCE existe déjà" });
-        return;
-      }
-
-      if (onssExists) {
-        setErrors({ onssNumber: "Ce numéro ONSS existe déjà" });
-        return;
-      }
 
       const company = await AdminUserService.createCompany(companyData);
       setCreatedCompany(company);
@@ -194,13 +164,7 @@ export function CreateCompanyContactPage() {
       toast.success("Entreprise créée avec succès");
     } catch (error: any) {
       console.error("Error creating company:", error);
-      if (error.message?.includes("BCE")) {
-        setErrors({ bceNumber: "Ce numéro BCE existe déjà" });
-      } else if (error.message?.includes("ONSS")) {
-        setErrors({ onssNumber: "Ce numéro ONSS existe déjà" });
-      } else {
-        toast.error("Erreur lors de la création de l'entreprise");
-      }
+      toast.error("Erreur lors de la création de l'entreprise");
     } finally {
       setLoading(false);
     }
@@ -278,24 +242,6 @@ Veuillez conserver ces informations en sécurité.`;
     setShowPassword(false);
     setCopiedField(null);
     navigate(ROUTES.ADMIN_USERS);
-  };
-
-  const handleReset = () => {
-    setCurrentStep(1);
-    setCreatedCompany(null);
-    setCompanyData({ name: "", bceNumber: "", onssNumber: "" });
-    setUserData({
-      firstName: "",
-      lastName: "",
-      username: "",
-      email: "",
-      password: "",
-      phoneNumber: "",
-      fonction: "",
-      permissions: "",
-      roles: ["ROLE_COMPANY"],
-    });
-    setErrors({});
   };
 
   const handleCancel = () => {
@@ -411,40 +357,12 @@ Veuillez conserver ces informations en sécurité.`;
                       <p className="text-sm text-red-500 mt-1">{errors.name}</p>
                     )}
                   </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="bceNumber" className="block">Numéro BCE *</Label>
-                    <Input
-                      id="bceNumber"
-                      value={companyData.bceNumber}
-                      onChange={(e) => setCompanyData({ ...companyData, bceNumber: e.target.value })}
-                      placeholder="0123456789"
-                      className={errors.bceNumber ? "border-red-500" : ""}
-                    />
-                    {errors.bceNumber && (
-                      <p className="text-sm text-red-500 mt-1">{errors.bceNumber}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-3">
-                    <Label htmlFor="onssNumber" className="block">Numéro ONSS *</Label>
-                    <Input
-                      id="onssNumber"
-                      value={companyData.onssNumber}
-                      onChange={(e) => setCompanyData({ ...companyData, onssNumber: e.target.value })}
-                      placeholder="1234567"
-                      className={errors.onssNumber ? "border-red-500" : ""}
-                    />
-                    {errors.onssNumber && (
-                      <p className="text-sm text-red-500 mt-1">{errors.onssNumber}</p>
-                    )}
-                  </div>
                 </div>
 
                 <Alert className="bg-sky-50 border-sky-200">
                   <AlertCircle className="h-4 w-4 text-sky-600" />
                   <AlertDescription className="text-sky-800">
-                    Seuls les champs obligatoires sont demandés pour la création rapide. 
+                    Seuls le nom de l'entreprise est demandé pour la création rapide. 
                     Les autres informations pourront être ajoutées ultérieurement.
                   </AlertDescription>
                 </Alert>
@@ -469,9 +387,6 @@ Veuillez conserver ces informations en sécurité.`;
                         <SelectItem key={company.id} value={company.id}>
                           <div className="flex flex-col">
                             <span className="font-medium">{company.name}</span>
-                            <span className="text-xs text-gray-500">
-                              BCE: {company.bceNumber} | ONSS: {company.onssNumber}
-                            </span>
                           </div>
                         </SelectItem>
                       ))}

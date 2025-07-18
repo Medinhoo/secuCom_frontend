@@ -11,12 +11,12 @@ const PendingAccountGuard: React.FC<PendingAccountGuardProps> = ({ children }) =
   const location = useLocation();
   const { isPendingAccount, isAllowedRoute } = useAccountRestrictions();
 
-  // Si ce n'est pas un compte PENDING, laisser passer
+  // Si l'entreprise est confirmée ou l'utilisateur n'est pas ROLE_COMPANY, laisser passer
   if (!isPendingAccount) {
     return <>{children}</>;
   }
 
-  // Si c'est un compte PENDING, vérifier si la route est autorisée
+  // Si l'entreprise n'est pas confirmée, vérifier si la route est autorisée
   if (!isAllowedRoute(location.pathname)) {
     // Rediriger vers le dashboard si la route n'est pas autorisée
     return <Navigate to={ROUTES.DASHBOARD} replace />;

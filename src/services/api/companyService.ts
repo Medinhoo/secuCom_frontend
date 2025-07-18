@@ -1,6 +1,6 @@
 import { apiClient } from "./baseApi";
 import { COMPANY_ENDPOINTS } from "@/config/api.config";
-import type { CompanyDto } from "@/types/CompanyTypes";
+import type { CompanyDto, CompanyUpdateResponse, CompanyConfirmationHistoryDto } from "@/types/CompanyTypes";
 import type { CompanyLookupDto } from "@/types/CompanyLookupTypes";
 
 export const companyService = {
@@ -20,7 +20,7 @@ export const companyService = {
     }),
 
   updateCompany: (id: string, company: CompanyDto) =>
-    apiClient.put<CompanyDto>(COMPANY_ENDPOINTS.UPDATE(id), company, {
+    apiClient.put<CompanyUpdateResponse>(COMPANY_ENDPOINTS.UPDATE(id), company, {
       requiresAuth: true,
     }),
 
@@ -49,6 +49,16 @@ export const companyService = {
 
   lookupCompanyByVat: (vatNumber: string) =>
     apiClient.get<CompanyLookupDto>(COMPANY_ENDPOINTS.LOOKUP_VAT(vatNumber), {
+      requiresAuth: true,
+    }),
+
+  confirmCompanyData: (id: string) =>
+    apiClient.put<CompanyDto>(COMPANY_ENDPOINTS.CONFIRM(id), {}, {
+      requiresAuth: true,
+    }),
+
+  getConfirmationHistory: (id: string) =>
+    apiClient.get<CompanyConfirmationHistoryDto[]>(COMPANY_ENDPOINTS.CONFIRMATION_HISTORY(id), {
       requiresAuth: true,
     }),
 };

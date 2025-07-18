@@ -5,7 +5,10 @@ import {
   UserPlus, 
   FileText, 
   RefreshCw,
-  Clock
+  Clock,
+  Building,
+  CheckCircle,
+  AlertTriangle
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/config/routes.config";
@@ -30,6 +33,12 @@ function getNotificationIcon(type: NotificationType, isRead: boolean) {
       return <FileText size={16} className={cn(baseClasses, !isRead && "text-blue-500")} />;
     case NotificationType.DIMONA_STATUS_CHANGED:
       return <RefreshCw size={16} className={cn(baseClasses, !isRead && "text-orange-500")} />;
+    case NotificationType.COMPANY_COMPLETED:
+      return <Building size={16} className={cn(baseClasses, !isRead && "text-blue-500")} />;
+    case NotificationType.COMPANY_DATA_CONFIRMED:
+      return <CheckCircle size={16} className={cn(baseClasses, !isRead && "text-green-500")} />;
+    case NotificationType.COMPANY_DATA_RECONFIRMATION_REQUIRED:
+      return <AlertTriangle size={16} className={cn(baseClasses, !isRead && "text-orange-500")} />;
     default:
       return <FileText size={16} className={baseClasses} />;
   }

@@ -79,6 +79,8 @@ export const COMPANY_ENDPOINTS = {
   CHECK_VAT: (vatNumber: string) => `/company/check/vat/${vatNumber}`,
   LOOKUP_BCE: (bceNumber: string) => `/company/lookup/bce/${bceNumber}`,
   LOOKUP_VAT: (vatNumber: string) => `/company/lookup/vat/${vatNumber}`,
+  CONFIRM: (id: string) => `/company/${id}/confirm`,
+  CONFIRMATION_HISTORY: (id: string) => `/company/${id}/confirmation-history`,
 } as const;
 
 // Notification endpoints

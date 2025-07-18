@@ -8,6 +8,7 @@ import { ROUTES } from "@/config/routes.config";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { SearchBar } from "@/components/layout/SearchBar";
 import { DataTable, Column } from "@/components/layout/DataTable";
+import { CompanyConfirmationBadge } from "@/components/features/company/CompanyConfirmationBadge";
 
 // Helper function to get sector color (kept as is)
 const getSectorLightColor = (sector: string | undefined) => {
@@ -130,6 +131,15 @@ export function CompanyPage() {
             ))}
           </div>
         </div>
+      ),
+    },
+    {
+      header: "Statut",
+      accessor: (company) => (
+        <CompanyConfirmationBadge 
+          company={company}
+          className="text-xs"
+        />
       ),
     },
   ];

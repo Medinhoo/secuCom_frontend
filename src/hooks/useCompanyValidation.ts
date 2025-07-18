@@ -416,5 +416,40 @@ export const useCompanyValidation = (formData: CompanyDto | null, originalData?:
     }
   }, [debouncedVatNumber, formData?.bceNumber, touchedFields, checkVatUniqueness]);
 
-  return validationState;
+  // Function to check if all mandatory fields are filled
+  const checkMandatoryFields = useCallback((data: CompanyDto): { isComplete: boolean; missingFields: string[] } => {
+    const missingFields: string[] = [];
+    
+    if (!data.name || data.name.trim().length === 0) missingFields.push('Nom de l\'entreprise');
+    if (!data.bceNumber || data.bceNumber.trim().length === 0) missingFields.push('Numéro BCE');
+    if (!data.onssNumber || data.onssNumber.trim().length === 0) missingFields.push('Numéro ONSS');
+    if (!data.email || data.email.trim().length === 0) missingFields.push('Email');
+    if (!data.phoneNumber || data.phoneNumber.trim().length === 0) missingFields.push('Numéro de téléphone');
+    if (!data.iban || data.iban.trim().length === 0) missingFields.push('IBAN');
+    if (!data.securityFund || data.securityFund.trim().length === 0) missingFields.push('Fonds de sécurité');
+    if (!data.workAccidentInsurance || data.workAccidentInsurance.trim().length === 0) missingFields.push('Assurance accidents du travail');
+    if (!data.legalForm || data.legalForm.trim().length === 0) missingFields.push('Forme juridique');
+    if (!data.companyName || data.companyName.trim().length === 0) missingFields.push('Dénomination sociale');
+    if (!data.creationDate) missingFields.push('Date de création');
+    if (!data.vatNumber || data.vatNumber.trim().length === 0) missingFields.push('Numéro TVA');
+    if (!data.workRegime || data.workRegime.trim().length === 0) missingFields.push('Régime de travail');
+    if (!data.salaryReduction || data.salaryReduction.trim().length === 0) missingFields.push('Réduction salariale');
+    if (!data.activitySector || data.activitySector.trim().length === 0) missingFields.push('Secteur d\'activité');
+    if (!data.jointCommittees || data.jointCommittees.length === 0) missingFields.push('Commissions paritaires');
+    if (!data.category || data.category.trim().length === 0) missingFields.push('Catégorie');
+    if (!data.workCalendar || data.workCalendar.trim().length === 0) missingFields.push('Calendrier de travail');
+    if (!data.collaborationStartDate) missingFields.push('Date de début de collaboration');
+    if (!data.subscriptionFormula || data.subscriptionFormula.trim().length === 0) missingFields.push('Formule d\'abonnement');
+    if (!data.declarationFrequency || data.declarationFrequency.trim().length === 0) missingFields.push('Fréquence de déclaration');
+
+    return {
+      isComplete: missingFields.length === 0,
+      missingFields
+    };
+  }, []);
+
+  return {
+    ...validationState,
+    checkMandatoryFields
+  };
 };
