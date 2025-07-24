@@ -47,6 +47,31 @@ export const documentService = {
       requiresAuth: true,
     }),
 
+  // Récupérer les documents avec filtrage par type
+  getDocuments: (type?: string) =>
+    apiClient.get<DocumentGeneration[]>(
+      type ? `${DOCUMENT_ENDPOINTS.GET_GENERATIONS}?type=${type}` : DOCUMENT_ENDPOINTS.GET_GENERATIONS,
+      { requiresAuth: true }
+    ),
+
+  // Récupérer les contrats
+  getContrats: () =>
+    apiClient.get<any[]>(`${DOCUMENT_ENDPOINTS.GET_GENERATIONS}?type=CONTRAT`, {
+      requiresAuth: true,
+    }),
+
+  // Terminer un contrat
+  terminerContrat: (contratId: string) =>
+    apiClient.put<{ message: string }>(DOCUMENT_ENDPOINTS.TERMINATE_CONTRACT(contratId), {}, {
+      requiresAuth: true,
+    }),
+
+  // Activer un contrat
+  activerContrat: (contratId: string) =>
+    apiClient.put<{ message: string }>(DOCUMENT_ENDPOINTS.ACTIVATE_CONTRACT(contratId), {}, {
+      requiresAuth: true,
+    }),
+
   // Récupérer une génération par ID
   getGenerationById: (generationId: string) =>
     apiClient.get<DocumentGeneration>(DOCUMENT_ENDPOINTS.GET_GENERATION_BY_ID(generationId), {

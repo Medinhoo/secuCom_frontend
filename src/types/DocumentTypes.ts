@@ -50,7 +50,21 @@ export interface DocumentGeneration {
   errorMessage?: string;
   createdAt: string;
   formData: Record<string, string>;
+  documentType?: string;
 }
+
+export interface ContratDto extends DocumentGeneration {
+  collaboratorId?: string;
+  collaboratorFirstName?: string;
+  collaboratorLastName?: string;
+  dimonaInId?: string;
+  dimonaOutId?: string;
+  contratStatus: ContratStatus;
+  startDate?: string;
+  endDate?: string;
+}
+
+export type ContratStatus = 'ACTIF' | 'TERMINE';
 
 export type DocumentGenerationStatus = 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 

@@ -101,16 +101,19 @@ export const DOCUMENT_ENDPOINTS = {
   GET_TEMPLATE_VARIABLES: (id: string) => `/documents/templates/${id}/variables`,
   GET_TEMPLATE_VARIABLES_BY_NAME: (name: string) => `/documents/templates/by-name/${name}/variables`,
   GENERATE_DOCUMENT: "/documents/generate",
-  GET_GENERATIONS: "/documents/generations",
-  GET_GENERATION_BY_ID: (id: string) => `/documents/generations/${id}`,
-  DOWNLOAD_DOCUMENT: (id: string) => `/documents/generations/${id}/download-docx`,
-  DOWNLOAD_DOCUMENT_PDF: (id: string) => `/documents/generations/${id}/download-pdf`,
+  GET_GENERATIONS: "/documents",
+  GET_GENERATION_BY_ID: (id: string) => `/documents/${id}`,
+  DOWNLOAD_DOCUMENT: (id: string) => `/documents/${id}/download-docx`,
+  DOWNLOAD_DOCUMENT_PDF: (id: string) => `/documents/${id}/download-pdf`,
   // Nouveaux endpoints pour la création de templates
   ANALYZE_TEMPLATE: "/documents/templates/analyze",
   GET_ENTITY_METADATA: "/documents/templates/metadata",
   CHECK_TEMPLATE_NAME: (name: string) => `/documents/templates/check-name/${encodeURIComponent(name)}`,
   CREATE_TEMPLATE: "/documents/templates/create",
   // Endpoints pour l'envoi d'emails
-  GET_EMAIL_TEMPLATE: (generationId: string) => `/documents/generations/${generationId}/email-template`,
+  GET_EMAIL_TEMPLATE: (generationId: string) => `/documents/${generationId}/email-template`,
   SEND_EMAIL: "/documents/send-email",
+  // Nouveaux endpoints pour les contrats
+  TERMINATE_CONTRACT: (id: string) => `/documents/contrats/${id}/terminer`,
+  ACTIVATE_CONTRACT: (id: string) => `/documents/contrats/${id}/activer`,
 } as const;

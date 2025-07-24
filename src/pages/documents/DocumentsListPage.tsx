@@ -162,23 +162,30 @@ export function DocumentsListPage() {
   // Charger les documents depuis l'API
   useEffect(() => {
     const loadDocuments = async () => {
-      if (categoryId === 'contracts') {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const generations = await documentService.getGenerations();
-          const convertedDocuments = generations.map(convertGenerationToDocument);
-          setDocuments(convertedDocuments);
-        } catch (err) {
-          console.error('Erreur lors du chargement des documents:', err);
-          setError('Erreur lors du chargement des documents');
-          toast.error('Erreur lors du chargement des documents');
-        } finally {
-          setIsLoading(false);
+      setIsLoading(true);
+      setError(null);
+      try {
+        let generations: any[] = [];
+        
+        if (categoryId === 'contracts') {
+          // Charger seulement les contrats
+          generations = await documentService.getDocuments('CONTRAT');
+        } else if (categoryId === 'administratif' || categoryId === 'certificates') {
+          // Charger tous les documents non-contrats
+          const allDocuments = await documentService.getDocuments();
+          generations = allDocuments.filter((doc: any) => doc.documentType !== 'Contrat');
+        } else {
+          // Pour les autres catégories, pas de documents pour l'instant
+          generations = [];
         }
-      } else {
-        // Pour les autres catégories, pas de documents pour l'instant
-        setDocuments([]);
+        
+        const convertedDocuments = generations.map(convertGenerationToDocument);
+        setDocuments(convertedDocuments);
+      } catch (err) {
+        console.error('Erreur lors du chargement des documents:', err);
+        setError('Erreur lors du chargement des documents');
+        toast.error('Erreur lors du chargement des documents');
+      } finally {
         setIsLoading(false);
       }
     };

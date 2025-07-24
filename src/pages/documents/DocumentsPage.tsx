@@ -107,8 +107,8 @@ export function DocumentsPage() {
     const loadContractsCount = async () => {
       setIsLoadingCounts(true);
       try {
-        const generations = await documentService.getGenerations();
-        setContractsCount(generations.length);
+        const contracts = await documentService.getDocuments('CONTRAT');
+        setContractsCount(contracts.length);
       } catch (error) {
         console.error('Erreur lors du chargement du nombre de contrats:', error);
         // En cas d'erreur, on garde le compteur à 0

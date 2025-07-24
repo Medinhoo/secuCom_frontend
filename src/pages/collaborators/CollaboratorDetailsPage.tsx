@@ -79,6 +79,10 @@ import {
 } from "@/data/mockData";
 import { ROUTES } from "@/config/routes.config";
 
+// Import new document components
+import { ContractsList } from "@/components/features/collaborators/ContractsList";
+import { OtherDocumentsList } from "@/components/features/collaborators/OtherDocumentsList";
+
 // Calendar helper function
 function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate();
@@ -1391,108 +1395,40 @@ export function CollaboratorDetailsPage() {
         {/* Documents Tab */}
         <TabsContent value="documents">
           <Card className="border-0 shadow-sm bg-white overflow-hidden">
-            <CardHeader className="pb-3 border-b border-slate-100 flex flex-row justify-between items-center">
-              <div>
-                <CardTitle className="text-blue-700">Documents</CardTitle>
-                <CardDescription>
-                  Documents associés à l'employé
-                </CardDescription>
+            <CardHeader className="pb-3 border-b border-slate-100">
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className="text-blue-700">Documents</CardTitle>
+                  <CardDescription>
+                    Documents et contrats associés au collaborateur
+                  </CardDescription>
+                </div>
+                <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                  <Plus className="mr-2 h-4 w-4" /> Générer un document
+                </Button>
               </div>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                <Plus className="mr-2 h-4 w-4" /> Ajouter un document
-              </Button>
             </CardHeader>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="hover:bg-transparent border-b border-slate-100">
-                    <TableHead className="text-blue-700 font-medium">
-                      Nom
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium">
-                      Type
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium hidden md:table-cell">
-                      Date d'upload
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium hidden md:table-cell">
-                      Taille
-                    </TableHead>
-                    <TableHead className="text-blue-700 font-medium text-right">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {documents.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        className="text-center py-10 text-slate-500"
-                      >
-                        <div className="flex flex-col items-center justify-center">
-                          <FileText className="h-10 w-10 text-slate-300 mb-2" />
-                          <p>Aucun document trouvé</p>
-                          <p className="text-sm text-slate-400 mt-1">
-                            Commencez par ajouter un document pour ce
-                            collaborateur
-                          </p>
-                          <Button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                            <Plus className="mr-2 h-4 w-4" /> Ajouter un
-                            document
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    documents.map((document) => (
-                      <TableRow
-                        key={document.id}
-                        className="hover:bg-slate-50 border-b border-slate-100 group"
-                      >
-                        <TableCell className="font-medium text-blue-800 group-hover:text-blue-600 transition-colors">
-                          {document.nom}
-                        </TableCell>
-                        <TableCell>
-                          <Badge
-                            variant="outline"
-                            className="bg-slate-50 text-slate-700"
-                          >
-                            {document.type}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <div className="flex items-center">
-                            <Calendar className="h-3 w-3 text-slate-400 mr-1" />
-                            <span>{document.dateUpload}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell font-mono text-sm text-slate-600">
-                          {document.taille}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="secondary"
-                              size="sm"
-                              className="bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-700"
-                            >
-                              Voir
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+            <CardContent className="pt-6">
+              <Tabs defaultValue="contrats" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="contrats" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Contrats
+                  </TabsTrigger>
+                  <TabsTrigger value="autres" className="flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Autres Documents
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="contrats">
+                  <ContractsList collaboratorId={collaborator.id} />
+                </TabsContent>
+                
+                <TabsContent value="autres">
+                  <OtherDocumentsList collaboratorId={collaborator.id} />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </TabsContent>
